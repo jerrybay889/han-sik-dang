@@ -1,0 +1,15 @@
+@import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;700&display=swap');
+
+:root {
+  --font-family-primary: 'Pretendard', sans-serif;
+  --background: #FFFFFF;
+  --foreground: #000000;
+  --primary: #1A5F7A;
+  --accent: #FF7B54;
+}
+
+body {
+  font-family: var(--font-family-primary);
+  background: var(--background);
+  color: var(--foreground);
+}
