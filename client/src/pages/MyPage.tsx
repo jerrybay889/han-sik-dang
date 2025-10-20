@@ -158,7 +158,6 @@ export default function MyPage() {
                   </div>
                   <div className="flex-1 text-left">
                     <p className="font-medium">{item.title}</p>
-                    <p className="text-sm text-muted-foreground">{item.titleEn}</p>
                   </div>
                   {item.badge && (
                     <Badge variant="secondary" className="mr-2">
@@ -244,7 +243,6 @@ export default function MyPage() {
                   <Icon className="w-5 h-5 text-muted-foreground" />
                   <div className="flex-1 text-left">
                     <p className="font-medium">{item.title}</p>
-                    <p className="text-sm text-muted-foreground">{item.titleEn}</p>
                   </div>
                   <ChevronRight className="w-5 h-5 text-muted-foreground" />
                 </button>
