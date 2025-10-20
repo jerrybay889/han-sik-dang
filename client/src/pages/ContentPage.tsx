@@ -170,13 +170,10 @@ export default function ContentPage() {
               <div className="w-8 h-8 rounded-full bg-[hsl(var(--blog-indicator))] flex items-center justify-center text-white text-sm font-bold">
                 B
               </div>
-              <div>
-                <h2 className="text-lg font-bold">블로그 포스트</h2>
-                <p className="text-xs text-muted-foreground">Blog Posts</p>
-              </div>
+              <h2 className="text-lg font-bold">{t("content.blogs")}</h2>
             </div>
             <Button variant="ghost" size="sm" data-testid="button-see-all-blogs">
-              더보기
+              {t("content.seeAll")}
             </Button>
           </div>
 
