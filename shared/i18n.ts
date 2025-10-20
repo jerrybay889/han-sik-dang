@@ -50,7 +50,20 @@ type TranslationKey =
   | "discover.popular"
   | "discover.trending"
   | "discover.viewAll"
-  | "language.select";
+  | "discover.title"
+  | "language.select"
+  | "restaurant.price"
+  | "restaurant.location"
+  | "restaurant.about"
+  | "restaurant.info"
+  | "restaurant.address"
+  | "restaurant.phone"
+  | "restaurant.hours"
+  | "reviews.title"
+  | "reviews.write"
+  | "reviews.empty"
+  | "reviews.beFirst"
+  | "error.notFound";
 
 export const translations: Record<Language, Record<TranslationKey, string>> = {
   ko: {
@@ -92,7 +105,20 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     "discover.popular": "인기 맛집",
     "discover.trending": "트렌딩",
     "discover.viewAll": "전체보기",
+    "discover.title": "한식당 발견",
     "language.select": "언어 선택",
+    "restaurant.price": "가격대",
+    "restaurant.location": "위치",
+    "restaurant.about": "소개",
+    "restaurant.info": "정보",
+    "restaurant.address": "주소",
+    "restaurant.phone": "전화번호",
+    "restaurant.hours": "영업시간",
+    "reviews.title": "리뷰",
+    "reviews.write": "리뷰 작성",
+    "reviews.empty": "아직 리뷰가 없습니다",
+    "reviews.beFirst": "첫 리뷰를 작성해보세요!",
+    "error.notFound": "레스토랑을 찾을 수 없습니다",
   },
   en: {
     "app.name": "Han Sik Dang",
@@ -133,7 +159,20 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     "discover.popular": "Popular Restaurants",
     "discover.trending": "Trending Now",
     "discover.viewAll": "View All",
+    "discover.title": "Discover Korean Restaurants",
     "language.select": "Select Language",
+    "restaurant.price": "Price Range",
+    "restaurant.location": "Location",
+    "restaurant.about": "About",
+    "restaurant.info": "Information",
+    "restaurant.address": "Address",
+    "restaurant.phone": "Phone",
+    "restaurant.hours": "Hours",
+    "reviews.title": "Reviews",
+    "reviews.write": "Write Review",
+    "reviews.empty": "No reviews yet",
+    "reviews.beFirst": "Be the first to review!",
+    "error.notFound": "Restaurant not found",
   },
   ja: {
     "app.name": "韓食堂",
@@ -174,7 +213,20 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     "discover.popular": "人気レストラン",
     "discover.trending": "トレンド",
     "discover.viewAll": "すべて見る",
+    "discover.title": "韓国レストランを発見",
     "language.select": "言語選択",
+    "restaurant.price": "価格帯",
+    "restaurant.location": "場所",
+    "restaurant.about": "について",
+    "restaurant.info": "情報",
+    "restaurant.address": "住所",
+    "restaurant.phone": "電話番号",
+    "restaurant.hours": "営業時間",
+    "reviews.title": "レビュー",
+    "reviews.write": "レビューを書く",
+    "reviews.empty": "まだレビューがありません",
+    "reviews.beFirst": "最初のレビューを書いてください！",
+    "error.notFound": "レストランが見つかりません",
   },
   "zh-CN": {
     "app.name": "韩食堂",
@@ -215,7 +267,20 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     "discover.popular": "热门餐厅",
     "discover.trending": "热门趋势",
     "discover.viewAll": "查看全部",
+    "discover.title": "发现韩国餐厅",
     "language.select": "选择语言",
+    "restaurant.price": "价格范围",
+    "restaurant.location": "位置",
+    "restaurant.about": "关于",
+    "restaurant.info": "信息",
+    "restaurant.address": "地址",
+    "restaurant.phone": "电话",
+    "restaurant.hours": "营业时间",
+    "reviews.title": "评论",
+    "reviews.write": "写评论",
+    "reviews.empty": "暂无评论",
+    "reviews.beFirst": "成为第一个评论者！",
+    "error.notFound": "未找到餐厅",
   },
   "zh-TW": {
     "app.name": "韓食堂",
@@ -256,7 +321,20 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     "discover.popular": "熱門餐廳",
     "discover.trending": "熱門趨勢",
     "discover.viewAll": "查看全部",
+    "discover.title": "發現韓國餐廳",
     "language.select": "選擇語言",
+    "restaurant.price": "價格範圍",
+    "restaurant.location": "位置",
+    "restaurant.about": "關於",
+    "restaurant.info": "資訊",
+    "restaurant.address": "地址",
+    "restaurant.phone": "電話",
+    "restaurant.hours": "營業時間",
+    "reviews.title": "評論",
+    "reviews.write": "撰寫評論",
+    "reviews.empty": "暫無評論",
+    "reviews.beFirst": "成為第一個評論者！",
+    "error.notFound": "未找到餐廳",
   },
   es: {
     "app.name": "Han Sik Dang",
@@ -297,7 +375,20 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     "discover.popular": "Restaurantes Populares",
     "discover.trending": "Tendencias",
     "discover.viewAll": "Ver Todo",
+    "discover.title": "Descubrir Restaurantes Coreanos",
     "language.select": "Seleccionar Idioma",
+    "restaurant.price": "Rango de Precios",
+    "restaurant.location": "Ubicación",
+    "restaurant.about": "Acerca de",
+    "restaurant.info": "Información",
+    "restaurant.address": "Dirección",
+    "restaurant.phone": "Teléfono",
+    "restaurant.hours": "Horario",
+    "reviews.title": "Reseñas",
+    "reviews.write": "Escribir Reseña",
+    "reviews.empty": "Aún no hay reseñas",
+    "reviews.beFirst": "¡Sé el primero en reseñar!",
+    "error.notFound": "Restaurante no encontrado",
   },
   fr: {
     "app.name": "Han Sik Dang",
@@ -338,7 +429,20 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     "discover.popular": "Restaurants Populaires",
     "discover.trending": "Tendances",
     "discover.viewAll": "Voir Tout",
+    "discover.title": "Découvrir les Restaurants Coréens",
     "language.select": "Sélectionner la Langue",
+    "restaurant.price": "Gamme de Prix",
+    "restaurant.location": "Emplacement",
+    "restaurant.about": "À Propos",
+    "restaurant.info": "Informations",
+    "restaurant.address": "Adresse",
+    "restaurant.phone": "Téléphone",
+    "restaurant.hours": "Horaires",
+    "reviews.title": "Avis",
+    "reviews.write": "Écrire un Avis",
+    "reviews.empty": "Pas encore d'avis",
+    "reviews.beFirst": "Soyez le premier à donner votre avis !",
+    "error.notFound": "Restaurant non trouvé",
   },
   de: {
     "app.name": "Han Sik Dang",
@@ -379,6 +483,19 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     "discover.popular": "Beliebte Restaurants",
     "discover.trending": "Trending",
     "discover.viewAll": "Alle Anzeigen",
+    "discover.title": "Koreanische Restaurants Entdecken",
     "language.select": "Sprache Auswählen",
+    "restaurant.price": "Preisspanne",
+    "restaurant.location": "Standort",
+    "restaurant.about": "Über",
+    "restaurant.info": "Informationen",
+    "restaurant.address": "Adresse",
+    "restaurant.phone": "Telefon",
+    "restaurant.hours": "Öffnungszeiten",
+    "reviews.title": "Bewertungen",
+    "reviews.write": "Bewertung Schreiben",
+    "reviews.empty": "Noch keine Bewertungen",
+    "reviews.beFirst": "Seien Sie der Erste, der bewertet!",
+    "error.notFound": "Restaurant nicht gefunden",
   },
 };

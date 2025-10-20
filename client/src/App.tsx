@@ -9,6 +9,7 @@ import MainScreen from "@/pages/MainScreen";
 import AIPage from "@/pages/AIPage";
 import ContentPage from "@/pages/ContentPage";
 import MyPage from "@/pages/MyPage";
+import RestaurantDetailPage from "@/pages/RestaurantDetailPage";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -18,6 +19,7 @@ function Router() {
       <Route path="/ai" component={AIPage} />
       <Route path="/content" component={ContentPage} />
       <Route path="/my" component={MyPage} />
+      <Route path="/restaurant/:id" component={RestaurantDetailPage} />
       <Route component={NotFound} />
     </Switch>
   );
