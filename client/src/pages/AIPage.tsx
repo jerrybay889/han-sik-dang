@@ -58,13 +58,15 @@ export default function AIPage() {
       {/* Header */}
       <header className="sticky top-0 z-50 bg-primary text-primary-foreground shadow-md">
         <div className="max-w-md mx-auto px-4 py-4">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center">
-              <Bot className="w-7 h-7" />
-            </div>
-            <div className="flex-1">
-              <h1 className="text-lg font-bold">{t("ai.title")}</h1>
-              <p className="text-xs text-primary-foreground/80">{t("app.tagline")}</p>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center flex-shrink-0">
+                <Bot className="w-6 h-6" />
+              </div>
+              <div>
+                <h1 className="text-base font-bold">{t("ai.title")}</h1>
+                <p className="text-xs text-primary-foreground/80">{t("app.tagline")}</p>
+              </div>
             </div>
             <LanguageSelector />
           </div>

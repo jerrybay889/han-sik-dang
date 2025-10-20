@@ -86,7 +86,12 @@ export default function MyPage() {
       {/* Header */}
       <header className="bg-primary text-primary-foreground">
         <div className="max-w-md mx-auto px-4 py-6">
-          <div className="flex items-center justify-end mb-4">
+          <div className="flex items-center justify-between mb-4">
+            <img
+              src="/attached_assets/배경제거 -Gemini_Generated_Image_1ac1sb1ac1sb1ac1_ALTools_AIRemoveBG_1760940109625.png"
+              alt="한식당"
+              className="h-8 brightness-0 invert"
+            />
             <LanguageSelector />
           </div>
           <div className="flex items-center gap-4">

@@ -81,10 +81,11 @@ export default function ContentPage() {
       <header className="sticky top-0 z-50 bg-card border-b border-border">
         <div className="max-w-md mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <BookText className="w-6 h-6 text-primary" />
-              <h1 className="text-lg font-bold">{t("content.title")}</h1>
-            </div>
+            <img
+              src="/attached_assets/배경제거 -Gemini_Generated_Image_1ac1sb1ac1sb1ac1_ALTools_AIRemoveBG_1760940109625.png"
+              alt="한식당"
+              className="h-8"
+            />
             <div className="flex items-center gap-1">
               <LanguageSelector />
               <Button variant="ghost" size="sm" data-testid="button-filter">
