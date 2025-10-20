@@ -104,6 +104,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.post("/api/reviews", async (req, res) => {
+    try {
+      const { userId, restaurantId, rating, comment } = req.body;
+      
+      if (!userId || !restaurantId || !rating) {
+        return res.status(400).json({ error: "userId, restaurantId, and rating are required" });
+      }
+
+      if (rating < 1 || rating > 5) {
+        return res.status(400).json({ error: "Rating must be between 1 and 5" });
+      }
+
+      const user = await storage.getUser(userId);
+      const userName = user?.username || "Guest User";
+
+      const review = await storage.createReview({
+        userId,
+        restaurantId,
+        userName,
+        rating,
+        comment: comment || "",
+      });
+
+      res.json(review);
+    } catch (error) {
+      console.error("Create review error:", error);
+      res.status(500).json({ error: "Failed to create review" });
+    }
+  });
+
   app.get("/api/saved/:userId", async (req, res) => {
     try {
       const savedRestaurants = await storage.getSavedRestaurants(req.params.userId);
