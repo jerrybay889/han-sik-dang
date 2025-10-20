@@ -137,6 +137,53 @@ Preferred communication style: Simple, everyday language.
 - Serverless-ready database configuration for modern deployment platforms
 - Replit-optimized development experience with custom plugins
 
+### Restaurant Detail Page
+
+**Implementation**: Comprehensive restaurant detail page with full multilingual support
+
+**Features**:
+- **Restaurant Information Display**:
+  - Hero image with responsive layout
+  - Dual-language restaurant names (Korean/English)
+  - Star rating and review count
+  - Cuisine type and dietary badges (Vegan/Halal)
+  - Price range and location information
+  - Full restaurant description
+  
+- **Contact Information**:
+  - Full address display
+  - Clickable phone number (`tel:` link for mobile)
+  - Operating hours with multi-line support
+  
+- **Reviews Section**:
+  - Review list display with user names, ratings, comments, dates
+  - "Write Review" button (UI ready for implementation)
+  - Empty state when no reviews exist
+  - Loading skeleton during data fetch
+  
+- **Navigation**:
+  - Back button to return to homepage
+  - Save/bookmark button (UI ready for implementation)
+  - URL structure: `/restaurant/:id`
+  
+- **SEO Optimization**:
+  - Page-specific meta tags (title, description, keywords)
+  - Open Graph tags for social sharing
+  - Structured data with restaurant details
+
+**Technical Implementation**:
+- Route: `/restaurant/:id` defined in `client/src/App.tsx`
+- Component: `client/src/pages/RestaurantDetailPage.tsx`
+- API endpoints: GET `/api/restaurants/:id`, GET `/api/reviews/:restaurantId`
+- Multilingual support: 13 new translation keys across all 8 languages
+- Click navigation from MainScreen restaurant cards via wouter `<Link>`
+
+**Translation Keys Added**:
+- `restaurant.price`, `restaurant.location`, `restaurant.about`, `restaurant.info`
+- `restaurant.address`, `restaurant.phone`, `restaurant.hours`
+- `reviews.title`, `reviews.write`, `reviews.empty`, `reviews.beFirst`
+- `error.notFound`, `discover.title`
+
 ### SEO and Search Optimization
 
 **Implementation**: Comprehensive SEO strategy for dual-platform deployment (mobile apps + web)
