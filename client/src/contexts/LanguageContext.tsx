@@ -17,14 +17,14 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     }
     
     const browserLang = navigator.language.toLowerCase();
-    if (browserLang.startsWith("ko")) return "ko";
+    if (browserLang.startsWith("en")) return "en";
     if (browserLang.startsWith("ja")) return "ja";
     if (browserLang.startsWith("zh-cn") || browserLang === "zh") return "zh-CN";
     if (browserLang.startsWith("zh-tw") || browserLang === "zh-hant") return "zh-TW";
     if (browserLang.startsWith("es")) return "es";
     if (browserLang.startsWith("fr")) return "fr";
     if (browserLang.startsWith("de")) return "de";
-    return "en";
+    return "ko";
   });
 
   useEffect(() => {
