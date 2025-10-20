@@ -63,6 +63,15 @@ type TranslationKey =
   | "reviews.write"
   | "reviews.empty"
   | "reviews.beFirst"
+  | "review.write"
+  | "review.yourRating"
+  | "review.yourReview"
+  | "review.placeholder"
+  | "review.submit"
+  | "review.cancel"
+  | "review.success"
+  | "review.error"
+  | "my.profile"
   | "error.notFound";
 
 export const translations: Record<Language, Record<TranslationKey, string>> = {
@@ -118,6 +127,15 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     "reviews.write": "리뷰 작성",
     "reviews.empty": "아직 리뷰가 없습니다",
     "reviews.beFirst": "첫 리뷰를 작성해보세요!",
+    "review.write": "리뷰 작성",
+    "review.yourRating": "별점",
+    "review.yourReview": "리뷰 작성",
+    "review.placeholder": "이곳에 대한 경험을 공유해주세요...",
+    "review.submit": "리뷰 등록",
+    "review.cancel": "취소",
+    "review.success": "리뷰가 성공적으로 등록되었습니다",
+    "review.error": "리뷰 등록에 실패했습니다",
+    "my.profile": "마이 페이지",
     "error.notFound": "레스토랑을 찾을 수 없습니다",
   },
   en: {
@@ -172,6 +190,15 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     "reviews.write": "Write Review",
     "reviews.empty": "No reviews yet",
     "reviews.beFirst": "Be the first to review!",
+    "review.write": "Write Review",
+    "review.yourRating": "Your Rating",
+    "review.yourReview": "Your Review",
+    "review.placeholder": "Share your experience...",
+    "review.submit": "Submit Review",
+    "review.cancel": "Cancel",
+    "review.success": "Review submitted successfully",
+    "review.error": "Failed to submit review",
+    "my.profile": "My Profile",
     "error.notFound": "Restaurant not found",
   },
   ja: {
@@ -226,6 +253,15 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     "reviews.write": "レビューを書く",
     "reviews.empty": "まだレビューがありません",
     "reviews.beFirst": "最初のレビューを書いてください！",
+    "review.write": "レビューを書く",
+    "review.yourRating": "評価",
+    "review.yourReview": "レビュー",
+    "review.placeholder": "体験を共有してください...",
+    "review.submit": "レビューを投稿",
+    "review.cancel": "キャンセル",
+    "review.success": "レビューが正常に投稿されました",
+    "review.error": "レビューの投稿に失敗しました",
+    "my.profile": "マイページ",
     "error.notFound": "レストランが見つかりません",
   },
   "zh-CN": {
@@ -280,6 +316,15 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     "reviews.write": "写评论",
     "reviews.empty": "暂无评论",
     "reviews.beFirst": "成为第一个评论者！",
+    "review.write": "撰写评论",
+    "review.yourRating": "您的评分",
+    "review.yourReview": "您的评论",
+    "review.placeholder": "分享您的体验...",
+    "review.submit": "提交评论",
+    "review.cancel": "取消",
+    "review.success": "评论提交成功",
+    "review.error": "评论提交失败",
+    "my.profile": "我的主页",
     "error.notFound": "未找到餐厅",
   },
   "zh-TW": {
@@ -334,6 +379,15 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     "reviews.write": "撰寫評論",
     "reviews.empty": "暫無評論",
     "reviews.beFirst": "成為第一個評論者！",
+    "review.write": "撰寫評論",
+    "review.yourRating": "您的評分",
+    "review.yourReview": "您的評論",
+    "review.placeholder": "分享您的體驗...",
+    "review.submit": "提交評論",
+    "review.cancel": "取消",
+    "review.success": "評論提交成功",
+    "review.error": "評論提交失敗",
+    "my.profile": "我的主頁",
     "error.notFound": "未找到餐廳",
   },
   es: {
@@ -388,6 +442,15 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     "reviews.write": "Escribir Reseña",
     "reviews.empty": "Aún no hay reseñas",
     "reviews.beFirst": "¡Sé el primero en reseñar!",
+    "review.write": "Escribir Reseña",
+    "review.yourRating": "Tu Calificación",
+    "review.yourReview": "Tu Reseña",
+    "review.placeholder": "Comparte tu experiencia...",
+    "review.submit": "Enviar Reseña",
+    "review.cancel": "Cancelar",
+    "review.success": "Reseña enviada exitosamente",
+    "review.error": "Error al enviar la reseña",
+    "my.profile": "Mi Perfil",
     "error.notFound": "Restaurante no encontrado",
   },
   fr: {
@@ -442,6 +505,15 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     "reviews.write": "Écrire un Avis",
     "reviews.empty": "Pas encore d'avis",
     "reviews.beFirst": "Soyez le premier à donner votre avis !",
+    "review.write": "Écrire un Avis",
+    "review.yourRating": "Votre Note",
+    "review.yourReview": "Votre Avis",
+    "review.placeholder": "Partagez votre expérience...",
+    "review.submit": "Soumettre l'Avis",
+    "review.cancel": "Annuler",
+    "review.success": "Avis soumis avec succès",
+    "review.error": "Échec de la soumission de l'avis",
+    "my.profile": "Mon Profil",
     "error.notFound": "Restaurant non trouvé",
   },
   de: {
@@ -496,6 +568,15 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     "reviews.write": "Bewertung Schreiben",
     "reviews.empty": "Noch keine Bewertungen",
     "reviews.beFirst": "Seien Sie der Erste, der bewertet!",
+    "review.write": "Bewertung Schreiben",
+    "review.yourRating": "Ihre Bewertung",
+    "review.yourReview": "Ihre Bewertung",
+    "review.placeholder": "Teilen Sie Ihre Erfahrung...",
+    "review.submit": "Bewertung Absenden",
+    "review.cancel": "Abbrechen",
+    "review.success": "Bewertung erfolgreich übermittelt",
+    "review.error": "Fehler beim Übermitteln der Bewertung",
+    "my.profile": "Mein Profil",
     "error.notFound": "Restaurant nicht gefunden",
   },
 };
