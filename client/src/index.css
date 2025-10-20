@@ -76,7 +76,13 @@
   --chart-4: 280 65% 50%;
   --chart-5: 340 82% 52%;
 
-  --font-sans: Open Sans, sans-serif;
+  --accent-success: 142 76% 36%;
+  --accent-warning: 25 95% 53%;
+  --video-indicator: 0 84% 60%;
+  --blog-indicator: 258 90% 66%;
+  --ad-zone: 210 20% 98%;
+
+  --font-sans: -apple-system, "Noto Sans KR", sans-serif;
   --font-serif: Georgia, serif;
   --font-mono: Menlo, monospace;
   --radius: .5rem; /* 8px */
@@ -193,6 +199,12 @@
   --chart-3: 142 76% 50%;
   --chart-4: 280 65% 65%;
   --chart-5: 340 82% 65%;
+
+  --accent-success: 142 76% 50%;
+  --accent-warning: 25 95% 60%;
+  --video-indicator: 0 84% 70%;
+  --blog-indicator: 258 90% 75%;
+  --ad-zone: 210 30% 14%;
 
   --shadow-2xs: 0px 2px 0px 0px hsl(0 0% 0% / 0.20);
   --shadow-xs: 0px 2px 0px 0px hsl(0 0% 0% / 0.25);
