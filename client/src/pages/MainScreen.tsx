@@ -2,13 +2,24 @@ import { Search, MapPin, Star, Clock, TrendingUp, Play, Bot } from "lucide-react
 import { AdSlot } from "@/components/AdSlot";
 import { BottomNav } from "@/components/BottomNav";
 import { LanguageSelector } from "@/components/LanguageSelector";
+import { SEO } from "@/components/SEO";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { createWebsiteSchema, createOrganizationSchema } from "@/lib/structuredData";
 
 export default function MainScreen() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+  
+  const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@graph": [
+      createWebsiteSchema(baseUrl),
+      createOrganizationSchema(baseUrl),
+    ],
+  };
 
   const sampleRestaurants = [
     {
@@ -63,8 +74,16 @@ export default function MainScreen() {
   ];
 
   return (
-    <div className="min-h-screen bg-background pb-[72px]">
-      {/* Header */}
+    <>
+      <SEO
+        title={t("discover.title")}
+        description={t("app.tagline")}
+        keywords={["Korean restaurant", "맛집", "한식당", "Seoul restaurants", "AI recommendations", "tourist guide", "Korean food"]}
+        url="/"
+        structuredData={structuredData}
+      />
+      <div className="min-h-screen bg-background pb-[72px]">
+        {/* Header */}
       <header className="sticky top-0 z-50 bg-card border-b border-border">
         <div className="max-w-md mx-auto px-4 py-3">
           <div className="flex items-center justify-between mb-3">
@@ -290,5 +309,6 @@ export default function MainScreen() {
 
       <BottomNav />
     </div>
+    </>
   );
 }

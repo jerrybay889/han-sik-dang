@@ -1,6 +1,7 @@
 import { BookText, Play, Clock, TrendingUp, Calendar } from "lucide-react";
 import { BottomNav } from "@/components/BottomNav";
 import { LanguageSelector } from "@/components/LanguageSelector";
+import { SEO } from "@/components/SEO";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -76,8 +77,15 @@ export default function ContentPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-background pb-[72px]">
-      {/* Header */}
+    <>
+      <SEO
+        title={t("content.title")}
+        description="Discover Korean food culture through videos and blogs. Learn about authentic restaurants and Korean cuisine."
+        keywords={["Korean food videos", "restaurant blogs", "Korean cuisine guide", "food content", "travel guides"]}
+        url="/content"
+      />
+      <div className="min-h-screen bg-background pb-[72px]">
+        {/* Header */}
       <header className="sticky top-0 z-50 bg-card border-b border-border">
         <div className="max-w-md mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
@@ -227,5 +235,6 @@ export default function ContentPage() {
 
       <BottomNav />
     </div>
+    </>
   );
 }

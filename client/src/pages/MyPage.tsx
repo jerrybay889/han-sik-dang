@@ -1,6 +1,7 @@
 import { User, Heart, Star, MapPin, Settings, ChevronRight, FileText, Users, Bell } from "lucide-react";
 import { BottomNav } from "@/components/BottomNav";
 import { LanguageSelector } from "@/components/LanguageSelector";
+import { SEO } from "@/components/SEO";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -82,8 +83,15 @@ export default function MyPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-background pb-[72px]">
-      {/* Header */}
+    <>
+      <SEO
+        title={t("my.profile")}
+        description="Manage your saved restaurants, reviews, and preferences. Track your Korean food journey."
+        keywords={["saved restaurants", "reviews", "user profile", "restaurant bookmarks"]}
+        url="/my"
+      />
+      <div className="min-h-screen bg-background pb-[72px]">
+        {/* Header */}
       <header className="bg-primary text-primary-foreground">
         <div className="max-w-md mx-auto px-4 py-6">
           <div className="flex items-center justify-between mb-4">
@@ -259,5 +267,6 @@ export default function MyPage() {
 
       <BottomNav />
     </div>
+    </>
   );
 }

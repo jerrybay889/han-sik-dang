@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Bot, Send, Sparkles, Utensils, MapPin, Heart } from "lucide-react";
 import { BottomNav } from "@/components/BottomNav";
 import { LanguageSelector } from "@/components/LanguageSelector";
+import { SEO } from "@/components/SEO";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -54,8 +55,15 @@ export default function AIPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background pb-[72px] flex flex-col">
-      {/* Header */}
+    <>
+      <SEO
+        title={t("ai.title")}
+        description="Get personalized Korean restaurant recommendations with AI. Perfect for tourists visiting Korea."
+        keywords={["AI recommendations", "Korean food guide", "restaurant finder", "tourist guide", "AI concierge"]}
+        url="/ai"
+      />
+      <div className="min-h-screen bg-background pb-[72px] flex flex-col">
+        {/* Header */}
       <header className="sticky top-0 z-50 bg-primary text-primary-foreground shadow-md">
         <div className="max-w-md mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
@@ -161,5 +169,6 @@ export default function AIPage() {
 
       <BottomNav />
     </div>
+    </>
   );
 }
