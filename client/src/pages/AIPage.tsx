@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { Bot, Send, Sparkles, Utensils, MapPin, Heart } from "lucide-react";
 import { BottomNav } from "@/components/BottomNav";
+import { LanguageSelector } from "@/components/LanguageSelector";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { AdSlot } from "@/components/AdSlot";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 type Message = {
   id: number;
@@ -13,20 +15,21 @@ type Message = {
 };
 
 export default function AIPage() {
+  const { t } = useLanguage();
   const [messages, setMessages] = useState<Message[]>([
     {
       id: 1,
       type: "ai",
-      content: "안녕하세요! 👋 한식당 AI 컨시어지입니다.\n\nHello! I'm your Korean restaurant AI concierge. How can I help you today?",
+      content: t("ai.welcome"),
     },
   ]);
   const [input, setInput] = useState("");
 
   const suggestions = [
-    { icon: Utensils, text: "비건 한식", textEn: "Vegan Korean" },
-    { icon: MapPin, text: "홍대 근처", textEn: "Near Hongdae" },
-    { icon: Heart, text: "로맨틱", textEn: "Romantic" },
-    { icon: Sparkles, text: "특별한 날", textEn: "Special Day" },
+    { icon: Utensils, text: t("ai.suggestions.vegan") },
+    { icon: MapPin, text: t("ai.suggestions.nearby") },
+    { icon: Heart, text: t("ai.suggestions.romantic") },
+    { icon: Sparkles, text: t("ai.suggestions.special") },
   ];
 
   const handleSend = () => {
@@ -59,11 +62,11 @@ export default function AIPage() {
             <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center">
               <Bot className="w-7 h-7" />
             </div>
-            <div>
-              <h1 className="text-lg font-bold">AI 컨시어지</h1>
-              <p className="text-xs text-primary-foreground/80">AI Restaurant Concierge</p>
+            <div className="flex-1">
+              <h1 className="text-lg font-bold">{t("ai.title")}</h1>
+              <p className="text-xs text-primary-foreground/80">{t("app.tagline")}</p>
             </div>
-            <Sparkles className="ml-auto w-6 h-6 animate-pulse" />
+            <LanguageSelector />
           </div>
         </div>
       </header>
@@ -104,9 +107,6 @@ export default function AIPage() {
         {/* Quick Suggestions */}
         {messages.length === 1 && (
           <div className="pt-4" data-testid="suggestions-container">
-            <p className="text-sm text-muted-foreground mb-3 text-center">
-              빠른 추천 받기 • Quick Suggestions
-            </p>
             <div className="grid grid-cols-2 gap-2">
               {suggestions.map((suggestion, index) => {
                 const Icon = suggestion.icon;
@@ -121,10 +121,7 @@ export default function AIPage() {
                       <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
                         <Icon className="w-5 h-5 text-primary" />
                       </div>
-                      <div>
-                        <p className="text-sm font-medium">{suggestion.text}</p>
-                        <p className="text-xs text-muted-foreground">{suggestion.textEn}</p>
-                      </div>
+                      <p className="text-sm font-medium">{suggestion.text}</p>
                     </div>
                   </Card>
                 );
@@ -143,7 +140,7 @@ export default function AIPage() {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyPress={(e) => e.key === "Enter" && handleSend()}
-              placeholder="메시지를 입력하세요... Type your message..."
+              placeholder={t("ai.placeholder")}
               className="flex-1 px-4 py-3 rounded-full bg-muted text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
               data-testid="input-message"
             />

@@ -1,11 +1,14 @@
 import { BookText, Play, Clock, TrendingUp, Calendar } from "lucide-react";
 import { BottomNav } from "@/components/BottomNav";
+import { LanguageSelector } from "@/components/LanguageSelector";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { AdSlot } from "@/components/AdSlot";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function ContentPage() {
+  const { t } = useLanguage();
   const videos = [
     {
       id: 1,
@@ -80,14 +83,14 @@ export default function ContentPage() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <BookText className="w-6 h-6 text-primary" />
-              <div>
-                <h1 className="text-lg font-bold">콘텐츠</h1>
-                <p className="text-xs text-muted-foreground">Content</p>
-              </div>
+              <h1 className="text-lg font-bold">{t("content.title")}</h1>
             </div>
-            <Button variant="ghost" size="sm" data-testid="button-filter">
-              필터
-            </Button>
+            <div className="flex items-center gap-1">
+              <LanguageSelector />
+              <Button variant="ghost" size="sm" data-testid="button-filter">
+                {t("content.filter")}
+              </Button>
+            </div>
           </div>
         </div>
       </header>
@@ -105,13 +108,10 @@ export default function ContentPage() {
               <div className="w-8 h-8 rounded-full bg-[hsl(var(--video-indicator))] flex items-center justify-center">
                 <Play className="w-4 h-4 text-white fill-white" />
               </div>
-              <div>
-                <h2 className="text-lg font-bold">인기 영상</h2>
-                <p className="text-xs text-muted-foreground">Trending Videos</p>
-              </div>
+              <h2 className="text-lg font-bold">{t("content.videos")}</h2>
             </div>
             <Button variant="ghost" size="sm" data-testid="button-see-all-videos">
-              더보기
+              {t("content.seeAll")}
             </Button>
           </div>
 

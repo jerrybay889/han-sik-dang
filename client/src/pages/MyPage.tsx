@@ -1,43 +1,42 @@
 import { User, Heart, Star, MapPin, Settings, ChevronRight, FileText, Users, Bell } from "lucide-react";
 import { BottomNav } from "@/components/BottomNav";
+import { LanguageSelector } from "@/components/LanguageSelector";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { AdSlot } from "@/components/AdSlot";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function MyPage() {
+  const { t } = useLanguage();
   const stats = [
-    { label: "저장한 맛집", labelEn: "Saved", value: 24, icon: Heart },
-    { label: "작성한 리뷰", labelEn: "Reviews", value: 12, icon: Star },
-    { label: "방문한 곳", labelEn: "Visited", value: 38, icon: MapPin },
+    { label: t("my.saved"), value: 24, icon: Heart },
+    { label: t("my.reviews"), value: 12, icon: Star },
+    { label: t("my.visited"), value: 38, icon: MapPin },
   ];
 
   const menuItems = [
     {
       icon: Heart,
-      title: "저장한 맛집",
-      titleEn: "Saved Restaurants",
+      title: t("my.saved"),
       badge: "24",
       testId: "menu-saved",
     },
     {
       icon: Star,
-      title: "내 리뷰",
-      titleEn: "My Reviews",
+      title: t("my.reviews"),
       badge: "12",
       testId: "menu-reviews",
     },
     {
       icon: MapPin,
-      title: "방문 기록",
-      titleEn: "Visit History",
+      title: t("my.visited"),
       badge: "38",
       testId: "menu-visits",
     },
     {
       icon: Users,
-      title: "팔로잉",
-      titleEn: "Following",
+      title: t("my.following"),
       badge: "15",
       testId: "menu-following",
     },
@@ -46,20 +45,17 @@ export default function MyPage() {
   const settingItems = [
     {
       icon: Bell,
-      title: "알림 설정",
-      titleEn: "Notifications",
+      title: t("my.notifications"),
       testId: "settings-notifications",
     },
     {
       icon: Settings,
-      title: "앱 설정",
-      titleEn: "App Settings",
+      title: t("my.settings"),
       testId: "settings-app",
     },
     {
       icon: FileText,
-      title: "이용약관 & 개인정보",
-      titleEn: "Terms & Privacy",
+      title: t("my.terms"),
       testId: "settings-terms",
     },
   ];
@@ -90,20 +86,22 @@ export default function MyPage() {
       {/* Header */}
       <header className="bg-primary text-primary-foreground">
         <div className="max-w-md mx-auto px-4 py-6">
+          <div className="flex items-center justify-end mb-4">
+            <LanguageSelector />
+          </div>
           <div className="flex items-center gap-4">
             <div className="w-20 h-20 rounded-full bg-white/20 flex items-center justify-center border-2 border-white/30">
               <User className="w-10 h-10" />
             </div>
             <div className="flex-1">
               <h1 className="text-xl font-bold mb-1">Guest User</h1>
-              <p className="text-sm text-primary-foreground/80">게스트 사용자</p>
               <Button
                 variant="outline"
                 size="sm"
                 className="mt-2 border-white/30 text-primary-foreground hover:bg-white/10"
                 data-testid="button-edit-profile"
               >
-                프로필 편집
+                {t("my.editProfile")}
               </Button>
             </div>
           </div>
