@@ -19,6 +19,7 @@ Preferred communication style: Simple, everyday language.
 - **State Management**: TanStack React Query v5 for server state management
 - **UI Components**: shadcn/ui component library (New York style variant) built on Radix UI primitives
 - **Styling**: Tailwind CSS v4 with custom CSS variables for theming
+- **SEO**: react-helmet-async for dynamic meta tag management
 
 **Design System**:
 - Mobile-first responsive design with max-width container approach (`max-w-md mx-auto`)
@@ -32,6 +33,7 @@ Preferred communication style: Simple, everyday language.
 - CSS variable-based theming for consistent design across light/dark modes
 - Content-first approach with ad monetization zones integrated into UI
 - Path aliases configured for clean imports (`@/`, `@shared/`, `@assets/`)
+- SEO-first approach for both mobile app deployment and web search visibility
 
 ### Backend Architecture
 
@@ -134,3 +136,51 @@ Preferred communication style: Simple, everyday language.
 - AI-first features prepared via Google Generative AI integration
 - Serverless-ready database configuration for modern deployment platforms
 - Replit-optimized development experience with custom plugins
+
+### SEO and Search Optimization
+
+**Implementation**: Comprehensive SEO strategy for dual-platform deployment (mobile apps + web)
+
+**Core Components**:
+- **SEO Component** (`client/src/components/SEO.tsx`):
+  - React Helmet Async integration for dynamic meta tag management
+  - Per-page customizable title, description, keywords
+  - Open Graph tags for social media sharing (Facebook, LinkedIn)
+  - Twitter Card meta tags for Twitter/X previews
+  - Canonical URLs to prevent duplicate content
+  - JSON-LD structured data injection
+  
+- **Structured Data** (`client/src/lib/structuredData.ts`):
+  - Schema.org Organization schema with multilingual name
+  - Schema.org WebSite schema with search action capability
+  - Rich snippet support for search engines
+
+- **Multilingual SEO**:
+  - hreflang link tags in `index.html` for 8 languages (ko, en, ja, zh-Hans, zh-Hant, es, fr, de)
+  - Language-specific meta descriptions and keywords
+  - Ensures proper indexing for regional search engines
+
+- **Search Engine Discovery**:
+  - `sitemap.xml` - XML sitemap with all main pages and hreflang alternates
+  - `robots.txt` - Search engine crawler directives with sitemap reference
+  - Both files located in `client/public/`
+
+**SEO Coverage**:
+- Homepage (`/`) - Restaurant discovery, AI recommendations
+- AI Guide (`/ai`) - Personalized restaurant recommendations
+- Content Feed (`/content`) - Videos and blogs about Korean food
+- User Profile (`/my`) - Saved restaurants and reviews
+
+**Key SEO Features**:
+- Unique meta tags per page with descriptive titles and descriptions
+- Social media preview optimization (Open Graph + Twitter Cards)
+- Structured data for rich search results
+- Mobile-first indexing compliance
+- Fast page load times for Core Web Vitals
+- Semantic HTML structure with proper heading hierarchy
+
+**Target Search Visibility**:
+- Google Search (global and regional)
+- LLM AI searches (ChatGPT, Perplexity, etc.)
+- Social media link previews
+- Mobile app store SEO (when deployed)
