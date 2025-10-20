@@ -5,6 +5,8 @@ import { ArrowLeft, MapPin, Phone, Clock, Star, DollarSign, Users, Heart } from 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
 import { SEO } from "@/components/SEO";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { queryClient, apiRequest } from "@/lib/queryClient";
@@ -18,6 +20,10 @@ export default function RestaurantDetailPage() {
   const { toast } = useToast();
   const [, params] = useRoute("/restaurant/:id");
   const restaurantId = params?.id;
+  
+  const [isReviewDialogOpen, setIsReviewDialogOpen] = useState(false);
+  const [reviewRating, setReviewRating] = useState(0);
+  const [reviewComment, setReviewComment] = useState("");
 
   const { data: restaurant, isLoading: loadingRestaurant } = useQuery<Restaurant>({
     queryKey: ["/api/restaurants", restaurantId],
@@ -60,6 +66,45 @@ export default function RestaurantDetailPage() {
       });
     },
   });
+
+  const reviewMutation = useMutation({
+    mutationFn: async () => {
+      await apiRequest("POST", "/api/reviews", {
+        userId: TEMP_USER_ID,
+        restaurantId,
+        rating: reviewRating,
+        comment: reviewComment,
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/reviews", restaurantId] });
+      queryClient.invalidateQueries({ queryKey: ["/api/restaurants", restaurantId] });
+      setIsReviewDialogOpen(false);
+      setReviewRating(0);
+      setReviewComment("");
+      toast({
+        title: t("review.success"),
+      });
+    },
+    onError: () => {
+      toast({
+        title: t("review.error"),
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleSubmitReview = () => {
+    if (reviewRating === 0) {
+      toast({
+        title: t("review.error"),
+        description: t("review.yourRating"),
+        variant: "destructive",
+      });
+      return;
+    }
+    reviewMutation.mutate();
+  };
 
   if (loadingRestaurant) {
     return (
@@ -247,7 +292,12 @@ export default function RestaurantDetailPage() {
                   <Users className="w-5 h-5" />
                   {t("reviews.title")} ({reviews.length})
                 </h2>
-                <Button size="sm" variant="default" data-testid="button-write-review">
+                <Button 
+                  size="sm" 
+                  variant="default" 
+                  onClick={() => setIsReviewDialogOpen(true)}
+                  data-testid="button-write-review"
+                >
                   {t("reviews.write")}
                 </Button>
               </div>
@@ -294,6 +344,75 @@ export default function RestaurantDetailPage() {
           </div>
         </div>
       </div>
+
+      {/* Review Dialog */}
+      <Dialog open={isReviewDialogOpen} onOpenChange={setIsReviewDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>{t("review.write")}</DialogTitle>
+            <DialogDescription>{restaurantName}</DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4 py-4">
+            {/* Star Rating */}
+            <div>
+              <label className="text-sm font-medium mb-2 block">{t("review.yourRating")}</label>
+              <div className="flex gap-2" data-testid="rating-input">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <button
+                    key={star}
+                    type="button"
+                    onClick={() => setReviewRating(star)}
+                    className="focus:outline-none transition-transform hover:scale-110"
+                    data-testid={`button-star-${star}`}
+                  >
+                    <Star
+                      className={`w-8 h-8 ${
+                        star <= reviewRating
+                          ? "fill-[hsl(var(--accent-success))] text-[hsl(var(--accent-success))]"
+                          : "text-muted-foreground"
+                      }`}
+                    />
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Comment */}
+            <div>
+              <label className="text-sm font-medium mb-2 block">{t("review.yourReview")}</label>
+              <Textarea
+                placeholder={t("review.placeholder")}
+                value={reviewComment}
+                onChange={(e) => setReviewComment(e.target.value)}
+                rows={4}
+                data-testid="textarea-review-comment"
+              />
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setIsReviewDialogOpen(false);
+                setReviewRating(0);
+                setReviewComment("");
+              }}
+              data-testid="button-cancel-review"
+            >
+              {t("review.cancel")}
+            </Button>
+            <Button
+              onClick={handleSubmitReview}
+              disabled={reviewMutation.isPending || reviewRating === 0}
+              data-testid="button-submit-review"
+            >
+              {reviewMutation.isPending ? "..." : t("review.submit")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
