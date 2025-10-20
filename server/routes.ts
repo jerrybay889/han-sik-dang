@@ -57,6 +57,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get("/api/restaurants/search/:query", async (req, res) => {
+    try {
+      const query = req.params.query;
+      if (!query || query.trim().length === 0) {
+        return res.status(400).json({ error: "Search query is required" });
+      }
+      const restaurants = await storage.searchRestaurants(query);
+      res.json(restaurants);
+    } catch (error) {
+      console.error("Search restaurants error:", error);
+      res.status(500).json({ error: "Failed to search restaurants" });
+    }
+  });
+
   app.get("/api/restaurants/:id", async (req, res) => {
     try {
       const restaurant = await storage.getRestaurant(req.params.id);

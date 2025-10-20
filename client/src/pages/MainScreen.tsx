@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Search, MapPin, Star, Clock, TrendingUp, Play, Bot } from "lucide-react";
 import { AdSlot } from "@/components/AdSlot";
 import { BottomNav } from "@/components/BottomNav";
@@ -14,9 +15,25 @@ import type { Restaurant } from "@shared/schema";
 
 export default function MainScreen() {
   const { t, language } = useLanguage();
+  const [searchQuery, setSearchQuery] = useState("");
 
   const { data: restaurants, isLoading } = useQuery<Restaurant[]>({
     queryKey: ["/api/restaurants"],
+  });
+
+  const { data: searchResults = [], isLoading: isSearching } = useQuery<Restaurant[]>({
+    queryKey: ["/api/restaurants/search", searchQuery],
+    queryFn: async () => {
+      if (!searchQuery || searchQuery.trim().length === 0) {
+        return [];
+      }
+      const response = await fetch(`/api/restaurants/search/${encodeURIComponent(searchQuery)}`);
+      if (!response.ok) {
+        throw new Error("Failed to search restaurants");
+      }
+      return response.json();
+    },
+    enabled: searchQuery.trim().length > 0,
   });
   
   const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
@@ -28,7 +45,9 @@ export default function MainScreen() {
     ],
   };
 
-  const displayRestaurants = restaurants?.slice(0, 6) || [];
+  const displayRestaurants = searchQuery.trim().length > 0 
+    ? searchResults 
+    : (restaurants?.slice(0, 6) || []);
 
   const sampleVideos = [
     {
@@ -81,6 +100,8 @@ export default function MainScreen() {
             <input
               type="search"
               placeholder={t("search.placeholder")}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full h-12 pl-10 pr-4 rounded-full bg-muted text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
               data-testid="input-search"
             />
@@ -127,20 +148,26 @@ export default function MainScreen() {
           </div>
         </div>
 
-        {/* Trending Section */}
+        {/* Trending Section / Search Results */}
         <section className="px-4 py-4">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <TrendingUp className="w-5 h-5 text-primary" />
-              <h2 className="text-lg font-semibold">{t("discover.popular")}</h2>
+              <h2 className="text-lg font-semibold">
+                {searchQuery.trim().length > 0 
+                  ? `${t("search.button")}: "${searchQuery}"` 
+                  : t("discover.popular")}
+              </h2>
             </div>
-            <Button variant="ghost" size="sm" data-testid="button-see-all-trending">
-              {t("discover.viewAll")}
-            </Button>
+            {!searchQuery && (
+              <Button variant="ghost" size="sm" data-testid="button-see-all-trending">
+                {t("discover.viewAll")}
+              </Button>
+            )}
           </div>
 
           <div className="space-y-4">
-            {isLoading ? (
+            {(isLoading || isSearching) ? (
               Array.from({ length: 3 }).map((_, i) => (
                 <Card key={i} className="overflow-hidden">
                   <div className="flex gap-3 p-3">
@@ -153,6 +180,14 @@ export default function MainScreen() {
                   </div>
                 </Card>
               ))
+            ) : displayRestaurants.length === 0 && searchQuery.trim().length > 0 ? (
+              <Card className="p-8 text-center">
+                <Search className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+                <p className="text-lg font-semibold mb-2">No restaurants found</p>
+                <p className="text-sm text-muted-foreground">
+                  Try searching with different keywords
+                </p>
+              </Card>
             ) : (
               displayRestaurants.map((restaurant) => (
                 <Link key={restaurant.id} href={`/restaurant/${restaurant.id}`}>
