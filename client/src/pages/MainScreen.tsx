@@ -1,11 +1,15 @@
 import { Search, MapPin, Star, Clock, TrendingUp, Play, Bot } from "lucide-react";
 import { AdSlot } from "@/components/AdSlot";
 import { BottomNav } from "@/components/BottomNav";
+import { LanguageSelector } from "@/components/LanguageSelector";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function MainScreen() {
+  const { t } = useLanguage();
+
   const sampleRestaurants = [
     {
       id: 1,
@@ -71,14 +75,17 @@ export default function MainScreen() {
                 className="h-8"
               />
             </div>
-            <Button size="icon" variant="ghost" data-testid="button-search">
-              <Search className="w-5 h-5" />
-            </Button>
+            <div className="flex items-center gap-1">
+              <LanguageSelector />
+              <Button size="icon" variant="ghost" data-testid="button-search">
+                <Search className="w-5 h-5" />
+              </Button>
+            </div>
           </div>
           <div className="relative">
             <input
               type="search"
-              placeholder="레스토랑, 음식 검색..."
+              placeholder={t("search.placeholder")}
               className="w-full h-12 pl-10 pr-4 rounded-full bg-muted text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
               data-testid="input-search"
             />
@@ -98,7 +105,7 @@ export default function MainScreen() {
           <div
             className="relative overflow-hidden rounded-xl p-6 text-white"
             style={{
-              background: "linear-gradient(135deg, hsl(203 89% 32%) 0%, hsl(203 89% 45%) 100%)",
+              background: "linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--primary) / 0.8) 100%)",
             }}
           >
             <div className="relative z-10">
@@ -106,20 +113,20 @@ export default function MainScreen() {
                 <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
                   <Bot className="w-6 h-6" />
                 </div>
-                <span className="text-sm font-medium">AI 컨시어지</span>
+                <span className="text-sm font-medium">{t("ai.title")}</span>
               </div>
               <h2 className="text-2xl font-bold mb-2">
-                당신만을 위한 맞춤 추천
+                {t("discover.aiRecommend")}
               </h2>
               <p className="text-sm text-white/80 mb-4">
-                What Korean food suits you today?
+                {t("app.tagline")}
               </p>
               <Button
                 variant="secondary"
                 className="bg-white text-primary hover:bg-white/90"
                 data-testid="button-ai-recommend"
               >
-                AI 추천 받기
+                {t("nav.ai")}
               </Button>
             </div>
           </div>
@@ -130,16 +137,15 @@ export default function MainScreen() {
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <TrendingUp className="w-5 h-5 text-primary" />
-              <h2 className="text-lg font-semibold">인기 맛집</h2>
-              <span className="text-sm text-muted-foreground">Trending</span>
+              <h2 className="text-lg font-semibold">{t("discover.popular")}</h2>
             </div>
             <Button variant="ghost" size="sm" data-testid="button-see-all-trending">
-              더보기
+              {t("discover.viewAll")}
             </Button>
           </div>
 
           <div className="space-y-4">
-            {sampleRestaurants.map((restaurant, index) => (
+            {sampleRestaurants.map((restaurant) => (
               <Card
                 key={restaurant.id}
                 className="overflow-hidden hover-elevate active-elevate-2 cursor-pointer"
@@ -193,11 +199,10 @@ export default function MainScreen() {
               <div className="w-6 h-6 rounded bg-[hsl(var(--video-indicator))] flex items-center justify-center">
                 <Play className="w-4 h-4 text-white fill-white" />
               </div>
-              <h2 className="text-lg font-semibold">인기 영상</h2>
-              <span className="text-sm text-muted-foreground">Videos</span>
+              <h2 className="text-lg font-semibold">{t("content.videos")}</h2>
             </div>
             <Button variant="ghost" size="sm" data-testid="button-see-all-videos">
-              더보기
+              {t("content.seeAll")}
             </Button>
           </div>
 
@@ -230,7 +235,7 @@ export default function MainScreen() {
                   {video.titleEn}
                 </p>
                 <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                  <span>{video.views} views</span>
+                  <span>{video.views} {t("content.views")}</span>
                   <span>•</span>
                   <span>2 days ago</span>
                 </div>
@@ -251,11 +256,10 @@ export default function MainScreen() {
               <div className="w-6 h-6 rounded bg-[hsl(var(--blog-indicator))] flex items-center justify-center text-white text-xs font-bold">
                 B
               </div>
-              <h2 className="text-lg font-semibold">최신 글</h2>
-              <span className="text-sm text-muted-foreground">Blog</span>
+              <h2 className="text-lg font-semibold">{t("content.blogs")}</h2>
             </div>
             <Button variant="ghost" size="sm" data-testid="button-see-all-blogs">
-              더보기
+              {t("content.seeAll")}
             </Button>
           </div>
 
@@ -275,7 +279,7 @@ export default function MainScreen() {
               </p>
               <div className="flex items-center gap-2 text-xs text-muted-foreground">
                 <Clock className="w-3 h-3" />
-                <span>5 min read</span>
+                <span>5 {t("content.readTime")}</span>
                 <span>•</span>
                 <span>1 day ago</span>
               </div>

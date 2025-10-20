@@ -1,14 +1,16 @@
-import { Home, Bot, BookText, User } from "lucide-react";
+import { Compass, Bot, BookText, User } from "lucide-react";
 import { Link, useLocation } from "wouter";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export function BottomNav() {
   const [location] = useLocation();
+  const { t } = useLanguage();
 
   const navItems = [
-    { path: "/", icon: Home, label: "발견", labelEn: "Discover" },
-    { path: "/ai", icon: Bot, label: "AI 추천", labelEn: "AI" },
-    { path: "/content", icon: BookText, label: "콘텐츠", labelEn: "Content" },
-    { path: "/my", icon: User, label: "마이", labelEn: "My" },
+    { path: "/", icon: Compass, label: t("nav.discover"), testId: "nav-discover" },
+    { path: "/ai", icon: Bot, label: t("nav.ai"), testId: "nav-ai" },
+    { path: "/content", icon: BookText, label: t("nav.content"), testId: "nav-content" },
+    { path: "/my", icon: User, label: t("nav.my"), testId: "nav-my" },
   ];
 
   return (
@@ -22,7 +24,7 @@ export function BottomNav() {
             <Link
               key={item.path}
               href={item.path}
-              data-testid={`nav-${item.labelEn.toLowerCase()}`}
+              data-testid={item.testId}
             >
               <button
                 className={`flex flex-col items-center justify-center gap-1 min-w-[60px] h-[56px] rounded-md transition-colors ${

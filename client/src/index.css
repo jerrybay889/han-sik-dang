@@ -48,13 +48,13 @@
 
   --popover-border: 210 20% 86%;
 
-  --primary: 155 65% 45%;
+  --primary: 194 64% 28%;
 
   --primary-foreground: 0 0% 100%;
   
-  --secondary: 28 70% 55%;
+  --accent: 14 100% 66%;
 
-  --secondary-foreground: 0 0% 100%;
+  --accent-foreground: 0 0% 100%;
 
   --secondary: 210 20% 90%;
 
@@ -176,13 +176,13 @@
 
   --popover-border: 210 30% 19%;
 
-  --primary: 155 60% 55%;
+  --primary: 194 64% 38%;
 
   --primary-foreground: 0 0% 100%;
   
-  --secondary: 28 75% 65%;
+  --accent: 14 100% 70%;
 
-  --secondary-foreground: 0 0% 100%;
+  --accent-foreground: 0 0% 100%;
 
   --secondary: 210 30% 18%;
 
