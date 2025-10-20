@@ -14,9 +14,9 @@
   --elevate-1: rgba(0,0,0, .03);
   --elevate-2: rgba(0,0,0, .08);
 
-  --background: 0 0% 98%;
+  --background: 40 20% 97%;
 
-  --foreground: 210 40% 12%;
+  --foreground: 20 15% 25%;
 
   --border: 210 20% 88%;
 
@@ -48,17 +48,21 @@
 
   --popover-border: 210 20% 86%;
 
-  --primary: 203 89% 29%;
+  --primary: 155 65% 45%;
 
   --primary-foreground: 0 0% 100%;
+  
+  --secondary: 28 70% 55%;
+
+  --secondary-foreground: 0 0% 100%;
 
   --secondary: 210 20% 90%;
 
   --secondary-foreground: 210 40% 15%;
 
-  --muted: 210 15% 93%;
+  --muted: 40 15% 93%;
 
-  --muted-foreground: 210 20% 40%;
+  --muted-foreground: 30 10% 50%;
 
   --accent: 210 15% 94%;
 
@@ -77,10 +81,10 @@
   --chart-5: 340 82% 52%;
 
   --accent-success: 142 76% 36%;
-  --accent-warning: 25 95% 53%;
+  --accent-warning: 28 85% 60%;
   --video-indicator: 0 84% 60%;
-  --blog-indicator: 258 90% 66%;
-  --ad-zone: 210 20% 98%;
+  --blog-indicator: 155 65% 55%;
+  --ad-zone: 40 15% 96%;
 
   --font-sans: -apple-system, "Noto Sans KR", sans-serif;
   --font-serif: Georgia, serif;
@@ -138,15 +142,15 @@
   --elevate-1: rgba(255,255,255, .04);
   --elevate-2: rgba(255,255,255, .09);
 
-  --background: 210 40% 8%;
+  --background: 20 20% 12%;
 
-  --foreground: 210 20% 92%;
+  --foreground: 40 20% 95%;
 
   --border: 210 30% 18%;
 
-  --card: 210 35% 10%;
+  --card: 20 15% 15%;
 
-  --card-foreground: 210 20% 92%;
+  --card-foreground: 40 20% 95%;
 
   --card-border: 210 30% 15%;
 
@@ -172,9 +176,13 @@
 
   --popover-border: 210 30% 19%;
 
-  --primary: 203 89% 32%;
+  --primary: 155 60% 55%;
 
   --primary-foreground: 0 0% 100%;
+  
+  --secondary: 28 75% 65%;
+
+  --secondary-foreground: 0 0% 100%;
 
   --secondary: 210 30% 18%;
 
@@ -201,10 +209,10 @@
   --chart-5: 340 82% 65%;
 
   --accent-success: 142 76% 50%;
-  --accent-warning: 25 95% 60%;
+  --accent-warning: 28 85% 65%;
   --video-indicator: 0 84% 70%;
-  --blog-indicator: 258 90% 75%;
-  --ad-zone: 210 30% 14%;
+  --blog-indicator: 155 65% 65%;
+  --ad-zone: 20 15% 18%;
 
   --shadow-2xs: 0px 2px 0px 0px hsl(0 0% 0% / 0.20);
   --shadow-xs: 0px 2px 0px 0px hsl(0 0% 0% / 0.25);

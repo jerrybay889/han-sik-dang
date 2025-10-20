@@ -7,25 +7,28 @@
 
 ## Color System
 
-**Foundation Variables:**
+**Foundation Variables (Based on Logo):**
 ```css
---primary: 17 95 122          /* Deep Ocean Blue */
---foreground: 15 23 42        /* Rich Black */
+--primary: 155 65% 45%        /* Forest Green (from logo text) */
+--secondary: 28 70% 55%       /* Warm Orange (from bowl) */
+--foreground: 20 15% 25%      /* Dark Brown */
 --card: 0 0 100               /* Pure White */
---muted-foreground: 100 116 139
---accent-success: 34 197 94   /* Ratings */
---accent-warning: 249 115 22  /* Spicy indicator */
---video-indicator: 220 38 38
---blog-indicator: 139 92 246
---ad-zone: 248 250 252        /* Ad backgrounds */
+--background: 40 20% 97%      /* Warm Off-White */
+--muted-foreground: 30 10% 50%
+--accent-success: 142 76% 36% /* Ratings */
+--accent-warning: 28 85% 60%  /* Spicy indicator */
+--video-indicator: 0 84% 60%
+--blog-indicator: 155 65% 55%
+--ad-zone: 40 15% 96%         /* Ad backgrounds */
 ```
 
 **Dark Mode:**
 ```css
---background: 15 23 42
---card: 30 41 59
---primary: 56 189 248         /* Lighter for contrast */
---foreground: 226 232 240
+--background: 20 20% 12%
+--card: 20 15% 15%
+--primary: 155 60% 55%        /* Lighter green for contrast */
+--secondary: 28 75% 65%       /* Lighter orange */
+--foreground: 40 20% 95%
 ```
 
 **Requirements:** 4.5:1 text contrast, 3:1 icon contrast, ad zones maintain visibility in both modes.

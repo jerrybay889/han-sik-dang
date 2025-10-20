@@ -64,9 +64,13 @@ export default function MainScreen() {
       <header className="sticky top-0 z-50 bg-card border-b border-border">
         <div className="max-w-md mx-auto px-4 py-3">
           <div className="flex items-center justify-between mb-3">
-            <h1 className="text-xl font-bold text-foreground">
-              한식당 <span className="text-sm font-normal text-muted-foreground">hansikdang</span>
-            </h1>
+            <div className="flex items-center gap-2">
+              <img
+                src="/attached_assets/hansikdang-logo.png"
+                alt="한식당"
+                className="h-8"
+              />
+            </div>
             <Button size="icon" variant="ghost" data-testid="button-search">
               <Search className="w-5 h-5" />
             </Button>
