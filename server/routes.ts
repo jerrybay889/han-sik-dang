@@ -33,6 +33,49 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get("/api/restaurants", async (req, res) => {
+    try {
+      const restaurants = await storage.getAllRestaurants();
+      res.json(restaurants);
+    } catch (error) {
+      console.error("Get restaurants error:", error);
+      res.status(500).json({ error: "Failed to fetch restaurants" });
+    }
+  });
+
+  app.get("/api/restaurants/:id", async (req, res) => {
+    try {
+      const restaurant = await storage.getRestaurant(req.params.id);
+      if (!restaurant) {
+        return res.status(404).json({ error: "Restaurant not found" });
+      }
+      res.json(restaurant);
+    } catch (error) {
+      console.error("Get restaurant error:", error);
+      res.status(500).json({ error: "Failed to fetch restaurant" });
+    }
+  });
+
+  app.get("/api/restaurants/district/:district", async (req, res) => {
+    try {
+      const restaurants = await storage.getRestaurantsByDistrict(req.params.district);
+      res.json(restaurants);
+    } catch (error) {
+      console.error("Get restaurants by district error:", error);
+      res.status(500).json({ error: "Failed to fetch restaurants" });
+    }
+  });
+
+  app.get("/api/reviews/:restaurantId", async (req, res) => {
+    try {
+      const reviews = await storage.getReviewsByRestaurant(req.params.restaurantId);
+      res.json(reviews);
+    } catch (error) {
+      console.error("Get reviews error:", error);
+      res.status(500).json({ error: "Failed to fetch reviews" });
+    }
+  });
+
   const httpServer = createServer(app);
 
   return httpServer;

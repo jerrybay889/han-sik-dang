@@ -8,9 +8,15 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { createWebsiteSchema, createOrganizationSchema } from "@/lib/structuredData";
+import { useQuery } from "@tanstack/react-query";
+import type { Restaurant } from "@shared/schema";
 
 export default function MainScreen() {
   const { t, language } = useLanguage();
+
+  const { data: restaurants, isLoading } = useQuery<Restaurant[]>({
+    queryKey: ["/api/restaurants"],
+  });
   
   const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
   const structuredData = {
@@ -21,38 +27,7 @@ export default function MainScreen() {
     ],
   };
 
-  const sampleRestaurants = [
-    {
-      id: 1,
-      name: "홍대 전통 한식당",
-      nameEn: "Traditional Korean Restaurant",
-      cuisine: "전통한식",
-      rating: 4.8,
-      reviews: 234,
-      distance: "0.3km",
-      image: "https://images.unsplash.com/photo-1580822184713-fc5400e7fe10?w=400",
-    },
-    {
-      id: 2,
-      name: "김밥천국 홍대점",
-      nameEn: "Kimbap Heaven Hongdae",
-      cuisine: "분식",
-      rating: 4.5,
-      reviews: 156,
-      distance: "0.5km",
-      image: "https://images.unsplash.com/photo-1553163147-622ab57be1c7?w=400",
-    },
-    {
-      id: 3,
-      name: "매운 떡볶이 전문점",
-      nameEn: "Spicy Tteokbokki Specialist",
-      cuisine: "떡볶이",
-      rating: 4.7,
-      reviews: 189,
-      distance: "0.7km",
-      image: "https://images.unsplash.com/photo-1590301157890-4810ed352733?w=400",
-    },
-  ];
+  const displayRestaurants = restaurants?.slice(0, 6) || [];
 
   const sampleVideos = [
     {
@@ -164,45 +139,62 @@ export default function MainScreen() {
           </div>
 
           <div className="space-y-4">
-            {sampleRestaurants.map((restaurant) => (
-              <Card
-                key={restaurant.id}
-                className="overflow-hidden hover-elevate active-elevate-2 cursor-pointer"
-                data-testid={`card-restaurant-${restaurant.id}`}
-              >
-                <div className="flex gap-3 p-3">
-                  <img
-                    src={restaurant.image}
-                    alt={restaurant.name}
-                    className="w-24 h-24 rounded-md object-cover"
-                  />
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-base mb-1 truncate">
-                      {restaurant.name}
-                    </h3>
-                    <p className="text-sm text-muted-foreground mb-2">
-                      {restaurant.nameEn}
-                    </p>
-                    <div className="flex items-center gap-2 mb-2">
-                      <Badge variant="secondary" className="text-xs">
-                        {restaurant.cuisine}
-                      </Badge>
-                      <div className="flex items-center gap-1 text-sm">
-                        <Star className="w-4 h-4 fill-[hsl(var(--accent-success))] text-[hsl(var(--accent-success))]" />
-                        <span className="font-medium">{restaurant.rating}</span>
-                        <span className="text-muted-foreground">
-                          ({restaurant.reviews})
-                        </span>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                      <MapPin className="w-3 h-3" />
-                      <span>{restaurant.distance}</span>
+            {isLoading ? (
+              Array.from({ length: 3 }).map((_, i) => (
+                <Card key={i} className="overflow-hidden">
+                  <div className="flex gap-3 p-3">
+                    <div className="w-24 h-24 rounded-md bg-muted animate-pulse" />
+                    <div className="flex-1 min-w-0 space-y-2">
+                      <div className="h-5 bg-muted rounded animate-pulse w-3/4" />
+                      <div className="h-4 bg-muted rounded animate-pulse w-1/2" />
+                      <div className="h-4 bg-muted rounded animate-pulse w-2/3" />
                     </div>
                   </div>
-                </div>
-              </Card>
-            ))}
+                </Card>
+              ))
+            ) : (
+              displayRestaurants.map((restaurant) => (
+                <Card
+                  key={restaurant.id}
+                  className="overflow-hidden hover-elevate active-elevate-2 cursor-pointer"
+                  data-testid={`card-restaurant-${restaurant.id}`}
+                >
+                  <div className="flex gap-3 p-3">
+                    <img
+                      src={restaurant.imageUrl}
+                      alt={restaurant.name}
+                      className="w-24 h-24 rounded-md object-cover"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-semibold text-base mb-1 truncate">
+                        {language === "en" ? restaurant.nameEn : restaurant.name}
+                      </h3>
+                      <p className="text-sm text-muted-foreground mb-2 truncate">
+                        {language === "en" ? restaurant.name : restaurant.nameEn}
+                      </p>
+                      <div className="flex items-center gap-2 mb-2 flex-wrap">
+                        <Badge variant="secondary" className="text-xs">
+                          {restaurant.cuisine}
+                        </Badge>
+                        {restaurant.rating > 0 && (
+                          <div className="flex items-center gap-1 text-sm">
+                            <Star className="w-4 h-4 fill-[hsl(var(--accent-success))] text-[hsl(var(--accent-success))]" />
+                            <span className="font-medium">{restaurant.rating}</span>
+                            <span className="text-muted-foreground">
+                              ({restaurant.reviewCount})
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-1 text-xs text-muted-foreground truncate">
+                        <MapPin className="w-3 h-3 flex-shrink-0" />
+                        <span className="truncate">{restaurant.district}</span>
+                      </div>
+                    </div>
+                  </div>
+                </Card>
+              ))
+            )}
           </div>
         </section>
 
