@@ -3,7 +3,9 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { GoogleGenAI } from "@google/genai";
 
-const genAI = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "" });
+const genAI = new GoogleGenAI({ 
+  apiKey: process.env.GOOGLE_API_KEY_HANSIKDANG || process.env.GOOGLE_API_KEY2_HANSIKDANG || "" 
+});
 
 export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/ai/chat", async (req, res) => {
