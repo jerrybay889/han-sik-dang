@@ -72,7 +72,10 @@ type TranslationKey =
   | "review.success"
   | "review.error"
   | "my.profile"
-  | "error.notFound";
+  | "error.notFound"
+  | "category.guide"
+  | "category.tips"
+  | "category.recommendation";
 
 export const translations: Record<Language, Record<TranslationKey, string>> = {
   ko: {
@@ -137,6 +140,9 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     "review.error": "리뷰 등록에 실패했습니다",
     "my.profile": "마이 페이지",
     "error.notFound": "레스토랑을 찾을 수 없습니다",
+    "category.guide": "가이드",
+    "category.tips": "팁",
+    "category.recommendation": "추천",
   },
   en: {
     "app.name": "Han Sik Dang",
@@ -200,6 +206,9 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     "review.error": "Failed to submit review",
     "my.profile": "My Profile",
     "error.notFound": "Restaurant not found",
+    "category.guide": "Guide",
+    "category.tips": "Tips",
+    "category.recommendation": "Recommendation",
   },
   ja: {
     "app.name": "韓食堂",
@@ -263,6 +272,9 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     "review.error": "レビューの投稿に失敗しました",
     "my.profile": "マイページ",
     "error.notFound": "レストランが見つかりません",
+    "category.guide": "ガイド",
+    "category.tips": "ヒント",
+    "category.recommendation": "おすすめ",
   },
   "zh-CN": {
     "app.name": "韩食堂",
@@ -326,6 +338,9 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     "review.error": "评论提交失败",
     "my.profile": "我的主页",
     "error.notFound": "未找到餐厅",
+    "category.guide": "指南",
+    "category.tips": "小贴士",
+    "category.recommendation": "推荐",
   },
   "zh-TW": {
     "app.name": "韓食堂",
@@ -389,6 +404,9 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     "review.error": "評論提交失敗",
     "my.profile": "我的主頁",
     "error.notFound": "未找到餐廳",
+    "category.guide": "指南",
+    "category.tips": "小貼士",
+    "category.recommendation": "推薦",
   },
   es: {
     "app.name": "Han Sik Dang",
@@ -452,6 +470,9 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     "review.error": "Error al enviar la reseña",
     "my.profile": "Mi Perfil",
     "error.notFound": "Restaurante no encontrado",
+    "category.guide": "Guía",
+    "category.tips": "Consejos",
+    "category.recommendation": "Recomendación",
   },
   fr: {
     "app.name": "Han Sik Dang",
@@ -515,6 +536,9 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     "review.error": "Échec de la soumission de l'avis",
     "my.profile": "Mon Profil",
     "error.notFound": "Restaurant non trouvé",
+    "category.guide": "Guide",
+    "category.tips": "Conseils",
+    "category.recommendation": "Recommandation",
   },
   de: {
     "app.name": "Han Sik Dang",
@@ -578,5 +602,8 @@ export const translations: Record<Language, Record<TranslationKey, string>> = {
     "review.error": "Fehler beim Übermitteln der Bewertung",
     "my.profile": "Mein Profil",
     "error.notFound": "Restaurant nicht gefunden",
+    "category.guide": "Leitfaden",
+    "category.tips": "Tipps",
+    "category.recommendation": "Empfehlung",
   },
 };

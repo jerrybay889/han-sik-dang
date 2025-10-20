@@ -9,7 +9,7 @@ import { AdSlot } from "@/components/AdSlot";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function ContentPage() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const videos = [
     {
       id: 1,
@@ -50,7 +50,7 @@ export default function ContentPage() {
       image: "https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=800",
       readTime: "5 min",
       date: "1 day ago",
-      category: "가이드",
+      categoryKey: "category.guide" as const,
     },
     {
       id: 2,
@@ -61,7 +61,7 @@ export default function ContentPage() {
       image: "https://images.unsplash.com/photo-1553163147-622ab57be1c7?w=800",
       readTime: "4 min",
       date: "3 days ago",
-      category: "팁",
+      categoryKey: "category.tips" as const,
     },
     {
       id: 3,
@@ -72,7 +72,7 @@ export default function ContentPage() {
       image: "https://images.unsplash.com/photo-1590301157890-4810ed352733?w=800",
       readTime: "7 min",
       date: "5 days ago",
-      category: "추천",
+      categoryKey: "category.recommendation" as const,
     },
   ];
 
@@ -149,14 +149,16 @@ export default function ContentPage() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <h3 className="font-semibold text-sm mb-1 line-clamp-2">
-                      {video.title}
+                      {language === "en" ? video.titleEn : video.title}
                     </h3>
-                    <p className="text-xs text-muted-foreground mb-2 line-clamp-1">
-                      {video.titleEn}
-                    </p>
+                    {language !== "en" && language !== "ko" && (
+                      <p className="text-xs text-muted-foreground mb-2 line-clamp-1">
+                        {video.titleEn}
+                      </p>
+                    )}
                     <div className="flex items-center gap-2 text-xs text-muted-foreground">
                       <TrendingUp className="w-3 h-3" />
-                      <span>{video.views} views</span>
+                      <span>{video.views} {t("content.views")}</span>
                       <span>•</span>
                       <span>{video.date}</span>
                     </div>
@@ -201,7 +203,7 @@ export default function ContentPage() {
                 <div className="p-4">
                   <div className="flex items-center gap-2 mb-2">
                     <Badge variant="secondary" className="text-xs">
-                      {blog.category}
+                      {t(blog.categoryKey)}
                     </Badge>
                     <div className="flex items-center gap-1 text-xs text-muted-foreground">
                       <Clock className="w-3 h-3" />
@@ -209,13 +211,15 @@ export default function ContentPage() {
                     </div>
                   </div>
                   <h3 className="font-bold text-base mb-2 line-clamp-2">
-                    {blog.title}
+                    {language === "en" ? blog.titleEn : blog.title}
                   </h3>
-                  <p className="text-sm text-muted-foreground mb-1 line-clamp-1">
-                    {blog.titleEn}
-                  </p>
+                  {language !== "en" && language !== "ko" && (
+                    <p className="text-sm text-muted-foreground mb-1 line-clamp-1">
+                      {blog.titleEn}
+                    </p>
+                  )}
                   <p className="text-sm mb-3 line-clamp-2">
-                    {blog.excerpt}
+                    {language === "en" ? blog.excerptEn : blog.excerpt}
                   </p>
                   <div className="flex items-center gap-1 text-xs text-muted-foreground">
                     <Calendar className="w-3 h-3" />

@@ -277,11 +277,13 @@ export default function MainScreen() {
                   </div>
                 </div>
                 <h3 className="font-semibold text-sm mb-1 line-clamp-2">
-                  {video.title}
+                  {language === "en" ? video.titleEn : video.title}
                 </h3>
-                <p className="text-xs text-muted-foreground mb-1">
-                  {video.titleEn}
-                </p>
+                {language !== "en" && language !== "ko" && (
+                  <p className="text-xs text-muted-foreground mb-1">
+                    {video.titleEn}
+                  </p>
+                )}
                 <div className="flex items-center gap-2 text-xs text-muted-foreground">
                   <span>{video.views} {t("content.views")}</span>
                   <span>•</span>
