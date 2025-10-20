@@ -30,7 +30,7 @@ export default function MyPage() {
     {
       icon: Heart,
       title: t("my.saved"),
-      badge: "24",
+      badge: String(savedRestaurants.length),
       testId: "menu-saved",
     },
     {
@@ -71,26 +71,6 @@ export default function MyPage() {
     },
   ];
 
-  const recentReviews = [
-    {
-      id: 1,
-      restaurant: "홍대 전통 한식당",
-      restaurantEn: "Traditional Korean Restaurant",
-      rating: 5,
-      comment: "음식이 정말 맛있었어요! 외국인 친구들과 함께 갔는데 모두 좋아했습니다.",
-      date: "2 days ago",
-      image: "https://images.unsplash.com/photo-1580822184713-fc5400e7fe10?w=400",
-    },
-    {
-      id: 2,
-      restaurant: "매운 떡볶이 전문점",
-      restaurantEn: "Spicy Tteokbokki Specialist",
-      rating: 4,
-      comment: "떡볶이가 정말 맵지만 맛있어요. 치즈 토핑 추천!",
-      date: "1 week ago",
-      image: "https://images.unsplash.com/photo-1590301157890-4810ed352733?w=400",
-    },
-  ];
 
   return (
     <>
