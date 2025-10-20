@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Bot, Send, Sparkles, Utensils, MapPin, Heart } from "lucide-react";
+import { Bot, Send, Sparkles, Utensils, MapPin, Heart, Loader2 } from "lucide-react";
 import { BottomNav } from "@/components/BottomNav";
 import { LanguageSelector } from "@/components/LanguageSelector";
 import { SEO } from "@/components/SEO";
@@ -16,7 +16,7 @@ type Message = {
 };
 
 export default function AIPage() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [messages, setMessages] = useState<Message[]>([
     {
       id: 1,
@@ -25,6 +25,7 @@ export default function AIPage() {
     },
   ]);
   const [input, setInput] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const suggestions = [
     { icon: Utensils, text: t("ai.suggestions.vegan") },
@@ -33,25 +34,50 @@ export default function AIPage() {
     { icon: Sparkles, text: t("ai.suggestions.special") },
   ];
 
-  const handleSend = () => {
-    if (!input.trim()) return;
+  const handleSend = async (messageText?: string) => {
+    const userMessage = messageText || input.trim();
+    if (!userMessage) return;
     
-    setMessages([
-      ...messages,
-      { id: messages.length + 1, type: "user", content: input },
-    ]);
+    const newUserMessage = { id: messages.length + 1, type: "user" as const, content: userMessage };
+    setMessages(prev => [...prev, newUserMessage]);
     setInput("");
+    setIsLoading(true);
     
-    setTimeout(() => {
-      setMessages((prev) => [
+    try {
+      const res = await fetch("/api/ai/chat", {
+        method: "POST",
+        body: JSON.stringify({ message: userMessage, language }),
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+      });
+
+      if (!res.ok) {
+        throw new Error(`HTTP error! status: ${res.status}`);
+      }
+
+      const data = await res.json();
+      
+      setMessages(prev => [
         ...prev,
         {
           id: prev.length + 1,
           type: "ai",
-          content: "추천 레스토랑을 찾고 있습니다... 잠시만 기다려주세요.\n\nLooking for the perfect restaurant for you...",
+          content: data.response,
         },
       ]);
-    }, 500);
+    } catch (error) {
+      console.error("AI chat error:", error);
+      setMessages(prev => [
+        ...prev,
+        {
+          id: prev.length + 1,
+          type: "ai",
+          content: "Sorry, I encountered an error. Please try again. 죄송합니다, 오류가 발생했습니다. 다시 시도해주세요.",
+        },
+      ]);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -114,8 +140,24 @@ export default function AIPage() {
           </div>
         ))}
 
+        {/* Loading indicator */}
+        {isLoading && (
+          <div className="flex justify-start">
+            <div className="max-w-[80%] rounded-2xl px-4 py-3 bg-card text-foreground border border-border rounded-bl-sm">
+              <div className="flex items-center gap-2 mb-2">
+                <Bot className="w-4 h-4 text-primary" />
+                <span className="text-xs font-medium text-primary">AI Assistant</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Loader2 className="w-4 h-4 animate-spin text-primary" />
+                <p className="text-sm text-muted-foreground">Thinking...</p>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Quick Suggestions */}
-        {messages.length === 1 && (
+        {messages.length === 1 && !isLoading && (
           <div className="pt-4" data-testid="suggestions-container">
             <div className="grid grid-cols-2 gap-2">
               {suggestions.map((suggestion, index) => {
@@ -124,7 +166,7 @@ export default function AIPage() {
                   <Card
                     key={index}
                     className="p-4 hover-elevate active-elevate-2 cursor-pointer"
-                    onClick={() => setInput(suggestion.text)}
+                    onClick={() => handleSend(suggestion.text)}
                     data-testid={`suggestion-${index}`}
                   >
                     <div className="flex flex-col items-center gap-2 text-center">
@@ -157,11 +199,15 @@ export default function AIPage() {
             <Button
               size="icon"
               className="rounded-full w-12 h-12"
-              onClick={handleSend}
-              disabled={!input.trim()}
+              onClick={() => handleSend()}
+              disabled={!input.trim() || isLoading}
               data-testid="button-send"
             >
-              <Send className="w-5 h-5" />
+              {isLoading ? (
+                <Loader2 className="w-5 h-5 animate-spin" />
+              ) : (
+                <Send className="w-5 h-5" />
+              )}
             </Button>
           </div>
         </div>
