@@ -7,11 +7,21 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { AdSlot } from "@/components/AdSlot";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useQuery } from "@tanstack/react-query";
+import { Link } from "wouter";
+import type { Restaurant } from "@shared/schema";
+
+const TEMP_USER_ID = "guest-user";
 
 export default function MyPage() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+
+  const { data: savedRestaurants = [], isLoading: loadingSaved } = useQuery<Restaurant[]>({
+    queryKey: ["/api/saved", TEMP_USER_ID],
+  });
+
   const stats = [
-    { label: t("my.saved"), value: 24, icon: Heart },
+    { label: t("my.saved"), value: savedRestaurants.length, icon: Heart },
     { label: t("my.reviews"), value: 12, icon: Star },
     { label: t("my.visited"), value: 38, icon: MapPin },
   ];
@@ -179,58 +189,80 @@ export default function MyPage() {
           </Card>
         </section>
 
-        {/* Recent Reviews */}
+        {/* Saved Restaurants */}
         <section className="px-4 py-6">
           <div className="flex items-center justify-between mb-4">
-            <div>
-              <h2 className="text-lg font-bold">최근 리뷰</h2>
-              <p className="text-xs text-muted-foreground">Recent Reviews</p>
-            </div>
-            <Button variant="ghost" size="sm" data-testid="button-see-all-reviews">
-              전체보기
+            <h2 className="text-lg font-semibold">{t("my.saved")}</h2>
+            <Button variant="ghost" size="sm" data-testid="button-see-all-saved">
+              {t("my.seeAll")}
             </Button>
           </div>
 
           <div className="space-y-3">
-            {recentReviews.map((review) => (
-              <Card
-                key={review.id}
-                className="p-4 hover-elevate active-elevate-2 cursor-pointer"
-                data-testid={`review-${review.id}`}
-              >
-                <div className="flex gap-3">
-                  <img
-                    src={review.image}
-                    alt={review.restaurant}
-                    className="w-16 h-16 rounded-md object-cover"
-                  />
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-sm mb-1">
-                      {review.restaurant}
-                    </h3>
-                    <p className="text-xs text-muted-foreground mb-2">
-                      {review.restaurantEn}
-                    </p>
-                    <div className="flex items-center gap-1 mb-2">
-                      {[...Array(5)].map((_, i) => (
-                        <Star
-                          key={i}
-                          className={`w-3 h-3 ${
-                            i < review.rating
-                              ? "fill-[hsl(var(--accent-success))] text-[hsl(var(--accent-success))]"
-                              : "fill-muted text-muted"
-                          }`}
-                        />
-                      ))}
-                      <span className="text-xs text-muted-foreground ml-1">
-                        {review.date}
-                      </span>
+            {loadingSaved ? (
+              Array.from({ length: 3 }).map((_, i) => (
+                <Card key={i} className="p-4">
+                  <div className="flex gap-3">
+                    <div className="w-24 h-24 rounded-md bg-muted animate-pulse" />
+                    <div className="flex-1 space-y-2">
+                      <div className="h-5 bg-muted rounded animate-pulse w-3/4" />
+                      <div className="h-4 bg-muted rounded animate-pulse w-1/2" />
                     </div>
-                    <p className="text-sm line-clamp-2">{review.comment}</p>
                   </div>
-                </div>
+                </Card>
+              ))
+            ) : savedRestaurants.length === 0 ? (
+              <Card className="p-8 text-center">
+                <Heart className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+                <p className="text-lg font-semibold mb-2">No saved restaurants yet</p>
+                <p className="text-sm text-muted-foreground">
+                  Start saving your favorite restaurants to see them here
+                </p>
               </Card>
-            ))}
+            ) : (
+              savedRestaurants.map((restaurant) => (
+                <Link key={restaurant.id} href={`/restaurant/${restaurant.id}`}>
+                  <Card
+                    className="p-4 hover-elevate active-elevate-2 cursor-pointer"
+                    data-testid={`saved-restaurant-${restaurant.id}`}
+                  >
+                    <div className="flex gap-3">
+                      <img
+                        src={restaurant.imageUrl}
+                        alt={restaurant.name}
+                        className="w-24 h-24 rounded-md object-cover"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-semibold text-base mb-1 truncate">
+                          {language === "en" ? restaurant.nameEn : restaurant.name}
+                        </h3>
+                        <p className="text-sm text-muted-foreground mb-2 truncate">
+                          {language === "en" ? restaurant.name : restaurant.nameEn}
+                        </p>
+                        <div className="flex items-center gap-2 mb-2 flex-wrap">
+                          <Badge variant="secondary" className="text-xs">
+                            {restaurant.cuisine}
+                          </Badge>
+                          {restaurant.rating > 0 && (
+                            <div className="flex items-center gap-1 text-sm">
+                              <Star className="w-4 h-4 fill-[hsl(var(--accent-success))] text-[hsl(var(--accent-success))]" />
+                              <span className="font-medium">{restaurant.rating}</span>
+                              <span className="text-muted-foreground">
+                                ({restaurant.reviewCount})
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-1 text-xs text-muted-foreground truncate">
+                          <MapPin className="w-3 h-3 flex-shrink-0" />
+                          <span className="truncate">{restaurant.district}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </Card>
+                </Link>
+              ))
+            )}
           </div>
         </section>
 

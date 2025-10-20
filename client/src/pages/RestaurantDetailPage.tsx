@@ -1,15 +1,21 @@
+import { useState } from "react";
 import { useRoute, Link } from "wouter";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { ArrowLeft, MapPin, Phone, Clock, Star, DollarSign, Users, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { SEO } from "@/components/SEO";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { queryClient, apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 import type { Restaurant, Review } from "@shared/schema";
+
+const TEMP_USER_ID = "guest-user";
 
 export default function RestaurantDetailPage() {
   const { t, language } = useLanguage();
+  const { toast } = useToast();
   const [, params] = useRoute("/restaurant/:id");
   const restaurantId = params?.id;
 
@@ -21,6 +27,38 @@ export default function RestaurantDetailPage() {
   const { data: reviews = [], isLoading: loadingReviews } = useQuery<Review[]>({
     queryKey: ["/api/reviews", restaurantId],
     enabled: !!restaurantId,
+  });
+
+  const { data: savedStatus } = useQuery<{ isSaved: boolean }>({
+    queryKey: ["/api/saved", TEMP_USER_ID, "check", restaurantId],
+    enabled: !!restaurantId,
+  });
+
+  const isSaved = savedStatus?.isSaved || false;
+
+  const saveMutation = useMutation({
+    mutationFn: async () => {
+      if (isSaved) {
+        await apiRequest("DELETE", `/api/saved/${TEMP_USER_ID}/${restaurantId}`);
+      } else {
+        await apiRequest("POST", "/api/saved", { userId: TEMP_USER_ID, restaurantId });
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/saved", TEMP_USER_ID, "check", restaurantId] });
+      queryClient.invalidateQueries({ queryKey: ["/api/saved", TEMP_USER_ID] });
+      toast({
+        title: isSaved ? "Removed from saved" : "Saved successfully",
+        description: isSaved ? "Restaurant removed from your saved list" : "Restaurant saved to your list",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to update saved status",
+        variant: "destructive",
+      });
+    },
   });
 
   if (loadingRestaurant) {
@@ -89,9 +127,11 @@ export default function RestaurantDetailPage() {
                 size="icon"
                 variant="secondary"
                 className="bg-background/80 backdrop-blur-sm"
+                onClick={() => saveMutation.mutate()}
+                disabled={saveMutation.isPending}
                 data-testid="button-save"
               >
-                <Heart className="w-5 h-5" />
+                <Heart className={`w-5 h-5 ${isSaved ? "fill-red-500 text-red-500" : ""}`} />
               </Button>
             </div>
           </div>

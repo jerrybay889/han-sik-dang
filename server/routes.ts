@@ -104,6 +104,52 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get("/api/saved/:userId", async (req, res) => {
+    try {
+      const savedRestaurants = await storage.getSavedRestaurants(req.params.userId);
+      res.json(savedRestaurants);
+    } catch (error) {
+      console.error("Get saved restaurants error:", error);
+      res.status(500).json({ error: "Failed to fetch saved restaurants" });
+    }
+  });
+
+  app.post("/api/saved", async (req, res) => {
+    try {
+      const { userId, restaurantId } = req.body;
+      if (!userId || !restaurantId) {
+        return res.status(400).json({ error: "userId and restaurantId are required" });
+      }
+      const saved = await storage.saveRestaurant({ userId, restaurantId });
+      res.json(saved);
+    } catch (error) {
+      console.error("Save restaurant error:", error);
+      res.status(500).json({ error: "Failed to save restaurant" });
+    }
+  });
+
+  app.delete("/api/saved/:userId/:restaurantId", async (req, res) => {
+    try {
+      const { userId, restaurantId } = req.params;
+      await storage.unsaveRestaurant(userId, restaurantId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Unsave restaurant error:", error);
+      res.status(500).json({ error: "Failed to unsave restaurant" });
+    }
+  });
+
+  app.get("/api/saved/:userId/check/:restaurantId", async (req, res) => {
+    try {
+      const { userId, restaurantId } = req.params;
+      const isSaved = await storage.isRestaurantSaved(userId, restaurantId);
+      res.json({ isSaved });
+    } catch (error) {
+      console.error("Check saved restaurant error:", error);
+      res.status(500).json({ error: "Failed to check saved status" });
+    }
+  });
+
   const httpServer = createServer(app);
 
   return httpServer;
