@@ -18,17 +18,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const restaurants = await storage.getAllRestaurants();
-      const restaurantData = restaurants.map(r => ({
-        name: r.name,
-        nameEn: r.nameEn,
-        cuisine: r.cuisine,
-        district: r.district,
-        description: language === "en" ? r.descriptionEn : r.description,
-        rating: r.rating,
-        priceRange: r.priceRange,
-        isVegan: r.isVegan === 1,
-        isHalal: r.isHalal === 1,
-      }));
+      
+      const restaurantDataPromises = restaurants.map(async (r) => {
+        const insights = await storage.getRestaurantInsights(r.id);
+        return {
+          name: r.name,
+          nameEn: r.nameEn,
+          cuisine: r.cuisine,
+          district: r.district,
+          description: language === "en" ? r.descriptionEn : r.description,
+          rating: r.rating,
+          priceRange: r.priceRange,
+          isVegan: r.isVegan === 1,
+          isHalal: r.isHalal === 1,
+          aiInsights: insights ? {
+            reviewInsights: language === "en" ? insights.reviewInsightsEn : insights.reviewInsights,
+            bestFor: language === "en" ? insights.bestForEn : insights.bestFor,
+            culturalTips: language === "en" ? insights.culturalTipsEn : insights.culturalTips,
+            firstTimerTips: language === "en" ? insights.firstTimerTipsEn : insights.firstTimerTips,
+          } : null,
+        };
+      });
+      
+      const restaurantData = await Promise.all(restaurantDataPromises);
 
       const systemPrompt = getSystemPrompt(language);
       const restaurantContext = `\n\nAvailable restaurants in our database:\n${JSON.stringify(restaurantData, null, 2)}`;
@@ -391,12 +403,18 @@ function getSystemPrompt(language: string): string {
 - 각 레스토랑의 특징, 대표 메뉴, 가격대를 자세히 설명합니다
 - 외국인에게는 한국 음식 문화와 주문 방법도 친절하게 안내합니다
 - isVegan이나 isHalal 플래그를 확인하여 비건/할랄 요청에 정확히 답변합니다
+- **각 레스토랑의 aiInsights 데이터를 적극 활용하세요:**
+  - reviewInsights: 고객들이 좋아하는 점을 언급하세요
+  - bestFor: 어떤 상황에 적합한지 설명하세요 (예: 데이트, 가족 모임, 혼밥)
+  - culturalTips: 외국인을 위한 문화 팁을 제공하세요
+  - firstTimerTips: 첫 방문자를 위한 주문 팁을 알려주세요
 
 답변 스타일:
 - 친근하고 따뜻한 톤으로 대화합니다
 - 각 추천마다 왜 그 식당을 추천하는지 이유를 명확히 설명합니다
 - 2-3개의 레스토랑을 추천하고, 각각의 장단점을 균형있게 제시합니다
-- 레스토랑 이름, 위치(district), 요리 종류를 명확히 표시합니다`,
+- 레스토랑 이름, 위치(district), 요리 종류를 명확히 표시합니다
+- AI 인사이트 정보를 자연스럽게 대화에 녹여서 제공합니다`,
 
     en: `You are a Korean restaurant expert in Seoul, South Korea. You are an AI concierge who recommends the best Korean restaurants to both foreign tourists and locals.
 
@@ -406,12 +424,18 @@ Role:
 - Provide detailed descriptions of each restaurant's features, signature dishes, and price range
 - For foreigners, kindly guide them through Korean food culture and how to order
 - Check isVegan and isHalal flags to accurately respond to vegan/halal requests
+- **Actively use the aiInsights data for each restaurant:**
+  - reviewInsights: Mention what customers love about the place
+  - bestFor: Explain what situations it's perfect for (e.g., date, family gathering, solo dining)
+  - culturalTips: Provide cultural tips for foreign visitors
+  - firstTimerTips: Share ordering tips for first-time visitors
 
 Response Style:
 - Communicate in a friendly and warm tone
 - Clearly explain why you recommend each restaurant
 - Recommend 2-3 restaurants and present their pros and cons in a balanced way
-- Clearly display restaurant name, location (district), and cuisine type`,
+- Clearly display restaurant name, location (district), and cuisine type
+- Naturally incorporate AI insights into your conversation`,
 
     ja: `あなたは韓国ソウルの韓国料理レストランの専門家です。外国人観光客と地元の人々の両方に最高の韓国料理レストランを推薦するAIコンシェルジュです。
 
