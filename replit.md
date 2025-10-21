@@ -6,16 +6,15 @@ han sik dang is a hybrid content platform and utility app for discovering Korean
 
 ## Recent Changes
 
-**October 21, 2025 - Full Platform Launch Ready**
--   ✅ Migrated from in-memory storage to PostgreSQL (Neon)
--   ✅ Completed data seeding for 30 restaurant records (15 unique Seoul restaurants)
--   ✅ Generated AI insights for all 30 restaurants using Google Gemini 2.5 Flash
--   ✅ Integrated external reviews from Google, Naver, TripAdvisor
--   ✅ Added YouTube video content for restaurant discovery
--   ✅ AI chat concierge fully functional with complete restaurant context
--   ✅ User review system (create, edit, delete) with ownership validation
--   ✅ Google Analytics 4 integration for user tracking and analytics
--   ✅ E2E testing verified: homepage, restaurant details, AI chat, review creation
+**October 21, 2025 - Platform Updates**
+-   ✅ **Phase 1 (Advertising)**: Google AdSense integration complete with strategic ad placement
+-   ✅ **Phase 2 (Multilingual)**: 9-language support (Korean, English, Japanese, Chinese Simplified/Traditional, Spanish, French, German, Vietnamese)
+-   ✅ **Phase 3 (Performance)**: Optimization complete - image lazy loading, code splitting, database indexing (7 indexes), React Query caching with prefetching
+-   ✅ **Phase 4 (Restaurant Dashboard Backend)**: Complete backend infrastructure for B2B restaurant management
+    - Database schema: restaurantOwners, reviewResponses, promotions tables
+    - Storage layer: 14 new methods for ownership, responses, promotions, analytics
+    - API endpoints: 11 authenticated endpoints for restaurant dashboard features
+    - Ready for frontend UI implementation (pending)
 
 ## User Preferences
 
@@ -86,6 +85,26 @@ Preferred communication style: Simple, everyday language.
     - Initialization on app mount with VITE_GA_MEASUREMENT_ID
 -   **Files**: client/src/lib/analytics.ts, client/src/hooks/use-analytics.tsx, client/env.d.ts
 -   **Configuration**: Requires VITE_GA_MEASUREMENT_ID secret (optional, graceful degradation if missing)
+
+### Restaurant Dashboard (B2B Backend - Phase 4)
+
+-   **Purpose**: Enable restaurant owners to manage their restaurants, respond to reviews, track analytics, and create promotions
+-   **Database Tables**:
+    - `restaurantOwners`: Links users to restaurants they own/manage (userId, restaurantId, role)
+    - `reviewResponses`: Restaurant owner responses to customer reviews (reviewId, restaurantId, userId, response, timestamps)
+    - `promotions`: Promotional offers (title, description in KR/EN, discountType, dates, isActive)
+-   **Storage Methods**: 14 methods including ownership verification, response CRUD, promotion management, dashboard statistics
+-   **API Endpoints** (11 total):
+    - Ownership: GET /api/my-restaurants, GET /api/restaurants/:id/is-owner
+    - Analytics: GET /api/restaurants/:id/dashboard-stats (review stats, rating distribution, monthly trends)
+    - Review Responses: GET/POST/PATCH/DELETE /api/review-responses
+    - Promotions: GET/POST/PATCH/DELETE /api/promotions, GET /api/restaurants/:id/all-promotions
+-   **Status**: Backend complete, frontend UI pending implementation
+-   **Key Features**:
+    - Ownership verification middleware for all restaurant management actions
+    - Complete CRUD for review responses (one response per review)
+    - Promotion management with date-based activation
+    - Dashboard statistics: total reviews, average rating, rating distribution, monthly review counts
 
 ### AI Restaurant Insights
 

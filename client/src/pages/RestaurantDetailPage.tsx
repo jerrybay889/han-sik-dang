@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useRoute, Link } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { ArrowLeft, MapPin, Phone, Clock, Star, DollarSign, Users, Heart, Sparkles, Lightbulb, UtensilsCrossed, Play, Eye, Calendar, MessageSquare, MessageCircle, Send, X, Navigation } from "lucide-react";
+import { ArrowLeft, MapPin, Phone, Clock, Star, DollarSign, Users, Heart, Sparkles, Lightbulb, UtensilsCrossed, Play, Eye, Calendar, MessageSquare, MessageCircle, Send, X, Navigation, Store } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -17,7 +17,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import type { Restaurant, Review, RestaurantInsights, Menu, YoutubeVideo, ExternalReview } from "@shared/schema";
+import type { Restaurant, Review, RestaurantInsights, Menu, YoutubeVideo, ExternalReview, ReviewResponse } from "@shared/schema";
 
 type AICardType = "reviews" | "menu" | "howToEat" | "ordering";
 
