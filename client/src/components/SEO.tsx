@@ -27,7 +27,7 @@ export function SEO({
   const fullImageUrl = image.startsWith('http') ? image : `${baseUrl}${image}`;
   
   const defaultTitle = "한식당 (Hansikdang) - Your Korean Restaurant Guide";
-  const defaultDescription = "Discover authentic Korean restaurants with AI-powered recommendations. Perfect guide for tourists visiting Korea. Available in 8 languages.";
+  const defaultDescription = "Discover authentic Korean restaurants with AI-powered recommendations. Perfect guide for tourists visiting Korea. Available in 9 languages.";
   
   const finalTitle = title ? `${title} | 한식당` : defaultTitle;
   const finalDescription = description || defaultDescription;
@@ -79,6 +79,7 @@ export function SEO({
       <link rel="alternate" hrefLang="es" href={`${baseUrl}${url || '/'}`} />
       <link rel="alternate" hrefLang="fr" href={`${baseUrl}${url || '/'}`} />
       <link rel="alternate" hrefLang="de" href={`${baseUrl}${url || '/'}`} />
+      <link rel="alternate" hrefLang="vi" href={`${baseUrl}${url || '/'}`} />
       <link rel="alternate" hrefLang="x-default" href={`${baseUrl}${url || '/'}`} />
       
       {/* Canonical URL */}
