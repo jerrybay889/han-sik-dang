@@ -24,20 +24,29 @@ export default function MyPage() {
     queryKey: ["/api/saved", isAuthenticated],
     queryFn: async () => {
       console.log('[MyPage queryFn] Starting fetch, isAuthenticated:', isAuthenticated);
+      if (!isAuthenticated) {
+        console.log('[MyPage queryFn] Not authenticated, returning empty array');
+        return [];
+      }
       const res = await fetch("/api/saved", {
         credentials: "include",
       });
       console.log('[MyPage queryFn] Response status:', res.status, 'ok:', res.ok);
-      if (res.status === 401 || !res.ok) {
-        console.log('[MyPage queryFn] Returning empty array due to', res.status === 401 ? '401' : 'not ok');
+      if (res.status === 401) {
+        console.log('[MyPage queryFn] Got 401, returning empty array');
+        return [];
+      }
+      if (!res.ok) {
+        console.error('[MyPage queryFn] Response not ok:', res.status, await res.text());
         return [];
       }
       const data = await res.json();
-      console.log('[MyPage queryFn] Fetched saved restaurants:', data.length, 'items');
+      console.log('[MyPage queryFn] Fetched saved restaurants:', data.length, 'items', data);
       return data;
     },
     refetchOnMount: 'always',
     staleTime: 0,
+    enabled: isAuthenticated,
   });
 
   useEffect(() => {
