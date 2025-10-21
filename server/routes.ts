@@ -722,6 +722,321 @@ ${insights && insights.firstTimerTips ? `첫 방문 팁: ${insights.firstTimerTi
     }
   });
 
+  // Restaurant Dashboard API Routes
+
+  // Get restaurants owned by current user
+  app.get("/api/my-restaurants", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+
+      const restaurants = await storage.getRestaurantsByOwner(userId);
+      res.json(restaurants);
+    } catch (error) {
+      console.error("Get my restaurants error:", error);
+      res.status(500).json({ error: "Failed to fetch restaurants" });
+    }
+  });
+
+  // Check if user is owner of specific restaurant
+  app.get("/api/restaurants/:id/is-owner", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+
+      const { id } = req.params;
+      const isOwner = await storage.isRestaurantOwner(userId, id);
+      res.json({ isOwner });
+    } catch (error) {
+      console.error("Check ownership error:", error);
+      res.status(500).json({ error: "Failed to check ownership" });
+    }
+  });
+
+  // Get dashboard statistics for restaurant
+  app.get("/api/restaurants/:id/dashboard-stats", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+
+      const { id } = req.params;
+      const isOwner = await storage.isRestaurantOwner(userId, id);
+      if (!isOwner) {
+        return res.status(403).json({ error: "Forbidden: You are not the owner of this restaurant" });
+      }
+
+      const stats = await storage.getRestaurantDashboardStats(id);
+      res.json(stats);
+    } catch (error) {
+      console.error("Get dashboard stats error:", error);
+      res.status(500).json({ error: "Failed to fetch dashboard statistics" });
+    }
+  });
+
+  // Review Response Routes
+
+  // Get response for a specific review
+  app.get("/api/reviews/:reviewId/response", async (req, res) => {
+    try {
+      const { reviewId } = req.params;
+      const response = await storage.getResponseByReviewId(reviewId);
+      res.json(response || null);
+    } catch (error) {
+      console.error("Get review response error:", error);
+      res.status(500).json({ error: "Failed to fetch review response" });
+    }
+  });
+
+  // Create review response
+  app.post("/api/review-responses", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+
+      const { reviewId, restaurantId, response } = req.body;
+      
+      if (!reviewId || !restaurantId || !response) {
+        return res.status(400).json({ error: "Missing required fields" });
+      }
+
+      // Verify ownership
+      const isOwner = await storage.isRestaurantOwner(userId, restaurantId);
+      if (!isOwner) {
+        return res.status(403).json({ error: "Forbidden: You are not the owner of this restaurant" });
+      }
+
+      // Check if response already exists
+      const existingResponse = await storage.getResponseByReviewId(reviewId);
+      if (existingResponse) {
+        return res.status(409).json({ error: "Response already exists for this review" });
+      }
+
+      const newResponse = await storage.createReviewResponse({
+        reviewId,
+        restaurantId,
+        userId,
+        response,
+      });
+      
+      res.status(201).json(newResponse);
+    } catch (error) {
+      console.error("Create review response error:", error);
+      res.status(500).json({ error: "Failed to create review response" });
+    }
+  });
+
+  // Update review response
+  app.patch("/api/review-responses/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+
+      const { id } = req.params;
+      const { restaurantId, response } = req.body;
+
+      if (!restaurantId || !response) {
+        return res.status(400).json({ error: "Missing required fields" });
+      }
+
+      // Verify ownership
+      const isOwner = await storage.isRestaurantOwner(userId, restaurantId);
+      if (!isOwner) {
+        return res.status(403).json({ error: "Forbidden: You are not the owner of this restaurant" });
+      }
+
+      const updatedResponse = await storage.updateReviewResponse(id, userId, restaurantId, response);
+      if (!updatedResponse) {
+        return res.status(404).json({ error: "Review response not found or unauthorized" });
+      }
+
+      res.json(updatedResponse);
+    } catch (error) {
+      console.error("Update review response error:", error);
+      res.status(500).json({ error: "Failed to update review response" });
+    }
+  });
+
+  // Delete review response
+  app.delete("/api/review-responses/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+
+      const { id } = req.params;
+      const { restaurantId } = req.body;
+
+      if (!restaurantId) {
+        return res.status(400).json({ error: "Missing restaurantId" });
+      }
+
+      // Verify ownership
+      const isOwner = await storage.isRestaurantOwner(userId, restaurantId);
+      if (!isOwner) {
+        return res.status(403).json({ error: "Forbidden: You are not the owner of this restaurant" });
+      }
+
+      const deleted = await storage.deleteReviewResponse(id, userId, restaurantId);
+      if (!deleted) {
+        return res.status(404).json({ error: "Review response not found or unauthorized" });
+      }
+
+      res.status(204).send();
+    } catch (error) {
+      console.error("Delete review response error:", error);
+      res.status(500).json({ error: "Failed to delete review response" });
+    }
+  });
+
+  // Promotion Routes
+
+  // Get all promotions for a restaurant (public)
+  app.get("/api/restaurants/:id/promotions", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const promotions = await storage.getActivePromotionsByRestaurant(id);
+      res.json(promotions);
+    } catch (error) {
+      console.error("Get promotions error:", error);
+      res.status(500).json({ error: "Failed to fetch promotions" });
+    }
+  });
+
+  // Get all promotions for management (owner only)
+  app.get("/api/restaurants/:id/all-promotions", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+
+      const { id } = req.params;
+      const isOwner = await storage.isRestaurantOwner(userId, id);
+      if (!isOwner) {
+        return res.status(403).json({ error: "Forbidden: You are not the owner of this restaurant" });
+      }
+
+      const promotions = await storage.getPromotionsByRestaurant(id);
+      res.json(promotions);
+    } catch (error) {
+      console.error("Get all promotions error:", error);
+      res.status(500).json({ error: "Failed to fetch promotions" });
+    }
+  });
+
+  // Create promotion
+  app.post("/api/promotions", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+
+      const { restaurantId, title, titleEn, description, descriptionEn, discountType, discountValue, startDate, endDate } = req.body;
+
+      if (!restaurantId || !title || !titleEn || !description || !descriptionEn || !discountType || !startDate || !endDate) {
+        return res.status(400).json({ error: "Missing required fields" });
+      }
+
+      // Verify ownership
+      const isOwner = await storage.isRestaurantOwner(userId, restaurantId);
+      if (!isOwner) {
+        return res.status(403).json({ error: "Forbidden: You are not the owner of this restaurant" });
+      }
+
+      const promotion = await storage.createPromotion({
+        restaurantId,
+        title,
+        titleEn,
+        description,
+        descriptionEn,
+        discountType,
+        discountValue,
+        startDate: new Date(startDate),
+        endDate: new Date(endDate),
+        isActive: 1,
+      });
+
+      res.status(201).json(promotion);
+    } catch (error) {
+      console.error("Create promotion error:", error);
+      res.status(500).json({ error: "Failed to create promotion" });
+    }
+  });
+
+  // Update promotion
+  app.patch("/api/promotions/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+
+      const { id } = req.params;
+      const { restaurantId, ...updateData } = req.body;
+
+      if (!restaurantId) {
+        return res.status(400).json({ error: "Missing restaurantId" });
+      }
+
+      // Convert dates if present
+      if (updateData.startDate) {
+        updateData.startDate = new Date(updateData.startDate);
+      }
+      if (updateData.endDate) {
+        updateData.endDate = new Date(updateData.endDate);
+      }
+
+      const updatedPromotion = await storage.updatePromotion(id, userId, restaurantId, updateData);
+      if (!updatedPromotion) {
+        return res.status(404).json({ error: "Promotion not found or unauthorized" });
+      }
+
+      res.json(updatedPromotion);
+    } catch (error) {
+      console.error("Update promotion error:", error);
+      res.status(500).json({ error: "Failed to update promotion" });
+    }
+  });
+
+  // Delete promotion
+  app.delete("/api/promotions/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+
+      const { id } = req.params;
+      const { restaurantId } = req.body;
+
+      if (!restaurantId) {
+        return res.status(400).json({ error: "Missing restaurantId" });
+      }
+
+      const deleted = await storage.deletePromotion(id, userId, restaurantId);
+      if (!deleted) {
+        return res.status(404).json({ error: "Promotion not found or unauthorized" });
+      }
+
+      res.status(204).send();
+    } catch (error) {
+      console.error("Delete promotion error:", error);
+      res.status(500).json({ error: "Failed to delete promotion" });
+    }
+  });
+
   const httpServer = createServer(app);
 
   return httpServer;
