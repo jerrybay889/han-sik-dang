@@ -46,6 +46,7 @@ export interface IStorage {
   getRestaurant(id: string): Promise<Restaurant | undefined>;
   getRestaurantsByDistrict(district: string): Promise<Restaurant[]>;
   getRestaurantsByCategory(category: string): Promise<Restaurant[]>;
+  getFeaturedRestaurants(): Promise<Restaurant[]>;
   searchRestaurants(query: string): Promise<Restaurant[]>;
   createRestaurant(restaurant: InsertRestaurant): Promise<Restaurant>;
   updateRestaurantRating(id: string): Promise<void>;
@@ -124,6 +125,12 @@ export class DbStorage implements IStorage {
     return await db.select().from(restaurants).where(
       sql`${restaurants.name} ILIKE ${searchPattern} OR ${restaurants.nameEn} ILIKE ${searchPattern} OR ${restaurants.cuisine} ILIKE ${searchPattern}`
     );
+  }
+
+  async getFeaturedRestaurants(): Promise<Restaurant[]> {
+    return await db.select().from(restaurants)
+      .where(eq(restaurants.isFeatured, 1))
+      .orderBy(desc(restaurants.rating));
   }
 
   async createRestaurant(insertRestaurant: InsertRestaurant): Promise<Restaurant> {

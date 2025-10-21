@@ -46,6 +46,7 @@ export const restaurants = pgTable("restaurants", {
   phone: text("phone"),
   isVegan: integer("is_vegan").notNull().default(0),
   isHalal: integer("is_halal").notNull().default(0),
+  isFeatured: integer("is_featured").notNull().default(0),
 });
 
 export const insertRestaurantSchema = createInsertSchema(restaurants).omit({

@@ -261,6 +261,16 @@ ${insights && insights.firstTimerTips ? `첫 방문 팁: ${insights.firstTimerTi
     }
   });
 
+  app.get("/api/restaurants/featured", async (req, res) => {
+    try {
+      const restaurants = await storage.getFeaturedRestaurants();
+      res.json(restaurants);
+    } catch (error) {
+      console.error("Get featured restaurants error:", error);
+      res.status(500).json({ error: "Failed to fetch featured restaurants" });
+    }
+  });
+
   app.get("/api/restaurants/:id", async (req, res) => {
     try {
       const restaurant = await storage.getRestaurant(req.params.id);

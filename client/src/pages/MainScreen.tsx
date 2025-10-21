@@ -44,6 +44,10 @@ export default function MainScreen() {
   const { data: eventBanners = [] } = useQuery<EventBanner[]>({
     queryKey: ["/api/event-banners"],
   });
+
+  const { data: featuredRestaurants = [] } = useQuery<Restaurant[]>({
+    queryKey: ["/api/restaurants/featured"],
+  });
   
   const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
   const structuredData = {
@@ -156,6 +160,71 @@ export default function MainScreen() {
             </div>
           </div>
         </div>
+
+        {/* Featured Restaurants Section */}
+        {featuredRestaurants.length > 0 && !searchQuery && (
+          <section className="py-4">
+            <div className="px-4 mb-3">
+              <div className="flex items-center justify-between">
+                <h2 className="text-lg font-semibold">
+                  {language === "en" ? "Featured Restaurants" : "추천 프리미엄 맛집"}
+                </h2>
+                <Badge variant="default" className="bg-[hsl(var(--accent-warning))] text-[hsl(var(--accent-warning-foreground))]">
+                  {language === "en" ? "Sponsored" : "광고"}
+                </Badge>
+              </div>
+            </div>
+            <ScrollArea className="w-full whitespace-nowrap">
+              <div className="flex gap-4 px-4 pb-2">
+                {featuredRestaurants.map((restaurant) => (
+                  <Link key={restaurant.id} href={`/restaurant/${restaurant.id}`}>
+                    <Card
+                      className="w-[280px] overflow-hidden hover-elevate active-elevate-2 cursor-pointer flex-shrink-0"
+                      data-testid={`card-featured-${restaurant.id}`}
+                    >
+                      <div className="relative aspect-[4/3]">
+                        <img
+                          src={restaurant.imageUrl}
+                          alt={restaurant.name}
+                          className="w-full h-full object-cover"
+                        />
+                        <div className="absolute top-2 right-2">
+                          <Badge className="bg-[hsl(var(--primary))] text-primary-foreground">
+                            Featured
+                          </Badge>
+                        </div>
+                      </div>
+                      <div className="p-3">
+                        <h3 className="font-semibold text-base mb-1 truncate">
+                          {language === "en" ? restaurant.nameEn : restaurant.name}
+                        </h3>
+                        <p className="text-sm text-muted-foreground mb-2 truncate">
+                          {language === "en" ? restaurant.name : restaurant.nameEn}
+                        </p>
+                        <div className="flex items-center gap-2 mb-2">
+                          <Badge variant="secondary" className="text-xs">
+                            {restaurant.cuisine}
+                          </Badge>
+                          {restaurant.rating > 0 && (
+                            <div className="flex items-center gap-1 text-sm">
+                              <Star className="w-4 h-4 fill-[hsl(var(--accent-success))] text-[hsl(var(--accent-success))]" />
+                              <span className="font-medium">{restaurant.rating}</span>
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-1 text-xs text-muted-foreground truncate">
+                          <MapPin className="w-3 h-3 flex-shrink-0" />
+                          <span className="truncate">{restaurant.district}</span>
+                        </div>
+                      </div>
+                    </Card>
+                  </Link>
+                ))}
+              </div>
+              <ScrollBar orientation="horizontal" />
+            </ScrollArea>
+          </section>
+        )}
 
         {/* Trending Section / Search Results */}
         <section className="px-4 py-4">
