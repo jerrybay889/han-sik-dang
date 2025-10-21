@@ -1,5 +1,4 @@
 import { useEffect } from "react";
-import { Card } from "@/components/ui/card";
 
 interface AdSenseProps {
   slot: string;
@@ -23,14 +22,16 @@ export function AdSense({ slot, format = "auto", style, className = "" }: AdSens
 
   if (!publisherId) {
     return (
-      <Card className={`p-4 bg-muted/30 border-dashed ${className}`}>
-        <div className="text-center text-sm text-muted-foreground">
-          <p className="font-semibold mb-1">Advertisement Placeholder</p>
-          <p className="text-xs">
-            Set VITE_ADSENSE_PUBLISHER_ID to enable ads
-          </p>
+      <div className={className} data-testid={`ad-slot-${slot}`}>
+        <div className="rounded-xl border-2 border-dashed border-border bg-muted/30 p-4">
+          <div className="text-center text-sm text-muted-foreground">
+            <p className="font-semibold mb-1">Advertisement Placeholder</p>
+            <p className="text-xs">
+              Set VITE_ADSENSE_PUBLISHER_ID to enable ads
+            </p>
+          </div>
         </div>
-      </Card>
+      </div>
     );
   }
 
