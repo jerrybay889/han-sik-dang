@@ -53,6 +53,8 @@ export const reviews = pgTable("reviews", {
   userName: text("user_name").notNull(),
   rating: integer("rating").notNull(),
   comment: text("comment").notNull(),
+  imageUrls: text("image_urls").array(),
+  videoUrls: text("video_urls").array(),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
@@ -117,3 +119,90 @@ export const insertEventBannerSchema = createInsertSchema(eventBanners).omit({
 
 export type InsertEventBanner = z.infer<typeof insertEventBannerSchema>;
 export type EventBanner = typeof eventBanners.$inferSelect;
+
+export const menus = pgTable("menus", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  restaurantId: varchar("restaurant_id").notNull().references(() => restaurants.id),
+  name: text("name").notNull(),
+  nameEn: text("name_en").notNull(),
+  description: text("description"),
+  descriptionEn: text("description_en"),
+  price: integer("price").notNull(),
+  category: text("category"),
+  imageUrl: text("image_url"),
+  isPopular: integer("is_popular").notNull().default(0),
+  isRecommended: integer("is_recommended").notNull().default(0),
+  displayOrder: integer("display_order").notNull().default(0),
+});
+
+export const insertMenuSchema = createInsertSchema(menus).omit({
+  id: true,
+});
+
+export type InsertMenu = z.infer<typeof insertMenuSchema>;
+export type Menu = typeof menus.$inferSelect;
+
+export const menuAnalysis = pgTable("menu_analysis", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  menuId: varchar("menu_id").notNull().references(() => menus.id),
+  restaurantId: varchar("restaurant_id").notNull().references(() => restaurants.id),
+  howToEat: text("how_to_eat").notNull(),
+  howToEatEn: text("how_to_eat_en").notNull(),
+  orderingTips: text("ordering_tips").notNull(),
+  orderingTipsEn: text("ordering_tips_en").notNull(),
+  pairingRecommendations: text("pairing_recommendations"),
+  pairingRecommendationsEn: text("pairing_recommendations_en"),
+  culturalNotes: text("cultural_notes"),
+  culturalNotesEn: text("cultural_notes_en"),
+  analyzedAt: timestamp("analyzed_at").notNull().defaultNow(),
+});
+
+export const insertMenuAnalysisSchema = createInsertSchema(menuAnalysis).omit({
+  id: true,
+  analyzedAt: true,
+});
+
+export type InsertMenuAnalysis = z.infer<typeof insertMenuAnalysisSchema>;
+export type MenuAnalysis = typeof menuAnalysis.$inferSelect;
+
+export const youtubeVideos = pgTable("youtube_videos", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  restaurantId: varchar("restaurant_id").notNull().references(() => restaurants.id),
+  videoId: text("video_id").notNull(),
+  title: text("title").notNull(),
+  channelName: text("channel_name").notNull(),
+  thumbnailUrl: text("thumbnail_url").notNull(),
+  viewCount: integer("view_count"),
+  publishedAt: timestamp("published_at"),
+  relevanceScore: real("relevance_score"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const insertYoutubeVideoSchema = createInsertSchema(youtubeVideos).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertYoutubeVideo = z.infer<typeof insertYoutubeVideoSchema>;
+export type YoutubeVideo = typeof youtubeVideos.$inferSelect;
+
+export const externalReviews = pgTable("external_reviews", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  restaurantId: varchar("restaurant_id").notNull().references(() => restaurants.id),
+  source: text("source").notNull(),
+  rating: real("rating"),
+  comment: text("comment").notNull(),
+  commentEn: text("comment_en"),
+  author: text("author"),
+  publishedAt: timestamp("published_at"),
+  imageUrls: text("image_urls").array(),
+  fetchedAt: timestamp("fetched_at").notNull().defaultNow(),
+});
+
+export const insertExternalReviewSchema = createInsertSchema(externalReviews).omit({
+  id: true,
+  fetchedAt: true,
+});
+
+export type InsertExternalReview = z.infer<typeof insertExternalReviewSchema>;
+export type ExternalReview = typeof externalReviews.$inferSelect;
