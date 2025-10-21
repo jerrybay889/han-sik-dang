@@ -198,47 +198,54 @@ export default function MainScreen() {
                 </p>
               </Card>
             ) : (
-              displayRestaurants.map((restaurant) => (
-                <Link key={restaurant.id} href={`/restaurant/${restaurant.id}`}>
-                  <Card
-                    className="overflow-hidden hover-elevate active-elevate-2 cursor-pointer"
-                    data-testid={`card-restaurant-${restaurant.id}`}
-                  >
-                    <div className="flex gap-3 p-3">
-                      <img
-                        src={restaurant.imageUrl}
-                        alt={restaurant.name}
-                        className="w-24 h-24 rounded-md object-cover"
-                      />
-                      <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold text-base mb-1 truncate">
-                          {language === "en" ? restaurant.nameEn : restaurant.name}
-                        </h3>
-                        <p className="text-sm text-muted-foreground mb-2 truncate">
-                          {language === "en" ? restaurant.name : restaurant.nameEn}
-                        </p>
-                        <div className="flex items-center gap-2 mb-2 flex-wrap">
-                          <Badge variant="secondary" className="text-xs">
-                            {restaurant.cuisine}
-                          </Badge>
-                          {restaurant.rating > 0 && (
-                            <div className="flex items-center gap-1 text-sm">
-                              <Star className="w-4 h-4 fill-[hsl(var(--accent-success))] text-[hsl(var(--accent-success))]" />
-                              <span className="font-medium">{restaurant.rating}</span>
-                              <span className="text-muted-foreground">
-                                ({restaurant.reviewCount})
-                              </span>
-                            </div>
-                          )}
-                        </div>
-                        <div className="flex items-center gap-1 text-xs text-muted-foreground truncate">
-                          <MapPin className="w-3 h-3 flex-shrink-0" />
-                          <span className="truncate">{restaurant.district}</span>
+              displayRestaurants.map((restaurant, index) => (
+                <>
+                  <Link key={restaurant.id} href={`/restaurant/${restaurant.id}`}>
+                    <Card
+                      className="overflow-hidden hover-elevate active-elevate-2 cursor-pointer"
+                      data-testid={`card-restaurant-${restaurant.id}`}
+                    >
+                      <div className="flex gap-3 p-3">
+                        <img
+                          src={restaurant.imageUrl}
+                          alt={restaurant.name}
+                          className="w-24 h-24 rounded-md object-cover"
+                        />
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-semibold text-base mb-1 truncate">
+                            {language === "en" ? restaurant.nameEn : restaurant.name}
+                          </h3>
+                          <p className="text-sm text-muted-foreground mb-2 truncate">
+                            {language === "en" ? restaurant.name : restaurant.nameEn}
+                          </p>
+                          <div className="flex items-center gap-2 mb-2 flex-wrap">
+                            <Badge variant="secondary" className="text-xs">
+                              {restaurant.cuisine}
+                            </Badge>
+                            {restaurant.rating > 0 && (
+                              <div className="flex items-center gap-1 text-sm">
+                                <Star className="w-4 h-4 fill-[hsl(var(--accent-success))] text-[hsl(var(--accent-success))]" />
+                                <span className="font-medium">{restaurant.rating}</span>
+                                <span className="text-muted-foreground">
+                                  ({restaurant.reviewCount})
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-1 text-xs text-muted-foreground truncate">
+                            <MapPin className="w-3 h-3 flex-shrink-0" />
+                            <span className="truncate">{restaurant.district}</span>
+                          </div>
                         </div>
                       </div>
+                    </Card>
+                  </Link>
+                  {(index + 1) % 4 === 0 && index < displayRestaurants.length - 1 && (
+                    <div key={`ad-${index}`}>
+                      <AdSlot variant="feed" className="my-2" />
                     </div>
-                  </Card>
-                </Link>
+                  )}
+                </>
               ))
             )}
           </div>
