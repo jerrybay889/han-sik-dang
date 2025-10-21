@@ -12,6 +12,7 @@ import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { createWebsiteSchema, createOrganizationSchema } from "@/lib/structuredData";
 import { useQuery } from "@tanstack/react-query";
+import { queryClient } from "@/lib/queryClient";
 import { Link } from "wouter";
 import type { Restaurant, Announcement, EventBanner } from "@shared/schema";
 
@@ -62,6 +63,25 @@ export default function MainScreen() {
   const displayRestaurants = searchQuery.trim().length > 0 
     ? searchResults 
     : (restaurants || []);
+
+  const prefetchRestaurant = (restaurantId: string) => {
+    queryClient.prefetchQuery({
+      queryKey: ["/api/restaurants", restaurantId],
+      staleTime: 5 * 60 * 1000,
+    });
+    queryClient.prefetchQuery({
+      queryKey: ["/api/reviews", restaurantId],
+      staleTime: 5 * 60 * 1000,
+    });
+    queryClient.prefetchQuery({
+      queryKey: ["/api/restaurants", restaurantId, "insights"],
+      staleTime: 5 * 60 * 1000,
+    });
+    queryClient.prefetchQuery({
+      queryKey: ["/api/restaurants", restaurantId, "menus"],
+      staleTime: 5 * 60 * 1000,
+    });
+  };
 
   const sampleVideos = [
     {
@@ -182,6 +202,7 @@ export default function MainScreen() {
                     <Card
                       className="w-[280px] overflow-hidden hover-elevate active-elevate-2 cursor-pointer flex-shrink-0"
                       data-testid={`card-featured-${restaurant.id}`}
+                      onMouseEnter={() => prefetchRestaurant(restaurant.id)}
                     >
                       <div className="relative aspect-[4/3]">
                         <OptimizedImage
@@ -276,6 +297,7 @@ export default function MainScreen() {
                     <Card
                       className="overflow-hidden hover-elevate active-elevate-2 cursor-pointer"
                       data-testid={`card-restaurant-${restaurant.id}`}
+                      onMouseEnter={() => prefetchRestaurant(restaurant.id)}
                     >
                       <div className="flex gap-3 p-3">
                         <OptimizedImage

@@ -47,7 +47,15 @@ export const restaurants = pgTable("restaurants", {
   isVegan: integer("is_vegan").notNull().default(0),
   isHalal: integer("is_halal").notNull().default(0),
   isFeatured: integer("is_featured").notNull().default(0),
-});
+}, (table) => [
+  index("idx_restaurants_name").on(table.name),
+  index("idx_restaurants_name_en").on(table.nameEn),
+  index("idx_restaurants_district").on(table.district),
+  index("idx_restaurants_cuisine").on(table.cuisine),
+  index("idx_restaurants_category").on(table.category),
+  index("idx_restaurants_rating").on(table.rating),
+  index("idx_restaurants_is_featured").on(table.isFeatured),
+]);
 
 export const insertRestaurantSchema = createInsertSchema(restaurants).omit({
   id: true,
@@ -68,7 +76,11 @@ export const reviews = pgTable("reviews", {
   imageUrls: text("image_urls").array(),
   videoUrls: text("video_urls").array(),
   createdAt: timestamp("created_at").notNull().defaultNow(),
-});
+}, (table) => [
+  index("idx_reviews_restaurant_id").on(table.restaurantId),
+  index("idx_reviews_user_id").on(table.userId),
+  index("idx_reviews_created_at").on(table.createdAt),
+]);
 
 export const insertReviewSchema = createInsertSchema(reviews).omit({
   id: true,
