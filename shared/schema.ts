@@ -206,3 +206,27 @@ export const insertExternalReviewSchema = createInsertSchema(externalReviews).om
 
 export type InsertExternalReview = z.infer<typeof insertExternalReviewSchema>;
 export type ExternalReview = typeof externalReviews.$inferSelect;
+
+export const restaurantInsights = pgTable("restaurant_insights", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  restaurantId: varchar("restaurant_id").notNull().references(() => restaurants.id).unique(),
+  reviewInsights: text("review_insights").notNull(),
+  reviewInsightsEn: text("review_insights_en").notNull(),
+  bestFor: text("best_for").notNull(),
+  bestForEn: text("best_for_en").notNull(),
+  culturalTips: text("cultural_tips"),
+  culturalTipsEn: text("cultural_tips_en"),
+  firstTimerTips: text("first_timer_tips").notNull(),
+  firstTimerTipsEn: text("first_timer_tips_en").notNull(),
+  generatedAt: timestamp("generated_at").notNull().defaultNow(),
+  lastUpdated: timestamp("last_updated").notNull().defaultNow(),
+});
+
+export const insertRestaurantInsightsSchema = createInsertSchema(restaurantInsights).omit({
+  id: true,
+  generatedAt: true,
+  lastUpdated: true,
+});
+
+export type InsertRestaurantInsights = z.infer<typeof insertRestaurantInsightsSchema>;
+export type RestaurantInsights = typeof restaurantInsights.$inferSelect;

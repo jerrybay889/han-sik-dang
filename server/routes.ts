@@ -5,7 +5,7 @@ import { GoogleGenAI } from "@google/genai";
 import bcrypt from "bcryptjs";
 
 const genAI = new GoogleGenAI({ 
-  apiKey: process.env.GOOGLE_API_KEY_HANSIKDANG || process.env.GOOGLE_API_KEY2_HANSIKDANG || "" 
+  apiKey: process.env.gemini_hansikdang || "" 
 });
 
 export async function registerRoutes(app: Express): Promise<Server> {
