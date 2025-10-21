@@ -10,10 +10,16 @@ import {
   type InsertReview,
   type SavedRestaurant,
   type InsertSavedRestaurant,
+  type Announcement,
+  type InsertAnnouncement,
+  type EventBanner,
+  type InsertEventBanner,
   users,
   restaurants,
   reviews,
   savedRestaurants,
+  announcements,
+  eventBanners,
 } from "@shared/schema";
 
 const client = neon(process.env.DATABASE_URL!);
@@ -39,6 +45,12 @@ export interface IStorage {
   saveRestaurant(data: InsertSavedRestaurant): Promise<SavedRestaurant>;
   unsaveRestaurant(userId: string, restaurantId: string): Promise<void>;
   isRestaurantSaved(userId: string, restaurantId: string): Promise<boolean>;
+  
+  getRecentAnnouncements(limit: number): Promise<Announcement[]>;
+  createAnnouncement(announcement: InsertAnnouncement): Promise<Announcement>;
+  
+  getActiveEventBanners(): Promise<EventBanner[]>;
+  createEventBanner(banner: InsertEventBanner): Promise<EventBanner>;
 }
 
 export class DbStorage implements IStorage {
@@ -148,6 +160,31 @@ export class DbStorage implements IStorage {
         sql`${savedRestaurants.userId} = ${userId} AND ${savedRestaurants.restaurantId} = ${restaurantId}`
       );
     return result.length > 0;
+  }
+
+  async getRecentAnnouncements(limit: number): Promise<Announcement[]> {
+    return await db.select().from(announcements)
+      .orderBy(desc(announcements.isPinned), desc(announcements.createdAt))
+      .limit(limit);
+  }
+
+  async createAnnouncement(insertAnnouncement: InsertAnnouncement): Promise<Announcement> {
+    const result = await db.insert(announcements).values(insertAnnouncement).returning();
+    return result[0];
+  }
+
+  async getActiveEventBanners(): Promise<EventBanner[]> {
+    const now = new Date();
+    return await db.select().from(eventBanners)
+      .where(
+        sql`${eventBanners.isActive} = 1 AND ${eventBanners.startDate} <= ${now} AND ${eventBanners.endDate} >= ${now}`
+      )
+      .orderBy(eventBanners.displayOrder);
+  }
+
+  async createEventBanner(insertBanner: InsertEventBanner): Promise<EventBanner> {
+    const result = await db.insert(eventBanners).values(insertBanner).returning();
+    return result[0];
   }
 }
 

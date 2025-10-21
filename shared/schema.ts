@@ -78,3 +78,42 @@ export const insertSavedRestaurantSchema = createInsertSchema(savedRestaurants).
 
 export type InsertSavedRestaurant = z.infer<typeof insertSavedRestaurantSchema>;
 export type SavedRestaurant = typeof savedRestaurants.$inferSelect;
+
+export const announcements = pgTable("announcements", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  title: text("title").notNull(),
+  titleEn: text("title_en").notNull(),
+  content: text("content").notNull(),
+  contentEn: text("content_en").notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  isPinned: integer("is_pinned").notNull().default(0),
+});
+
+export const insertAnnouncementSchema = createInsertSchema(announcements).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertAnnouncement = z.infer<typeof insertAnnouncementSchema>;
+export type Announcement = typeof announcements.$inferSelect;
+
+export const eventBanners = pgTable("event_banners", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  title: text("title").notNull(),
+  titleEn: text("title_en").notNull(),
+  description: text("description").notNull(),
+  descriptionEn: text("description_en").notNull(),
+  imageUrl: text("image_url").notNull(),
+  linkUrl: text("link_url"),
+  startDate: timestamp("start_date").notNull(),
+  endDate: timestamp("end_date").notNull(),
+  isActive: integer("is_active").notNull().default(1),
+  displayOrder: integer("display_order").notNull().default(0),
+});
+
+export const insertEventBannerSchema = createInsertSchema(eventBanners).omit({
+  id: true,
+});
+
+export type InsertEventBanner = z.infer<typeof insertEventBannerSchema>;
+export type EventBanner = typeof eventBanners.$inferSelect;

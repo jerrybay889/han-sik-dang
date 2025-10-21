@@ -180,6 +180,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get("/api/announcements", async (req, res) => {
+    try {
+      const limit = parseInt(req.query.limit as string) || 2;
+      const announcements = await storage.getRecentAnnouncements(limit);
+      res.json(announcements);
+    } catch (error) {
+      console.error("Get announcements error:", error);
+      res.status(500).json({ error: "Failed to fetch announcements" });
+    }
+  });
+
+  app.get("/api/event-banners", async (req, res) => {
+    try {
+      const banners = await storage.getActiveEventBanners();
+      res.json(banners);
+    } catch (error) {
+      console.error("Get event banners error:", error);
+      res.status(500).json({ error: "Failed to fetch event banners" });
+    }
+  });
+
   const httpServer = createServer(app);
 
   return httpServer;
