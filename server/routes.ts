@@ -401,40 +401,6 @@ ${insights && insights.firstTimerTips ? `첫 방문 팁: ${insights.firstTimerTi
   });
 
 
-  app.post("/api/auth/login", async (req, res) => {
-    try {
-      const { username, password } = req.body;
-      
-      if (!username || !password) {
-        return res.status(400).json({ error: "Username and password are required" });
-      }
-
-      const user = await storage.getUserByUsername(username);
-      if (!user) {
-        return res.status(401).json({ error: "Invalid credentials" });
-      }
-
-      const isValidPassword = await bcrypt.compare(password, user.password);
-      if (!isValidPassword) {
-        return res.status(401).json({ error: "Invalid credentials" });
-      }
-
-      const userWithoutPassword = { id: user.id, username: user.username };
-      res.json(userWithoutPassword);
-    } catch (error) {
-      console.error("Login error:", error);
-      res.status(500).json({ error: "Failed to login" });
-    }
-  });
-
-  app.post("/api/auth/logout", async (req, res) => {
-    try {
-      res.json({ success: true });
-    } catch (error) {
-      console.error("Logout error:", error);
-      res.status(500).json({ error: "Failed to logout" });
-    }
-  });
 
   app.get("/api/auth/me", async (req, res) => {
     try {

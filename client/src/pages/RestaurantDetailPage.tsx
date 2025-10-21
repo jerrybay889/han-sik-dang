@@ -12,11 +12,11 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { SEO } from "@/components/SEO";
 import { AdSense } from "@/components/AdSense";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useAuth } from "@/hooks/useAuth";
+import { isUnauthorizedError } from "@/lib/authUtils";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import type { Restaurant, Review, RestaurantInsights, Menu, YoutubeVideo, ExternalReview } from "@shared/schema";
-
-const TEMP_USER_ID = "guest-user";
 
 type AICardType = "reviews" | "menu" | "howToEat" | "ordering";
 
@@ -28,6 +28,7 @@ interface ChatMessage {
 export default function RestaurantDetailPage() {
   const { t, language } = useLanguage();
   const { toast } = useToast();
+  const { user, isAuthenticated } = useAuth();
   const [, params] = useRoute("/restaurant/:id");
   const restaurantId = params?.id;
   
@@ -53,8 +54,9 @@ export default function RestaurantDetailPage() {
   });
 
   const { data: savedStatus } = useQuery<{ isSaved: boolean }>({
-    queryKey: ["/api/saved", TEMP_USER_ID, "check", restaurantId],
-    enabled: !!restaurantId,
+    queryKey: ["/api/saved/check", restaurantId],
+    enabled: !!restaurantId && isAuthenticated,
+    retry: false,
   });
 
   const { data: insights } = useQuery<RestaurantInsights | null>({
@@ -237,33 +239,53 @@ export default function RestaurantDetailPage() {
 
   const saveMutation = useMutation({
     mutationFn: async () => {
+      if (!isAuthenticated) {
+        throw new Error("Please log in to save restaurants");
+      }
+      
       if (isSaved) {
-        await apiRequest("DELETE", `/api/saved/${TEMP_USER_ID}/${restaurantId}`);
+        await apiRequest("DELETE", `/api/saved/${restaurantId}`);
       } else {
-        await apiRequest("POST", "/api/saved", { userId: TEMP_USER_ID, restaurantId });
+        await apiRequest("POST", "/api/saved", { restaurantId });
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/saved", TEMP_USER_ID, "check", restaurantId] });
-      queryClient.invalidateQueries({ queryKey: ["/api/saved", TEMP_USER_ID] });
+      queryClient.invalidateQueries({ queryKey: ["/api/saved/check", restaurantId] });
+      queryClient.invalidateQueries({ queryKey: ["/api/saved", user?.id] });
       toast({
-        title: isSaved ? "Removed from saved" : "Saved successfully",
-        description: isSaved ? "Restaurant removed from your saved list" : "Restaurant saved to your list",
+        title: isSaved ? (language === "en" ? "Removed from saved" : "저장 취소됨") : (language === "en" ? "Saved successfully" : "저장 완료"),
+        description: isSaved 
+          ? (language === "en" ? "Restaurant removed from your saved list" : "레스토랑이 저장 목록에서 제거되었습니다")
+          : (language === "en" ? "Restaurant saved to your list" : "레스토랑이 저장되었습니다"),
       });
     },
-    onError: () => {
-      toast({
-        title: "Error",
-        description: "Failed to update saved status",
-        variant: "destructive",
-      });
+    onError: (error: Error) => {
+      if (isUnauthorizedError(error) || error.message === "Please log in to save restaurants") {
+        toast({
+          title: language === "en" ? "Login Required" : "로그인 필요",
+          description: language === "en" ? "Please log in to save restaurants" : "레스토랑을 저장하려면 로그인하세요",
+          variant: "destructive",
+        });
+        setTimeout(() => {
+          window.location.href = "/api/login";
+        }, 1000);
+      } else {
+        toast({
+          title: language === "en" ? "Error" : "오류",
+          description: language === "en" ? "Failed to save restaurant" : "레스토랑 저장에 실패했습니다",
+          variant: "destructive",
+        });
+      }
     },
   });
 
   const reviewMutation = useMutation({
     mutationFn: async () => {
+      if (!isAuthenticated) {
+        throw new Error("Please log in to write reviews");
+      }
+      
       await apiRequest("POST", "/api/reviews", {
-        userId: TEMP_USER_ID,
         restaurantId,
         rating: reviewRating,
         comment: reviewComment,
@@ -279,11 +301,22 @@ export default function RestaurantDetailPage() {
         title: t("review.success"),
       });
     },
-    onError: () => {
-      toast({
-        title: t("review.error"),
-        variant: "destructive",
-      });
+    onError: (error: Error) => {
+      if (isUnauthorizedError(error) || error.message === "Please log in to write reviews") {
+        toast({
+          title: language === "en" ? "Login Required" : "로그인 필요",
+          description: language === "en" ? "Please log in to write reviews" : "리뷰를 작성하려면 로그인하세요",
+          variant: "destructive",
+        });
+        setTimeout(() => {
+          window.location.href = "/api/login";
+        }, 1000);
+      } else {
+        toast({
+          title: t("review.error"),
+          variant: "destructive",
+        });
+      }
     },
   });
 
