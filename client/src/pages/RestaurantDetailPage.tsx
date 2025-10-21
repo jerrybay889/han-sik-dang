@@ -978,7 +978,7 @@ export default function RestaurantDetailPage() {
             className="flex-1 overflow-y-auto px-4 py-3 space-y-3"
             data-testid="chat-messages-container"
           >
-            {chatMessages.length === 0 ? (
+            {chatMessages.length === 0 && !isSendingMessage ? (
               <div className="flex flex-col items-center justify-center h-full text-center py-8">
                 <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-3">
                   <Sparkles className="w-8 h-8 text-primary" />
@@ -1003,6 +1003,31 @@ export default function RestaurantDetailPage() {
                     : "주문 팁과 표현을 배워보세요")}
                 </p>
               </div>
+            ) : chatMessages.length === 0 && isSendingMessage ? (
+              <div className="flex flex-col items-center justify-center h-full text-center py-8">
+                <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-3">
+                  <Sparkles className="w-8 h-8 text-primary animate-pulse" />
+                </div>
+                <p className="text-sm text-muted-foreground mb-2">
+                  {language === "en" 
+                    ? "AI is analyzing..." 
+                    : "AI가 분석 중입니다..."}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {currentAICard === "reviews" && (language === "en" 
+                    ? "Analyzing customer reviews" 
+                    : "고객 리뷰를 분석하고 있습니다")}
+                  {currentAICard === "menu" && (language === "en" 
+                    ? "Preparing menu recommendations" 
+                    : "메뉴 추천을 준비하고 있습니다")}
+                  {currentAICard === "howToEat" && (language === "en" 
+                    ? "Gathering cultural insights" 
+                    : "문화 정보를 모으고 있습니다")}
+                  {currentAICard === "ordering" && (language === "en" 
+                    ? "Preparing ordering tips" 
+                    : "주문 팁을 준비하고 있습니다")}
+                </p>
+              </div>
             ) : (
               chatMessages.map((message, index) => (
                 <div
@@ -1022,7 +1047,7 @@ export default function RestaurantDetailPage() {
                 </div>
               ))
             )}
-            {isSendingMessage && (
+            {isSendingMessage && chatMessages.length > 0 && (
               <div className="flex justify-start">
                 <div className="max-w-[80%] rounded-lg px-3 py-2 bg-muted">
                   <div className="flex gap-1">
