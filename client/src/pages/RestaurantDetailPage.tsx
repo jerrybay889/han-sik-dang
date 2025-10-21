@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useRoute, Link } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { ArrowLeft, MapPin, Phone, Clock, Star, DollarSign, Users, Heart, Sparkles, Lightbulb } from "lucide-react";
+import { ArrowLeft, MapPin, Phone, Clock, Star, DollarSign, Users, Heart, Sparkles, Lightbulb, UtensilsCrossed, Play, Eye, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -11,7 +11,7 @@ import { SEO } from "@/components/SEO";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import type { Restaurant, Review, RestaurantInsights } from "@shared/schema";
+import type { Restaurant, Review, RestaurantInsights, Menu, YoutubeVideo } from "@shared/schema";
 
 const TEMP_USER_ID = "guest-user";
 
@@ -42,6 +42,16 @@ export default function RestaurantDetailPage() {
 
   const { data: insights } = useQuery<RestaurantInsights | null>({
     queryKey: ["/api/restaurants", restaurantId, "insights"],
+    enabled: !!restaurantId,
+  });
+
+  const { data: menus = [], isLoading: loadingMenus } = useQuery<Menu[]>({
+    queryKey: ["/api/restaurants", restaurantId, "menus"],
+    enabled: !!restaurantId,
+  });
+
+  const { data: videos = [], isLoading: loadingVideos } = useQuery<YoutubeVideo[]>({
+    queryKey: ["/api/restaurants", restaurantId, "videos"],
     enabled: !!restaurantId,
   });
 
@@ -289,6 +299,134 @@ export default function RestaurantDetailPage() {
                 </div>
               </div>
             </Card>
+
+            {/* Menu Section */}
+            {menus.length > 0 && (
+              <Card className="p-4 mb-6">
+                <div className="flex items-center gap-2 mb-4">
+                  <UtensilsCrossed className="w-5 h-5 text-primary" />
+                  <h2 className="font-semibold">{language === "en" ? "Menu" : "메뉴"}</h2>
+                </div>
+                
+                {loadingMenus ? (
+                  <div className="space-y-3">
+                    {Array.from({ length: 3 }).map((_, i) => (
+                      <div key={i} className="h-20 bg-muted rounded animate-pulse" />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {menus.map((menu) => (
+                      <Card key={menu.id} className="p-3 hover-elevate" data-testid={`menu-item-${menu.id}`}>
+                        <div className="flex justify-between items-start gap-3">
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-1 flex-wrap">
+                              <h3 className="font-semibold" data-testid="text-menu-name">
+                                {language === "en" ? menu.nameEn : menu.name}
+                              </h3>
+                              {menu.isPopular === 1 && (
+                                <Badge variant="secondary" className="text-xs">
+                                  {language === "en" ? "Popular" : "인기"}
+                                </Badge>
+                              )}
+                              {menu.isRecommended === 1 && (
+                                <Badge variant="outline" className="text-xs border-primary text-primary">
+                                  {language === "en" ? "Recommended" : "추천"}
+                                </Badge>
+                              )}
+                            </div>
+                            {menu.description && (
+                              <p className="text-sm text-muted-foreground mb-1" data-testid="text-menu-description">
+                                {language === "en" ? menu.descriptionEn : menu.description}
+                              </p>
+                            )}
+                            {menu.category && (
+                              <p className="text-xs text-muted-foreground">
+                                {menu.category}
+                              </p>
+                            )}
+                          </div>
+                          <div className="flex-shrink-0">
+                            <p className="font-semibold text-primary" data-testid="text-menu-price">
+                              ₩{menu.price.toLocaleString()}
+                            </p>
+                          </div>
+                        </div>
+                      </Card>
+                    ))}
+                  </div>
+                )}
+              </Card>
+            )}
+
+            {/* YouTube Videos Section */}
+            {videos.length > 0 && (
+              <Card className="p-4 mb-6">
+                <div className="flex items-center gap-2 mb-4">
+                  <Play className="w-5 h-5 text-red-500" />
+                  <h2 className="font-semibold">{language === "en" ? "Videos" : "영상 리뷰"}</h2>
+                </div>
+                
+                {loadingVideos ? (
+                  <div className="space-y-3">
+                    {Array.from({ length: 2 }).map((_, i) => (
+                      <div key={i} className="h-24 bg-muted rounded animate-pulse" />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {videos.map((video) => (
+                      <a
+                        key={video.id}
+                        href={`https://www.youtube.com/watch?v=${video.videoId}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="block"
+                        data-testid={`video-${video.id}`}
+                      >
+                        <Card className="p-3 hover-elevate active-elevate-2">
+                          <div className="flex gap-3">
+                            <div className="relative flex-shrink-0 w-32 h-20 bg-muted rounded overflow-hidden">
+                              <img
+                                src={video.thumbnailUrl}
+                                alt={video.title}
+                                className="w-full h-full object-cover"
+                                data-testid="img-video-thumbnail"
+                              />
+                              <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+                                <Play className="w-8 h-8 text-white fill-white" />
+                              </div>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <h3 className="font-medium text-sm line-clamp-2 mb-1" data-testid="text-video-title">
+                                {video.title}
+                              </h3>
+                              <p className="text-xs text-muted-foreground mb-1" data-testid="text-channel-name">
+                                {video.channelName}
+                              </p>
+                              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                {video.viewCount && (
+                                  <span className="flex items-center gap-1">
+                                    <Eye className="w-3 h-3" />
+                                    {video.viewCount.toLocaleString()}
+                                  </span>
+                                )}
+                                {video.publishedAt && (
+                                  <span className="flex items-center gap-1">
+                                    <Calendar className="w-3 h-3" />
+                                    {new Date(video.publishedAt).toLocaleDateString(language === "en" ? "en-US" : "ko-KR", { year: 'numeric', month: 'short' })}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </Card>
+                      </a>
+                    ))}
+                  </div>
+                )}
+              </Card>
+            )}
 
             {/* AI Insights Section */}
             {insights && (
