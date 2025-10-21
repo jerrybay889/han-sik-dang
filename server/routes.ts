@@ -2,13 +2,40 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { GoogleGenAI } from "@google/genai";
-import bcrypt from "bcryptjs";
+import { setupAuth, isAuthenticated } from "./replitAuth";
 
 const genAI = new GoogleGenAI({ 
-  apiKey: process.env.gemini_hansikdang || "" 
+  apiKey: process.env.GOOGLE_API_KEY_HANSIKDANG || "" 
 });
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Setup Replit Auth
+  await setupAuth(app);
+
+  // Auth endpoint - get current user
+  app.get('/api/auth/user', async (req: any, res) => {
+    try {
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      
+      const userId = req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      res.json(user);
+    } catch (error) {
+      console.error("Error fetching user:", error);
+      res.status(500).json({ message: "Failed to fetch user" });
+    }
+  });
+
   app.post("/api/ai/chat", async (req, res) => {
     try {
       const { message, language = "ko" } = req.body;

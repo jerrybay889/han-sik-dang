@@ -3,7 +3,7 @@ import { drizzle } from "drizzle-orm/neon-http";
 import { eq, desc, sql } from "drizzle-orm";
 import {
   type User,
-  type InsertUser,
+  type UpsertUser,
   type Restaurant,
   type InsertRestaurant,
   type Review,
@@ -38,9 +38,9 @@ const client = neon(process.env.DATABASE_URL!);
 const db = drizzle(client);
 
 export interface IStorage {
+  // User operations for Replit Auth
   getUser(id: string): Promise<User | undefined>;
-  getUserByUsername(username: string): Promise<User | undefined>;
-  createUser(user: InsertUser): Promise<User>;
+  upsertUser(user: UpsertUser): Promise<User>;
   
   getAllRestaurants(): Promise<Restaurant[]>;
   getRestaurant(id: string): Promise<Restaurant | undefined>;
@@ -79,18 +79,24 @@ export interface IStorage {
 }
 
 export class DbStorage implements IStorage {
+  // User operations for Replit Auth
   async getUser(id: string): Promise<User | undefined> {
     const result = await db.select().from(users).where(eq(users.id, id));
     return result[0];
   }
 
-  async getUserByUsername(username: string): Promise<User | undefined> {
-    const result = await db.select().from(users).where(eq(users.username, username));
-    return result[0];
-  }
-
-  async createUser(insertUser: InsertUser): Promise<User> {
-    const result = await db.insert(users).values(insertUser).returning();
+  async upsertUser(userData: UpsertUser): Promise<User> {
+    const result = await db
+      .insert(users)
+      .values(userData)
+      .onConflictDoUpdate({
+        target: users.id,
+        set: {
+          ...userData,
+          updatedAt: new Date(),
+        },
+      })
+      .returning();
     return result[0];
   }
 
