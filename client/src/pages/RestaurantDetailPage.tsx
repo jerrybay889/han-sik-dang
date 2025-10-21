@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useRoute, Link } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { ArrowLeft, MapPin, Phone, Clock, Star, DollarSign, Users, Heart, Sparkles, Lightbulb, UtensilsCrossed, Play, Eye, Calendar, MessageSquare, MessageCircle, Send, X, Map, Navigation } from "lucide-react";
+import { ArrowLeft, MapPin, Phone, Clock, Star, DollarSign, Users, Heart, Sparkles, Lightbulb, UtensilsCrossed, Play, Eye, Calendar, MessageSquare, MessageCircle, Send, X, Navigation } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -366,11 +366,35 @@ export default function RestaurantDetailPage() {
               <div className="space-y-3">
                 <div className="flex items-start gap-3">
                   <MapPin className="w-5 h-5 text-muted-foreground flex-shrink-0 mt-0.5" />
-                  <div>
+                  <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium mb-1">{t("restaurant.address")}</p>
-                    <p className="text-sm text-muted-foreground" data-testid="text-address">
+                    <p className="text-sm text-muted-foreground mb-2" data-testid="text-address">
                       {restaurant.address}
                     </p>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <a
+                        href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(restaurant.address)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        data-testid="button-google-maps"
+                      >
+                        <Badge variant="outline" className="hover-elevate active-elevate-2 cursor-pointer text-xs gap-1">
+                          <Navigation className="w-3 h-3" />
+                          {language === "en" ? "Google Maps" : "구글 지도"}
+                        </Badge>
+                      </a>
+                      <a
+                        href={`https://map.naver.com/v5/search/${encodeURIComponent(restaurant.address)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        data-testid="button-naver-maps"
+                      >
+                        <Badge variant="outline" className="hover-elevate active-elevate-2 cursor-pointer text-xs gap-1">
+                          <Navigation className="w-3 h-3" />
+                          {language === "en" ? "Naver Map" : "네이버 지도"}
+                        </Badge>
+                      </a>
+                    </div>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
@@ -395,62 +419,6 @@ export default function RestaurantDetailPage() {
                     </p>
                   </div>
                 </div>
-              </div>
-            </Card>
-
-            {/* Map Selection */}
-            <Card className="p-4 mb-6">
-              <div className="flex items-center gap-2 mb-4">
-                <Map className="w-5 h-5 text-primary" />
-                <h2 className="font-semibold">{language === "en" ? "View on Map" : "지도에서 보기"}</h2>
-              </div>
-              <p className="text-sm text-muted-foreground mb-4">
-                {language === "en" 
-                  ? "Choose your preferred map service to view the restaurant location" 
-                  : "선호하는 지도 서비스를 선택하여 레스토랑 위치를 확인하세요"}
-              </p>
-              <div className="grid grid-cols-2 gap-3">
-                <a
-                  href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(restaurant.address)}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  data-testid="button-google-maps"
-                >
-                  <Card className="p-4 hover-elevate active-elevate-2 cursor-pointer h-full">
-                    <div className="flex flex-col items-center text-center gap-2">
-                      <div className="w-12 h-12 rounded-full bg-red-500/10 flex items-center justify-center">
-                        <Navigation className="w-6 h-6 text-red-600 dark:text-red-500" />
-                      </div>
-                      <h3 className="font-semibold text-sm">
-                        {language === "en" ? "Google Maps" : "구글 지도"}
-                      </h3>
-                      <p className="text-xs text-muted-foreground">
-                        {language === "en" ? "Open in Google" : "구글에서 열기"}
-                      </p>
-                    </div>
-                  </Card>
-                </a>
-
-                <a
-                  href={`https://map.naver.com/v5/search/${encodeURIComponent(restaurant.address)}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  data-testid="button-naver-maps"
-                >
-                  <Card className="p-4 hover-elevate active-elevate-2 cursor-pointer h-full">
-                    <div className="flex flex-col items-center text-center gap-2">
-                      <div className="w-12 h-12 rounded-full bg-green-500/10 flex items-center justify-center">
-                        <Navigation className="w-6 h-6 text-green-600 dark:text-green-500" />
-                      </div>
-                      <h3 className="font-semibold text-sm">
-                        {language === "en" ? "Naver Map" : "네이버 지도"}
-                      </h3>
-                      <p className="text-xs text-muted-foreground">
-                        {language === "en" ? "Open in Naver" : "네이버에서 열기"}
-                      </p>
-                    </div>
-                  </Card>
-                </a>
               </div>
             </Card>
 
