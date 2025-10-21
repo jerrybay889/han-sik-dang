@@ -38,6 +38,11 @@ export default function RestaurantDetailPage() {
   const [reviewComment, setReviewComment] = useState("");
   const [editingReviewId, setEditingReviewId] = useState<string | null>(null);
   
+  const [isResponseDialogOpen, setIsResponseDialogOpen] = useState(false);
+  const [responseText, setResponseText] = useState("");
+  const [editingResponseReviewId, setEditingResponseReviewId] = useState<string | null>(null);
+  const [editingResponseId, setEditingResponseId] = useState<string | null>(null);
+  
   const [isAIChatOpen, setIsAIChatOpen] = useState(false);
   const [currentAICard, setCurrentAICard] = useState<AICardType | null>(null);
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
@@ -88,7 +93,40 @@ export default function RestaurantDetailPage() {
     enabled: !!restaurantId,
   });
 
+  // Check if current user is owner of this restaurant
+  const { data: ownershipStatus } = useQuery<{ isOwner: boolean }>({
+    queryKey: ["/api/restaurants", restaurantId, "is-owner"],
+    enabled: !!restaurantId && isAuthenticated,
+    retry: false,
+  });
+
+  // Fetch review responses - map of reviewId -> response
+  const { data: reviewResponses = {} } = useQuery<Record<string, ReviewResponse>>({
+    queryKey: ["/api/review-responses", restaurantId],
+    queryFn: async () => {
+      if (!reviews || reviews.length === 0) return {};
+      
+      const responses: Record<string, ReviewResponse> = {};
+      await Promise.all(
+        reviews.map(async (review) => {
+          const res = await fetch(`/api/reviews/${review.id}/response`, {
+            credentials: "include",
+          });
+          if (res.ok) {
+            const data = await res.json();
+            if (data) {
+              responses[review.id] = data;
+            }
+          }
+        })
+      );
+      return responses;
+    },
+    enabled: !!restaurantId && reviews.length > 0,
+  });
+
   const isSaved = savedStatus?.isSaved || false;
+  const isOwner = ownershipStatus?.isOwner || false;
 
   useEffect(() => {
     if (chatScrollRef.current) {
@@ -367,6 +405,87 @@ export default function RestaurantDetailPage() {
     },
   });
 
+  // Review Response Mutations
+  const responseCreateMutation = useMutation({
+    mutationFn: async ({ reviewId, response }: { reviewId: string; response: string }) => {
+      if (!isAuthenticated || !isOwner) {
+        throw new Error("Unauthorized");
+      }
+      await apiRequest("POST", "/api/review-responses", {
+        reviewId,
+        restaurantId,
+        response,
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/review-responses", restaurantId] });
+      setIsResponseDialogOpen(false);
+      setResponseText("");
+      setEditingResponseReviewId(null);
+      setEditingResponseId(null);
+      toast({
+        title: language === "en" ? "Response posted" : "답변이 등록되었습니다",
+      });
+    },
+    onError: () => {
+      toast({
+        title: language === "en" ? "Failed to post response" : "답변 등록 실패",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const responseUpdateMutation = useMutation({
+    mutationFn: async ({ responseId, response }: { responseId: string; response: string }) => {
+      if (!isAuthenticated || !isOwner) {
+        throw new Error("Unauthorized");
+      }
+      await apiRequest("PATCH", `/api/review-responses/${responseId}`, {
+        restaurantId,
+        response,
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/review-responses", restaurantId] });
+      setIsResponseDialogOpen(false);
+      setResponseText("");
+      setEditingResponseReviewId(null);
+      setEditingResponseId(null);
+      toast({
+        title: language === "en" ? "Response updated" : "답변이 수정되었습니다",
+      });
+    },
+    onError: () => {
+      toast({
+        title: language === "en" ? "Failed to update response" : "답변 수정 실패",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const responseDeleteMutation = useMutation({
+    mutationFn: async (responseId: string) => {
+      if (!isAuthenticated || !isOwner) {
+        throw new Error("Unauthorized");
+      }
+      await apiRequest("DELETE", `/api/review-responses/${responseId}`, {
+        restaurantId,
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/review-responses", restaurantId] });
+      toast({
+        title: language === "en" ? "Response deleted" : "답변이 삭제되었습니다",
+      });
+    },
+    onError: () => {
+      toast({
+        title: language === "en" ? "Failed to delete response" : "답변 삭제 실패",
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleSubmitReview = () => {
     if (reviewRating === 0) {
       toast({
@@ -382,6 +501,46 @@ export default function RestaurantDetailPage() {
   const handleDeleteReview = (reviewId: string) => {
     if (window.confirm(language === "en" ? "Are you sure you want to delete this review?" : "이 리뷰를 삭제하시겠습니까?")) {
       deleteMutation.mutate(reviewId);
+    }
+  };
+
+  const handleOpenResponseDialog = (reviewId: string, existingResponse?: ReviewResponse) => {
+    setEditingResponseReviewId(reviewId);
+    if (existingResponse) {
+      setEditingResponseId(existingResponse.id);
+      setResponseText(existingResponse.response);
+    } else {
+      setEditingResponseId(null);
+      setResponseText("");
+    }
+    setIsResponseDialogOpen(true);
+  };
+
+  const handleSubmitResponse = () => {
+    if (!responseText.trim()) {
+      toast({
+        title: language === "en" ? "Please enter a response" : "답변을 입력하세요",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (editingResponseId) {
+      responseUpdateMutation.mutate({
+        responseId: editingResponseId,
+        response: responseText,
+      });
+    } else if (editingResponseReviewId) {
+      responseCreateMutation.mutate({
+        reviewId: editingResponseReviewId,
+        response: responseText,
+      });
+    }
+  };
+
+  const handleDeleteResponse = (responseId: string) => {
+    if (window.confirm(language === "en" ? "Are you sure you want to delete this response?" : "이 답변을 삭제하시겠습니까?")) {
+      responseDeleteMutation.mutate(responseId);
     }
   };
 
@@ -979,6 +1138,56 @@ export default function RestaurantDetailPage() {
                         <p className="text-xs text-muted-foreground">
                           {new Date(review.createdAt).toLocaleDateString(language)}
                         </p>
+
+                        {/* Owner Response Section */}
+                        {reviewResponses[review.id] ? (
+                          <div className="mt-3 ml-4 pl-4 border-l-2 border-primary/30 bg-muted/30 p-3 rounded-r" data-testid={`response-${review.id}`}>
+                            <div className="flex items-start justify-between mb-2">
+                              <div className="flex items-center gap-2">
+                                <Store className="w-4 h-4 text-primary" />
+                                <p className="text-sm font-medium text-primary">
+                                  {language === "en" ? "Owner's Response" : "사장님 답변"}
+                                </p>
+                              </div>
+                              {isOwner && (
+                                <div className="flex gap-1">
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    onClick={() => handleOpenResponseDialog(review.id, reviewResponses[review.id])}
+                                    data-testid={`button-edit-response-${review.id}`}
+                                  >
+                                    {language === "en" ? "Edit" : "수정"}
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    onClick={() => handleDeleteResponse(reviewResponses[review.id].id)}
+                                    data-testid={`button-delete-response-${review.id}`}
+                                  >
+                                    {language === "en" ? "Delete" : "삭제"}
+                                  </Button>
+                                </div>
+                              )}
+                            </div>
+                            <p className="text-sm text-muted-foreground">{reviewResponses[review.id].response}</p>
+                            <p className="text-xs text-muted-foreground mt-2">
+                              {new Date(reviewResponses[review.id].createdAt).toLocaleDateString(language)}
+                            </p>
+                          </div>
+                        ) : isOwner && (
+                          <div className="mt-3 ml-4">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleOpenResponseDialog(review.id)}
+                              data-testid={`button-add-response-${review.id}`}
+                            >
+                              <MessageSquare className="w-4 h-4 mr-2" />
+                              {language === "en" ? "Respond" : "답변하기"}
+                            </Button>
+                          </div>
+                        )}
                       </div>
                     );
                   })}
@@ -1063,6 +1272,67 @@ export default function RestaurantDetailPage() {
               data-testid="button-submit-review"
             >
               {reviewMutation.isPending ? "..." : t("review.submit")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Response Dialog */}
+      <Dialog open={isResponseDialogOpen} onOpenChange={(open) => {
+        setIsResponseDialogOpen(open);
+        if (!open) {
+          setEditingResponseReviewId(null);
+          setEditingResponseId(null);
+          setResponseText("");
+        }
+      }}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>
+              {editingResponseId 
+                ? (language === "en" ? "Edit Response" : "답변 수정") 
+                : (language === "en" ? "Respond to Review" : "리뷰에 답변하기")}
+            </DialogTitle>
+            <DialogDescription>
+              {language === "en" 
+                ? "Share your appreciation or address customer feedback" 
+                : "고객의 리뷰에 감사를 표하거나 피드백에 응답하세요"}
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="py-4">
+            <Textarea
+              placeholder={language === "en" 
+                ? "Thank you for your feedback! We appreciate..." 
+                : "소중한 리뷰 감사합니다. 저희는..."}
+              value={responseText}
+              onChange={(e) => setResponseText(e.target.value)}
+              rows={4}
+              data-testid="textarea-response"
+            />
+          </div>
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setIsResponseDialogOpen(false);
+                setResponseText("");
+                setEditingResponseReviewId(null);
+                setEditingResponseId(null);
+              }}
+              data-testid="button-cancel-response"
+            >
+              {language === "en" ? "Cancel" : "취소"}
+            </Button>
+            <Button
+              onClick={handleSubmitResponse}
+              disabled={responseCreateMutation.isPending || responseUpdateMutation.isPending || !responseText.trim()}
+              data-testid="button-submit-response"
+            >
+              {(responseCreateMutation.isPending || responseUpdateMutation.isPending) 
+                ? "..." 
+                : (language === "en" ? "Post" : "등록")}
             </Button>
           </DialogFooter>
         </DialogContent>
