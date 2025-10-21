@@ -56,7 +56,7 @@ export default function MainScreen() {
 
   const displayRestaurants = searchQuery.trim().length > 0 
     ? searchResults 
-    : (restaurants?.slice(0, 6) || []);
+    : (restaurants || []);
 
   const sampleVideos = [
     {
