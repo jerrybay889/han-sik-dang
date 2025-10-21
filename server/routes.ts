@@ -294,12 +294,14 @@ ${insights && insights.firstTimerTips ? `첫 방문 팁: ${insights.firstTimerTi
     }
   });
 
-  app.post("/api/reviews", async (req, res) => {
+  // Protected review endpoint
+  app.post("/api/reviews", isAuthenticated, async (req: any, res) => {
     try {
-      const { userId, restaurantId, rating, comment } = req.body;
+      const userId = req.user.claims.sub;
+      const { restaurantId, rating, comment } = req.body;
       
-      if (!userId || !restaurantId || !rating) {
-        return res.status(400).json({ error: "userId, restaurantId, and rating are required" });
+      if (!restaurantId || !rating) {
+        return res.status(400).json({ error: "restaurantId and rating are required" });
       }
 
       if (rating < 1 || rating > 5) {
@@ -307,7 +309,9 @@ ${insights && insights.firstTimerTips ? `첫 방문 팁: ${insights.firstTimerTi
       }
 
       const user = await storage.getUser(userId);
-      const userName = user?.username || "Guest User";
+      const userName = user?.firstName && user?.lastName 
+        ? `${user.firstName} ${user.lastName}` 
+        : user?.email || "User";
 
       const review = await storage.createReview({
         userId,
@@ -324,9 +328,11 @@ ${insights && insights.firstTimerTips ? `첫 방문 팁: ${insights.firstTimerTi
     }
   });
 
-  app.get("/api/saved/:userId", async (req, res) => {
+  // Protected saved restaurants endpoints
+  app.get("/api/saved/:userId", isAuthenticated, async (req: any, res) => {
     try {
-      const savedRestaurants = await storage.getSavedRestaurants(req.params.userId);
+      const userId = req.user.claims.sub;
+      const savedRestaurants = await storage.getSavedRestaurants(userId);
       res.json(savedRestaurants);
     } catch (error) {
       console.error("Get saved restaurants error:", error);
@@ -334,11 +340,12 @@ ${insights && insights.firstTimerTips ? `첫 방문 팁: ${insights.firstTimerTi
     }
   });
 
-  app.post("/api/saved", async (req, res) => {
+  app.post("/api/saved", isAuthenticated, async (req: any, res) => {
     try {
-      const { userId, restaurantId } = req.body;
-      if (!userId || !restaurantId) {
-        return res.status(400).json({ error: "userId and restaurantId are required" });
+      const userId = req.user.claims.sub;
+      const { restaurantId } = req.body;
+      if (!restaurantId) {
+        return res.status(400).json({ error: "restaurantId is required" });
       }
       const saved = await storage.saveRestaurant({ userId, restaurantId });
       res.json(saved);
@@ -348,9 +355,10 @@ ${insights && insights.firstTimerTips ? `첫 방문 팁: ${insights.firstTimerTi
     }
   });
 
-  app.delete("/api/saved/:userId/:restaurantId", async (req, res) => {
+  app.delete("/api/saved/:restaurantId", isAuthenticated, async (req: any, res) => {
     try {
-      const { userId, restaurantId } = req.params;
+      const userId = req.user.claims.sub;
+      const { restaurantId } = req.params;
       await storage.unsaveRestaurant(userId, restaurantId);
       res.json({ success: true });
     } catch (error) {
@@ -359,9 +367,10 @@ ${insights && insights.firstTimerTips ? `첫 방문 팁: ${insights.firstTimerTi
     }
   });
 
-  app.get("/api/saved/:userId/check/:restaurantId", async (req, res) => {
+  app.get("/api/saved/check/:restaurantId", isAuthenticated, async (req: any, res) => {
     try {
-      const { userId, restaurantId } = req.params;
+      const userId = req.user.claims.sub;
+      const { restaurantId } = req.params;
       const isSaved = await storage.isRestaurantSaved(userId, restaurantId);
       res.json({ isSaved });
     } catch (error) {
@@ -391,37 +400,6 @@ ${insights && insights.firstTimerTips ? `첫 방문 팁: ${insights.firstTimerTi
     }
   });
 
-  app.post("/api/auth/signup", async (req, res) => {
-    try {
-      const { username, password } = req.body;
-      
-      if (!username || !password) {
-        return res.status(400).json({ error: "Username and password are required" });
-      }
-
-      if (username.length < 3) {
-        return res.status(400).json({ error: "Username must be at least 3 characters" });
-      }
-
-      if (password.length < 6) {
-        return res.status(400).json({ error: "Password must be at least 6 characters" });
-      }
-
-      const existingUser = await storage.getUserByUsername(username);
-      if (existingUser) {
-        return res.status(409).json({ error: "Username already exists" });
-      }
-
-      const hashedPassword = await bcrypt.hash(password, 10);
-      const user = await storage.createUser({ username, password: hashedPassword });
-
-      const userWithoutPassword = { id: user.id, username: user.username };
-      res.json(userWithoutPassword);
-    } catch (error) {
-      console.error("Signup error:", error);
-      res.status(500).json({ error: "Failed to create user" });
-    }
-  });
 
   app.post("/api/auth/login", async (req, res) => {
     try {

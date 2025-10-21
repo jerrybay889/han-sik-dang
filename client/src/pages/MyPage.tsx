@@ -1,4 +1,4 @@
-import { User, Heart, Star, MapPin, Settings, ChevronRight, FileText, Users, Bell } from "lucide-react";
+import { User, Heart, Star, MapPin, Settings, ChevronRight, FileText, Users, Bell, LogIn } from "lucide-react";
 import { BottomNav } from "@/components/BottomNav";
 import { LanguageSelector } from "@/components/LanguageSelector";
 import { SEO } from "@/components/SEO";
@@ -8,17 +8,19 @@ import { Badge } from "@/components/ui/badge";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { AdSlot } from "@/components/AdSlot";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useAuth } from "@/hooks/useAuth";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import type { Restaurant, Announcement, EventBanner } from "@shared/schema";
-
-const TEMP_USER_ID = "guest-user";
 
 export default function MyPage() {
   const { t, language } = useLanguage();
+  const { user, isAuthenticated, isLoading: authLoading } = useAuth();
 
   const { data: savedRestaurants = [], isLoading: loadingSaved } = useQuery<Restaurant[]>({
-    queryKey: ["/api/saved", TEMP_USER_ID],
+    queryKey: ["/api/saved", user?.id],
+    enabled: isAuthenticated,
   });
 
   const { data: announcements = [] } = useQuery<Announcement[]>({
@@ -102,20 +104,64 @@ export default function MyPage() {
             <LanguageSelector />
           </div>
           <div className="flex items-center gap-4">
-            <div className="w-20 h-20 rounded-full bg-white/20 flex items-center justify-center border-2 border-white/30">
-              <User className="w-10 h-10" />
-            </div>
-            <div className="flex-1">
-              <h1 className="text-xl font-bold mb-1">Guest User</h1>
-              <Button
-                variant="outline"
-                size="sm"
-                className="mt-2 border-white/30 text-primary-foreground hover:bg-white/10"
-                data-testid="button-edit-profile"
-              >
-                {t("my.editProfile")}
-              </Button>
-            </div>
+            {authLoading ? (
+              <>
+                <div className="w-20 h-20 rounded-full bg-white/20 animate-pulse" />
+                <div className="flex-1 space-y-2">
+                  <div className="h-6 bg-white/20 rounded animate-pulse w-32" />
+                  <div className="h-8 bg-white/20 rounded animate-pulse w-24" />
+                </div>
+              </>
+            ) : !isAuthenticated ? (
+              <>
+                <div className="w-20 h-20 rounded-full bg-white/20 flex items-center justify-center border-2 border-white/30">
+                  <User className="w-10 h-10" />
+                </div>
+                <div className="flex-1">
+                  <h1 className="text-xl font-bold mb-1">
+                    {language === "en" ? "Welcome to" : "한식당에 오신 것을"}
+                  </h1>
+                  <p className="text-sm text-primary-foreground/80 mb-2">
+                    {language === "en" ? "han sik dang" : "환영합니다"}
+                  </p>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="border-white/30 text-primary-foreground hover:bg-white/10"
+                    onClick={() => window.location.href = "/api/login"}
+                    data-testid="button-login"
+                  >
+                    <LogIn className="w-4 h-4 mr-2" />
+                    {language === "en" ? "Log In" : "로그인"}
+                  </Button>
+                </div>
+              </>
+            ) : (
+              <>
+                <Avatar className="w-20 h-20 border-2 border-white/30">
+                  <AvatarImage src={user?.profileImageUrl || undefined} />
+                  <AvatarFallback className="bg-white/20 text-primary-foreground text-2xl">
+                    {user?.firstName?.[0] || user?.email?.[0]?.toUpperCase() || "U"}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex-1">
+                  <h1 className="text-xl font-bold mb-1">
+                    {user?.firstName && user?.lastName 
+                      ? `${user.firstName} ${user.lastName}`
+                      : user?.email || "User"}
+                  </h1>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="mt-2 border-white/30 text-primary-foreground hover:bg-white/10"
+                    onClick={() => window.location.href = "/api/logout"}
+                    data-testid="button-logout"
+                  >
+                    {language === "en" ? "Log Out" : "로그아웃"}
+                  </Button>
+                </div>
+              </>
+            )}
           </div>
 
           {/* Stats */}
@@ -188,7 +234,26 @@ export default function MyPage() {
           </div>
 
           <div className="space-y-3">
-            {loadingSaved ? (
+            {!isAuthenticated ? (
+              <Card className="p-8 text-center">
+                <LogIn className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+                <p className="text-lg font-semibold mb-2">
+                  {language === "en" ? "Log in to save restaurants" : "로그인하여 레스토랑 저장"}
+                </p>
+                <p className="text-sm text-muted-foreground mb-4">
+                  {language === "en" 
+                    ? "Save your favorite Korean restaurants and access them anytime" 
+                    : "좋아하는 한식당을 저장하고 언제든지 확인하세요"}
+                </p>
+                <Button
+                  onClick={() => window.location.href = "/api/login"}
+                  data-testid="button-login-saved"
+                >
+                  <LogIn className="w-4 h-4 mr-2" />
+                  {language === "en" ? "Log In" : "로그인"}
+                </Button>
+              </Card>
+            ) : loadingSaved ? (
               Array.from({ length: 3 }).map((_, i) => (
                 <Card key={i} className="p-4">
                   <div className="flex gap-3">
@@ -203,9 +268,13 @@ export default function MyPage() {
             ) : savedRestaurants.length === 0 ? (
               <Card className="p-8 text-center">
                 <Heart className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-                <p className="text-lg font-semibold mb-2">No saved restaurants yet</p>
+                <p className="text-lg font-semibold mb-2">
+                  {language === "en" ? "No saved restaurants yet" : "저장된 레스토랑이 없습니다"}
+                </p>
                 <p className="text-sm text-muted-foreground">
-                  Start saving your favorite restaurants to see them here
+                  {language === "en"
+                    ? "Start saving your favorite restaurants to see them here"
+                    : "좋아하는 레스토랑을 저장하면 여기에 표시됩니다"}
                 </p>
               </Card>
             ) : (
