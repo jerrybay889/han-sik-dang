@@ -23,14 +23,17 @@ export default function MyPage() {
   const { data: savedRestaurants = [], isLoading: loadingSaved, error, isError, status, dataUpdatedAt, refetch } = useQuery<Restaurant[]>({
     queryKey: ["/api/saved", isAuthenticated],
     queryFn: async () => {
+      console.log('[MyPage queryFn] Starting fetch, isAuthenticated:', isAuthenticated);
       const res = await fetch("/api/saved", {
         credentials: "include",
       });
+      console.log('[MyPage queryFn] Response status:', res.status, 'ok:', res.ok);
       if (res.status === 401 || !res.ok) {
+        console.log('[MyPage queryFn] Returning empty array due to', res.status === 401 ? '401' : 'not ok');
         return [];
       }
       const data = await res.json();
-      console.log('[MyPage queryFn] Fetched saved restaurants:', data.length);
+      console.log('[MyPage queryFn] Fetched saved restaurants:', data.length, 'items');
       return data;
     },
     refetchOnMount: 'always',

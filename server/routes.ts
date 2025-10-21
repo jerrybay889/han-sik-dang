@@ -335,6 +335,7 @@ ${insights && insights.firstTimerTips ? `첫 방문 팁: ${insights.firstTimerTi
       console.log(`[GET /api/saved] userId: ${userId}`);
       const savedRestaurants = await storage.getSavedRestaurants(userId);
       console.log(`[GET /api/saved] Found ${savedRestaurants.length} saved restaurants for user ${userId}`);
+      console.log(`[GET /api/saved] Returning data:`, JSON.stringify(savedRestaurants.map(r => ({ id: r.id, name: r.name_en }))));
       res.json(savedRestaurants);
     } catch (error) {
       console.error("Get saved restaurants error:", error);

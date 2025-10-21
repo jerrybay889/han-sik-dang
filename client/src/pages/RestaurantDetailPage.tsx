@@ -250,6 +250,7 @@ export default function RestaurantDetailPage() {
       }
     },
     onSuccess: async () => {
+      console.log('[Save mutation] Invalidating queries after save/unsave');
       await queryClient.invalidateQueries({ 
         queryKey: ["/api/saved/check", restaurantId],
         refetchType: 'all'
@@ -258,6 +259,7 @@ export default function RestaurantDetailPage() {
         queryKey: ["/api/saved"],
         refetchType: 'all'
       });
+      console.log('[Save mutation] Queries invalidated, cache should update');
       toast({
         title: isSaved ? (language === "en" ? "Removed from saved" : "저장 취소됨") : (language === "en" ? "Saved successfully" : "저장 완료"),
         description: isSaved 
