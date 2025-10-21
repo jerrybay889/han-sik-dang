@@ -24,6 +24,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     if (browserLang.startsWith("es")) return "es";
     if (browserLang.startsWith("fr")) return "fr";
     if (browserLang.startsWith("de")) return "de";
+    if (browserLang.startsWith("vi")) return "vi";
     return "ko";
   });
 
