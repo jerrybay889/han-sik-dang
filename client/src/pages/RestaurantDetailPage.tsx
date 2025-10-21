@@ -10,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { SEO } from "@/components/SEO";
+import { AdSense } from "@/components/AdSense";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -422,6 +423,9 @@ export default function RestaurantDetailPage() {
               </div>
             </Card>
 
+            {/* Ad Slot 1 - Before Menu */}
+            <AdSense slot="menu-top" format="auto" className="mb-6" />
+
             {/* Menu Section */}
             {menus.length > 0 && (
               <Card className="p-4 mb-6">
@@ -635,6 +639,9 @@ export default function RestaurantDetailPage() {
               </div>
             </div>
 
+            {/* Ad Slot 2 - After AI Cards */}
+            <AdSense slot="ai-cards-bottom" format="auto" className="mb-6" />
+
             {/* AI Insights Section */}
             {insights && (
               <Card className="p-4 mb-6 border-primary/20">
@@ -777,6 +784,9 @@ export default function RestaurantDetailPage() {
                 </div>
               )}
             </Card>
+
+            {/* Ad Slot 3 - After Reviews */}
+            <AdSense slot="reviews-bottom" format="auto" className="mb-6" />
           </div>
         </div>
       </div>
