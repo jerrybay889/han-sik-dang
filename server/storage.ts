@@ -16,6 +16,12 @@ import {
   type InsertEventBanner,
   type RestaurantInsights,
   type InsertRestaurantInsights,
+  type Menu,
+  type InsertMenu,
+  type YoutubeVideo,
+  type InsertYoutubeVideo,
+  type ExternalReview,
+  type InsertExternalReview,
   users,
   restaurants,
   reviews,
@@ -23,6 +29,9 @@ import {
   announcements,
   eventBanners,
   restaurantInsights,
+  menus,
+  youtubeVideos,
+  externalReviews,
 } from "@shared/schema";
 
 const client = neon(process.env.DATABASE_URL!);
@@ -58,6 +67,15 @@ export interface IStorage {
   getRestaurantInsights(restaurantId: string): Promise<RestaurantInsights | undefined>;
   createRestaurantInsights(insights: InsertRestaurantInsights): Promise<RestaurantInsights>;
   updateRestaurantInsights(restaurantId: string, insights: Partial<InsertRestaurantInsights>): Promise<RestaurantInsights | undefined>;
+  
+  getMenusByRestaurant(restaurantId: string): Promise<Menu[]>;
+  createMenu(menu: InsertMenu): Promise<Menu>;
+  
+  getYoutubeVideosByRestaurant(restaurantId: string): Promise<YoutubeVideo[]>;
+  createYoutubeVideo(video: InsertYoutubeVideo): Promise<YoutubeVideo>;
+  
+  getExternalReviewsByRestaurant(restaurantId: string): Promise<ExternalReview[]>;
+  createExternalReview(review: InsertExternalReview): Promise<ExternalReview>;
 }
 
 export class DbStorage implements IStorage {
@@ -210,6 +228,39 @@ export class DbStorage implements IStorage {
       .set({ ...updates, lastUpdated: new Date() })
       .where(eq(restaurantInsights.restaurantId, restaurantId))
       .returning();
+    return result[0];
+  }
+
+  async getMenusByRestaurant(restaurantId: string): Promise<Menu[]> {
+    return await db.select().from(menus)
+      .where(eq(menus.restaurantId, restaurantId))
+      .orderBy(menus.displayOrder, desc(menus.isPopular), desc(menus.isRecommended));
+  }
+
+  async createMenu(insertMenu: InsertMenu): Promise<Menu> {
+    const result = await db.insert(menus).values(insertMenu).returning();
+    return result[0];
+  }
+
+  async getYoutubeVideosByRestaurant(restaurantId: string): Promise<YoutubeVideo[]> {
+    return await db.select().from(youtubeVideos)
+      .where(eq(youtubeVideos.restaurantId, restaurantId))
+      .orderBy(desc(youtubeVideos.relevanceScore), desc(youtubeVideos.viewCount));
+  }
+
+  async createYoutubeVideo(insertVideo: InsertYoutubeVideo): Promise<YoutubeVideo> {
+    const result = await db.insert(youtubeVideos).values(insertVideo).returning();
+    return result[0];
+  }
+
+  async getExternalReviewsByRestaurant(restaurantId: string): Promise<ExternalReview[]> {
+    return await db.select().from(externalReviews)
+      .where(eq(externalReviews.restaurantId, restaurantId))
+      .orderBy(desc(externalReviews.publishedAt));
+  }
+
+  async createExternalReview(insertReview: InsertExternalReview): Promise<ExternalReview> {
+    const result = await db.insert(externalReviews).values(insertReview).returning();
     return result[0];
   }
 }

@@ -312,6 +312,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get("/api/restaurants/:id/menus", async (req, res) => {
+    try {
+      const menus = await storage.getMenusByRestaurant(req.params.id);
+      res.json(menus);
+    } catch (error) {
+      console.error("Get menus error:", error);
+      res.status(500).json({ error: "Failed to fetch menus" });
+    }
+  });
+
+  app.get("/api/restaurants/:id/videos", async (req, res) => {
+    try {
+      const videos = await storage.getYoutubeVideosByRestaurant(req.params.id);
+      res.json(videos);
+    } catch (error) {
+      console.error("Get videos error:", error);
+      res.status(500).json({ error: "Failed to fetch videos" });
+    }
+  });
+
+  app.get("/api/restaurants/:id/external-reviews", async (req, res) => {
+    try {
+      const reviews = await storage.getExternalReviewsByRestaurant(req.params.id);
+      res.json(reviews);
+    } catch (error) {
+      console.error("Get external reviews error:", error);
+      res.status(500).json({ error: "Failed to fetch external reviews" });
+    }
+  });
+
   app.post("/api/admin/generate-insights/:restaurantId", async (req, res) => {
     try {
       const { restaurantId } = req.params;
@@ -385,6 +415,129 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Generate all insights error:", error);
       res.status(500).json({ error: "Failed to generate all insights" });
+    }
+  });
+
+  app.post("/api/admin/generate-sample-data/:restaurantId", async (req, res) => {
+    try {
+      const { restaurantId } = req.params;
+      
+      const restaurant = await storage.getRestaurant(restaurantId);
+      if (!restaurant) {
+        return res.status(404).json({ error: "Restaurant not found" });
+      }
+
+      const results: any = {
+        menus: [],
+        videos: [],
+        externalReviews: []
+      };
+
+      const existingMenus = await storage.getMenusByRestaurant(restaurantId);
+      if (existingMenus.length === 0) {
+        const sampleMenus = generateSampleMenus(restaurantId, restaurant.cuisine);
+        for (const menu of sampleMenus) {
+          const created = await storage.createMenu(menu);
+          results.menus.push(created);
+        }
+      }
+
+      const existingVideos = await storage.getYoutubeVideosByRestaurant(restaurantId);
+      if (existingVideos.length === 0) {
+        const sampleVideos = generateSampleVideos(restaurantId, restaurant.name);
+        for (const video of sampleVideos) {
+          const created = await storage.createYoutubeVideo(video);
+          results.videos.push(created);
+        }
+      }
+
+      const existingReviews = await storage.getExternalReviewsByRestaurant(restaurantId);
+      if (existingReviews.length === 0) {
+        const sampleReviews = generateSampleExternalReviews(restaurantId, restaurant.name);
+        for (const review of sampleReviews) {
+          const created = await storage.createExternalReview(review);
+          results.externalReviews.push(created);
+        }
+      }
+
+      res.json({
+        message: "Sample data generated",
+        restaurantId,
+        restaurantName: restaurant.name,
+        menusGenerated: results.menus.length,
+        videosGenerated: results.videos.length,
+        externalReviewsGenerated: results.externalReviews.length,
+        results
+      });
+    } catch (error) {
+      console.error("Generate sample data error:", error);
+      res.status(500).json({ error: "Failed to generate sample data" });
+    }
+  });
+
+  app.post("/api/admin/generate-all-sample-data", async (req, res) => {
+    try {
+      const restaurants = await storage.getAllRestaurants();
+      const results = [];
+      let totalMenus = 0;
+      let totalVideos = 0;
+      let totalReviews = 0;
+
+      for (const restaurant of restaurants) {
+        try {
+          const existingMenus = await storage.getMenusByRestaurant(restaurant.id);
+          if (existingMenus.length === 0) {
+            const sampleMenus = generateSampleMenus(restaurant.id, restaurant.cuisine);
+            for (const menu of sampleMenus) {
+              await storage.createMenu(menu);
+              totalMenus++;
+            }
+          }
+
+          const existingVideos = await storage.getYoutubeVideosByRestaurant(restaurant.id);
+          if (existingVideos.length === 0) {
+            const sampleVideos = generateSampleVideos(restaurant.id, restaurant.name);
+            for (const video of sampleVideos) {
+              await storage.createYoutubeVideo(video);
+              totalVideos++;
+            }
+          }
+
+          const existingReviews = await storage.getExternalReviewsByRestaurant(restaurant.id);
+          if (existingReviews.length === 0) {
+            const sampleReviews = generateSampleExternalReviews(restaurant.id, restaurant.name);
+            for (const review of sampleReviews) {
+              await storage.createExternalReview(review);
+              totalReviews++;
+            }
+          }
+
+          results.push({
+            restaurantId: restaurant.id,
+            name: restaurant.name,
+            status: "completed"
+          });
+        } catch (error) {
+          results.push({
+            restaurantId: restaurant.id,
+            name: restaurant.name,
+            status: "error",
+            error: error instanceof Error ? error.message : "Unknown error"
+          });
+        }
+      }
+
+      res.json({
+        message: "Batch sample data generation completed",
+        total: restaurants.length,
+        totalMenusGenerated: totalMenus,
+        totalVideosGenerated: totalVideos,
+        totalExternalReviewsGenerated: totalReviews,
+        results
+      });
+    } catch (error) {
+      console.error("Generate all sample data error:", error);
+      res.status(500).json({ error: "Failed to generate all sample data" });
     }
   });
 
@@ -636,4 +789,157 @@ Respond ONLY in JSON format:
     firstTimerTips: dataKo.firstTimerTips || "",
     firstTimerTipsEn: dataEn.firstTimerTips || "",
   };
+}
+
+function generateSampleMenus(restaurantId: string, cuisine: string) {
+  const menusByType: Record<string, Array<{ name: string; nameEn: string; description: string; descriptionEn: string; price: number; category: string }>> = {
+    "Korean BBQ": [
+      { name: "삼겹살", nameEn: "Samgyeopsal (Pork Belly)", description: "두툼한 삼겹살 구이", descriptionEn: "Grilled thick-cut pork belly", price: 18000, category: "Main" },
+      { name: "갈비", nameEn: "Galbi (Short Ribs)", description: "양념 소갈비 구이", descriptionEn: "Marinated beef short ribs", price: 32000, category: "Main" },
+      { name: "된장찌개", nameEn: "Doenjang Jjigae", description: "구수한 된장찌개", descriptionEn: "Savory soybean paste stew", price: 8000, category: "Soup" },
+      { name: "냉면", nameEn: "Naengmyeon", description: "시원한 물냉면", descriptionEn: "Cold buckwheat noodles", price: 10000, category: "Noodles" },
+    ],
+    "Bibimbap": [
+      { name: "전주비빔밥", nameEn: "Jeonju Bibimbap", description: "전통 전주 비빔밥", descriptionEn: "Traditional Jeonju-style mixed rice", price: 13000, category: "Main" },
+      { name: "돌솥비빔밥", nameEn: "Stone Pot Bibimbap", description: "뜨거운 돌솥 비빔밥", descriptionEn: "Hot stone pot bibimbap", price: 15000, category: "Main" },
+      { name: "육회비빔밥", nameEn: "Yukhoe Bibimbap", description: "신선한 육회와 비빔밥", descriptionEn: "Bibimbap with raw beef", price: 18000, category: "Main" },
+      { name: "순두부찌개", nameEn: "Sundubu Jjigae", description: "얼큰한 순두부찌개", descriptionEn: "Spicy soft tofu stew", price: 9000, category: "Soup" },
+    ],
+    "Korean Fried Chicken": [
+      { name: "양념치킨", nameEn: "Yangnyeom Chicken", description: "달콤매콤한 양념치킨", descriptionEn: "Sweet and spicy glazed chicken", price: 19000, category: "Main" },
+      { name: "후라이드치킨", nameEn: "Fried Chicken", description: "바삭한 프라이드치킨", descriptionEn: "Crispy fried chicken", price: 18000, category: "Main" },
+      { name: "반반치킨", nameEn: "Half & Half", description: "양념+후라이드 반반", descriptionEn: "Half yangnyeom, half fried", price: 19000, category: "Main" },
+      { name: "치킨무", nameEn: "Pickled Radish", description: "아삭한 치킨무", descriptionEn: "Crunchy pickled radish", price: 2000, category: "Side" },
+    ],
+    "Kimchi Stew": [
+      { name: "김치찌개", nameEn: "Kimchi Jjigae", description: "묵은지로 끓인 김치찌개", descriptionEn: "Stew with aged kimchi", price: 9000, category: "Main" },
+      { name: "부대찌개", nameEn: "Budae Jjigae", description: "햄과 소시지가 들어간 부대찌개", descriptionEn: "Army stew with ham and sausage", price: 11000, category: "Main" },
+      { name: "공기밥", nameEn: "Rice", description: "갓 지은 흰쌀밥", descriptionEn: "Freshly cooked white rice", price: 1500, category: "Rice" },
+      { name: "김치전", nameEn: "Kimchi Pancake", description: "바삭한 김치전", descriptionEn: "Crispy kimchi pancake", price: 12000, category: "Side" },
+    ],
+    "Ginseng Chicken Soup": [
+      { name: "삼계탕", nameEn: "Samgyetang", description: "영양 만점 삼계탕", descriptionEn: "Nourishing ginseng chicken soup", price: 16000, category: "Main" },
+      { name: "전복삼계탕", nameEn: "Abalone Samgyetang", description: "전복이 들어간 프리미엄 삼계탕", descriptionEn: "Premium samgyetang with abalone", price: 24000, category: "Main" },
+      { name: "백김치", nameEn: "White Kimchi", description: "시원한 백김치", descriptionEn: "Refreshing white kimchi", price: 3000, category: "Side" },
+      { name: "인삼주", nameEn: "Ginseng Wine", description: "전통 인삼주", descriptionEn: "Traditional ginseng wine", price: 8000, category: "Drink" },
+    ],
+  };
+
+  const defaultMenus = [
+    { name: "대표 메뉴", nameEn: "Signature Dish", description: "이 집 대표 메뉴", descriptionEn: "House signature dish", price: 15000, category: "Main" },
+    { name: "특선 메뉴", nameEn: "Special Menu", description: "셰프 추천 특선", descriptionEn: "Chef's special", price: 18000, category: "Main" },
+    { name: "사이드 메뉴", nameEn: "Side Dish", description: "곁들임 요리", descriptionEn: "Side dish", price: 5000, category: "Side" },
+  ];
+
+  const menus = menusByType[cuisine] || defaultMenus;
+
+  return menus.map((menu, index) => ({
+    restaurantId,
+    name: menu.name,
+    nameEn: menu.nameEn,
+    description: menu.description,
+    descriptionEn: menu.descriptionEn,
+    price: menu.price,
+    category: menu.category,
+    imageUrl: null,
+    isPopular: index === 0 ? 1 : 0,
+    isRecommended: index < 2 ? 1 : 0,
+    displayOrder: index,
+  }));
+}
+
+function generateSampleVideos(restaurantId: string, restaurantName: string) {
+  const videoTemplates = [
+    {
+      videoId: `vid_${restaurantId}_1`,
+      title: `${restaurantName} 맛집 리뷰 - 이 집 진짜 맛있어요!`,
+      channelName: "맛집탐험가",
+      viewCount: 125000,
+      relevanceScore: 0.95,
+    },
+    {
+      videoId: `vid_${restaurantId}_2`,
+      title: `Seoul Food Tour: ${restaurantName} Experience`,
+      channelName: "Korea Food Vlog",
+      viewCount: 87000,
+      relevanceScore: 0.88,
+    },
+    {
+      videoId: `vid_${restaurantId}_3`,
+      title: `${restaurantName} 먹방 - 현지인 추천 맛집`,
+      channelName: "서울먹방",
+      viewCount: 52000,
+      relevanceScore: 0.82,
+    },
+  ];
+
+  return videoTemplates.map(video => ({
+    restaurantId,
+    videoId: video.videoId,
+    title: video.title,
+    channelName: video.channelName,
+    thumbnailUrl: `https://img.youtube.com/vi/${video.videoId}/maxresdefault.jpg`,
+    viewCount: video.viewCount,
+    publishedAt: new Date(Date.now() - Math.random() * 90 * 24 * 60 * 60 * 1000),
+    relevanceScore: video.relevanceScore,
+  }));
+}
+
+function generateSampleExternalReviews(restaurantId: string, restaurantName: string) {
+  const naverReviews = [
+    {
+      source: "Naver",
+      rating: 4.5,
+      comment: "음식이 정말 맛있어요. 특히 메인 메뉴가 일품입니다. 직원분들도 친절하고 분위기도 좋아요.",
+      commentEn: "The food is really delicious. Especially the main dish is excellent. Staff are friendly and atmosphere is great.",
+      author: "네이버유저123",
+      publishedAt: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000),
+    },
+    {
+      source: "Naver",
+      rating: 4.8,
+      comment: "여러번 방문했는데 항상 만족스러워요. 맛도 좋고 가격도 합리적입니다.",
+      commentEn: "I've visited many times and always satisfied. Great taste and reasonable price.",
+      author: "김맛집",
+      publishedAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
+    },
+    {
+      source: "Naver",
+      rating: 4.3,
+      comment: "음식은 맛있는데 주말에는 사람이 많아서 대기 시간이 좀 있어요.",
+      commentEn: "Food is delicious but there's a wait time on weekends due to crowds.",
+      author: "서울러버",
+      publishedAt: new Date(Date.now() - 45 * 24 * 60 * 60 * 1000),
+    },
+  ];
+
+  const googleReviews = [
+    {
+      source: "Google",
+      rating: 4.6,
+      comment: "Authentic Korean food with great service. The atmosphere is cozy and traditional.",
+      commentEn: "Authentic Korean food with great service. The atmosphere is cozy and traditional.",
+      author: "John Smith",
+      publishedAt: new Date(Date.now() - 20 * 24 * 60 * 60 * 1000),
+    },
+    {
+      source: "Google",
+      rating: 4.7,
+      comment: "Best Korean restaurant I've tried in Seoul! Highly recommended for tourists.",
+      commentEn: "Best Korean restaurant I've tried in Seoul! Highly recommended for tourists.",
+      author: "Sarah Johnson",
+      publishedAt: new Date(Date.now() - 35 * 24 * 60 * 60 * 1000),
+    },
+  ];
+
+  return [...naverReviews, ...googleReviews].map(review => ({
+    restaurantId,
+    source: review.source,
+    rating: review.rating,
+    comment: review.comment,
+    commentEn: review.commentEn,
+    author: review.author,
+    publishedAt: review.publishedAt,
+    imageUrls: [],
+  }));
 }
