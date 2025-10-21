@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useRoute, Link } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { ArrowLeft, MapPin, Phone, Clock, Star, DollarSign, Users, Heart } from "lucide-react";
+import { ArrowLeft, MapPin, Phone, Clock, Star, DollarSign, Users, Heart, Sparkles, Lightbulb } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -11,7 +11,7 @@ import { SEO } from "@/components/SEO";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import type { Restaurant, Review } from "@shared/schema";
+import type { Restaurant, Review, RestaurantInsights } from "@shared/schema";
 
 const TEMP_USER_ID = "guest-user";
 
@@ -37,6 +37,11 @@ export default function RestaurantDetailPage() {
 
   const { data: savedStatus } = useQuery<{ isSaved: boolean }>({
     queryKey: ["/api/saved", TEMP_USER_ID, "check", restaurantId],
+    enabled: !!restaurantId,
+  });
+
+  const { data: insights } = useQuery<RestaurantInsights | null>({
+    queryKey: ["/api/restaurants", restaurantId, "insights"],
     enabled: !!restaurantId,
   });
 
@@ -284,6 +289,92 @@ export default function RestaurantDetailPage() {
                 </div>
               </div>
             </Card>
+
+            {/* AI Insights Section */}
+            {insights && (
+              <Card className="p-4 mb-6 border-primary/20">
+                <div className="flex items-center gap-2 mb-4">
+                  <Sparkles className="w-5 h-5 text-primary" />
+                  <h2 className="font-semibold">{language === "en" ? "AI Insights" : "AI 추천 정보"}</h2>
+                </div>
+                
+                <div className="space-y-4">
+                  {/* Review Insights */}
+                  {(language === "en" ? insights.reviewInsightsEn : insights.reviewInsights) && (
+                    <div className="pb-4 border-b">
+                      <div className="flex items-start gap-2 mb-2">
+                        <Star className="w-4 h-4 text-[hsl(var(--accent-success))] mt-0.5 flex-shrink-0" />
+                        <div>
+                          <p className="text-sm font-medium mb-1">
+                            {language === "en" ? "What customers love" : "고객들이 좋아하는 점"}
+                          </p>
+                          <p className="text-sm text-muted-foreground" data-testid="text-review-insights">
+                            {language === "en" ? insights.reviewInsightsEn : insights.reviewInsights}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Best For */}
+                  {(language === "en" ? insights.bestForEn : insights.bestFor) && (
+                    <div className="pb-4 border-b">
+                      <div className="flex items-start gap-2 mb-2">
+                        <Users className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
+                        <div>
+                          <p className="text-sm font-medium mb-1">
+                            {language === "en" ? "Best for" : "추천 상황"}
+                          </p>
+                          <div className="flex flex-wrap gap-2" data-testid="badges-best-for">
+                            {(language === "en" ? insights.bestForEn : insights.bestFor)
+                              .split(",")
+                              .map((item: string, idx: number) => (
+                                <Badge key={idx} variant="secondary" className="text-xs">
+                                  {item.trim()}
+                                </Badge>
+                              ))}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Cultural Tips */}
+                  {(language === "en" ? insights.culturalTipsEn : insights.culturalTips) && (
+                    <div className="pb-4 border-b">
+                      <div className="flex items-start gap-2 mb-2">
+                        <Lightbulb className="w-4 h-4 text-amber-500 mt-0.5 flex-shrink-0" />
+                        <div>
+                          <p className="text-sm font-medium mb-1">
+                            {language === "en" ? "Cultural tip" : "문화 팁"}
+                          </p>
+                          <p className="text-sm text-muted-foreground" data-testid="text-cultural-tips">
+                            {language === "en" ? insights.culturalTipsEn : insights.culturalTips}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* First Timer Tips */}
+                  {(language === "en" ? insights.firstTimerTipsEn : insights.firstTimerTips) && (
+                    <div>
+                      <div className="flex items-start gap-2 mb-2">
+                        <Sparkles className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
+                        <div>
+                          <p className="text-sm font-medium mb-1">
+                            {language === "en" ? "First-timer tip" : "첫 방문 팁"}
+                          </p>
+                          <p className="text-sm text-muted-foreground" data-testid="text-first-timer-tips">
+                            {language === "en" ? insights.firstTimerTipsEn : insights.firstTimerTips}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </Card>
+            )}
 
             {/* Reviews Section */}
             <Card className="p-4">
