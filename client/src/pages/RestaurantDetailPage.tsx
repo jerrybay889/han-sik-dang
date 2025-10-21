@@ -17,7 +17,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import type { Restaurant, Review, RestaurantInsights, Menu, YoutubeVideo, ExternalReview, ReviewResponse } from "@shared/schema";
+import type { Restaurant, Review, RestaurantInsights, Menu, YoutubeVideo, ExternalReview, ReviewResponse, Promotion } from "@shared/schema";
 
 type AICardType = "reviews" | "menu" | "howToEat" | "ordering";
 
@@ -123,6 +123,12 @@ export default function RestaurantDetailPage() {
       return responses;
     },
     enabled: !!restaurantId && reviews.length > 0,
+  });
+
+  // Fetch active promotions
+  const { data: promotions = [] } = useQuery<Promotion[]>({
+    queryKey: ["/api/restaurants", restaurantId, "promotions"],
+    enabled: !!restaurantId,
   });
 
   const isSaved = savedStatus?.isSaved || false;
@@ -749,6 +755,42 @@ export default function RestaurantDetailPage() {
                 </div>
               </div>
             </Card>
+
+            {/* Promotions Section */}
+            {promotions.length > 0 && (
+              <div className="space-y-3 mb-6">
+                {promotions.map((promotion) => (
+                  <Card 
+                    key={promotion.id} 
+                    className="p-4 border-2 border-[hsl(var(--accent-success))] bg-[hsl(var(--accent-success))]/5"
+                    data-testid={`promotion-${promotion.id}`}
+                  >
+                    <div className="flex items-start gap-3">
+                      <div className="flex-shrink-0 bg-[hsl(var(--accent-success))] text-white px-3 py-1 rounded-md">
+                        <p className="text-xs font-bold">
+                          {promotion.discountType === "percentage" 
+                            ? `${promotion.discountValue}%` 
+                            : promotion.discountType === "amount"
+                            ? `₩${promotion.discountValue?.toLocaleString()}`
+                            : language === "en" ? "Special" : "특가"}
+                        </p>
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="font-semibold text-[hsl(var(--accent-success))] mb-1">
+                          {language === "en" ? promotion.titleEn : promotion.title}
+                        </h3>
+                        <p className="text-sm text-muted-foreground mb-2">
+                          {language === "en" ? promotion.descriptionEn : promotion.description}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {new Date(promotion.startDate).toLocaleDateString(language)} - {new Date(promotion.endDate).toLocaleDateString(language)}
+                        </p>
+                      </div>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            )}
 
             {/* Ad Slot 1 - Before Menu */}
             <AdSense slot="menu-top" format="auto" className="mb-6" />
