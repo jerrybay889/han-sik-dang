@@ -294,7 +294,7 @@ ${insights && insights.firstTimerTips ? `첫 방문 팁: ${insights.firstTimerTi
     }
   });
 
-  // Protected review endpoint
+  // Protected review endpoints
   app.post("/api/reviews", isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
@@ -328,6 +328,51 @@ ${insights && insights.firstTimerTips ? `첫 방문 팁: ${insights.firstTimerTi
     }
   });
 
+  app.patch("/api/reviews/:reviewId", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { reviewId } = req.params;
+      const { rating, comment } = req.body;
+
+      if (!rating) {
+        return res.status(400).json({ error: "rating is required" });
+      }
+
+      if (rating < 1 || rating > 5) {
+        return res.status(400).json({ error: "Rating must be between 1 and 5" });
+      }
+
+      const updated = await storage.updateReview(reviewId, userId, { rating, comment: comment || "" });
+      
+      if (!updated) {
+        return res.status(404).json({ error: "Review not found or unauthorized" });
+      }
+
+      res.json(updated);
+    } catch (error) {
+      console.error("Update review error:", error);
+      res.status(500).json({ error: "Failed to update review" });
+    }
+  });
+
+  app.delete("/api/reviews/:reviewId", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { reviewId } = req.params;
+
+      const deleted = await storage.deleteReview(reviewId, userId);
+      
+      if (!deleted) {
+        return res.status(404).json({ error: "Review not found or unauthorized" });
+      }
+
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Delete review error:", error);
+      res.status(500).json({ error: "Failed to delete review" });
+    }
+  });
+
   // Protected saved restaurants endpoints
   app.get("/api/saved", isAuthenticated, async (req: any, res) => {
     try {
@@ -335,7 +380,7 @@ ${insights && insights.firstTimerTips ? `첫 방문 팁: ${insights.firstTimerTi
       console.log(`[GET /api/saved] userId: ${userId}`);
       const savedRestaurants = await storage.getSavedRestaurants(userId);
       console.log(`[GET /api/saved] Found ${savedRestaurants.length} saved restaurants for user ${userId}`);
-      console.log(`[GET /api/saved] Returning data:`, JSON.stringify(savedRestaurants.map(r => ({ id: r.id, name: r.name_en }))));
+      console.log(`[GET /api/saved] Returning data:`, JSON.stringify(savedRestaurants.map(r => ({ id: r.id, name: r.nameEn }))));
       res.json(savedRestaurants);
     } catch (error) {
       console.error("Get saved restaurants error:", error);
@@ -420,7 +465,7 @@ ${insights && insights.firstTimerTips ? `첫 방문 팁: ${insights.firstTimerTi
         return res.status(404).json({ error: "User not found" });
       }
 
-      const userWithoutPassword = { id: user.id, username: user.username };
+      const userWithoutPassword = { id: user.id, email: user.email, firstName: user.firstName, lastName: user.lastName };
       res.json(userWithoutPassword);
     } catch (error) {
       console.error("Get current user error:", error);

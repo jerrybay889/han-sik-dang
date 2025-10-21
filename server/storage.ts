@@ -52,6 +52,8 @@ export interface IStorage {
   
   getReviewsByRestaurant(restaurantId: string): Promise<Review[]>;
   createReview(review: InsertReview): Promise<Review>;
+  updateReview(reviewId: string, userId: string, data: { rating: number; comment: string }): Promise<Review | undefined>;
+  deleteReview(reviewId: string, userId: string): Promise<boolean>;
   
   getSavedRestaurants(userId: string): Promise<Restaurant[]>;
   saveRestaurant(data: InsertSavedRestaurant): Promise<SavedRestaurant>;
@@ -159,6 +161,34 @@ export class DbStorage implements IStorage {
     const result = await db.insert(reviews).values(insertReview).returning();
     await this.updateRestaurantRating(insertReview.restaurantId);
     return result[0];
+  }
+
+  async updateReview(reviewId: string, userId: string, data: { rating: number; comment: string }): Promise<Review | undefined> {
+    const result = await db.update(reviews)
+      .set({ rating: data.rating, comment: data.comment })
+      .where(sql`${reviews.id} = ${reviewId} AND ${reviews.userId} = ${userId}`)
+      .returning();
+    
+    if (result.length > 0) {
+      await this.updateRestaurantRating(result[0].restaurantId);
+      return result[0];
+    }
+    return undefined;
+  }
+
+  async deleteReview(reviewId: string, userId: string): Promise<boolean> {
+    const review = await db.select().from(reviews)
+      .where(sql`${reviews.id} = ${reviewId} AND ${reviews.userId} = ${userId}`);
+    
+    if (review.length === 0) {
+      return false;
+    }
+
+    await db.delete(reviews)
+      .where(sql`${reviews.id} = ${reviewId} AND ${reviews.userId} = ${userId}`);
+    
+    await this.updateRestaurantRating(review[0].restaurantId);
+    return true;
   }
 
   async getSavedRestaurants(userId: string): Promise<Restaurant[]> {

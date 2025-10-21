@@ -35,6 +35,7 @@ export default function RestaurantDetailPage() {
   const [isReviewDialogOpen, setIsReviewDialogOpen] = useState(false);
   const [reviewRating, setReviewRating] = useState(0);
   const [reviewComment, setReviewComment] = useState("");
+  const [editingReviewId, setEditingReviewId] = useState<string | null>(null);
   
   const [isAIChatOpen, setIsAIChatOpen] = useState(false);
   const [currentAICard, setCurrentAICard] = useState<AICardType | null>(null);
@@ -48,8 +49,15 @@ export default function RestaurantDetailPage() {
     enabled: !!restaurantId,
   });
 
-  const { data: reviews = [], isLoading: loadingReviews } = useQuery<Review[]>({
+  const { data: reviews = [], isLoading: loadingReviews, refetch: refetchReviews } = useQuery<Review[]>({
     queryKey: ["/api/reviews", restaurantId],
+    queryFn: async () => {
+      const res = await fetch(`/api/reviews/${restaurantId}`, {
+        credentials: "include",
+      });
+      if (!res.ok) throw new Error("Failed to fetch reviews");
+      return res.json();
+    },
     enabled: !!restaurantId,
   });
 
@@ -293,11 +301,18 @@ export default function RestaurantDetailPage() {
         throw new Error("Please log in to write reviews");
       }
       
-      await apiRequest("POST", "/api/reviews", {
-        restaurantId,
-        rating: reviewRating,
-        comment: reviewComment,
-      });
+      if (editingReviewId) {
+        await apiRequest("PATCH", `/api/reviews/${editingReviewId}`, {
+          rating: reviewRating,
+          comment: reviewComment,
+        });
+      } else {
+        await apiRequest("POST", "/api/reviews", {
+          restaurantId,
+          rating: reviewRating,
+          comment: reviewComment,
+        });
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/reviews", restaurantId] });
@@ -305,8 +320,9 @@ export default function RestaurantDetailPage() {
       setIsReviewDialogOpen(false);
       setReviewRating(0);
       setReviewComment("");
+      setEditingReviewId(null);
       toast({
-        title: t("review.success"),
+        title: editingReviewId ? (language === "en" ? "Review updated" : "리뷰 수정됨") : t("review.success"),
       });
     },
     onError: (error: Error) => {
@@ -328,6 +344,28 @@ export default function RestaurantDetailPage() {
     },
   });
 
+  const deleteMutation = useMutation({
+    mutationFn: async (reviewId: string) => {
+      if (!isAuthenticated) {
+        throw new Error("Please log in to delete reviews");
+      }
+      await apiRequest("DELETE", `/api/reviews/${reviewId}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/reviews", restaurantId] });
+      queryClient.invalidateQueries({ queryKey: ["/api/restaurants", restaurantId] });
+      toast({
+        title: language === "en" ? "Review deleted" : "리뷰 삭제됨",
+      });
+    },
+    onError: () => {
+      toast({
+        title: language === "en" ? "Failed to delete review" : "리뷰 삭제 실패",
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleSubmitReview = () => {
     if (reviewRating === 0) {
       toast({
@@ -338,6 +376,12 @@ export default function RestaurantDetailPage() {
       return;
     }
     reviewMutation.mutate();
+  };
+
+  const handleDeleteReview = (reviewId: string) => {
+    if (window.confirm(language === "en" ? "Are you sure you want to delete this review?" : "이 리뷰를 삭제하시겠습니까?")) {
+      deleteMutation.mutate(reviewId);
+    }
   };
 
   if (loadingRestaurant) {
@@ -886,21 +930,51 @@ export default function RestaurantDetailPage() {
                 </div>
               ) : (
                 <div className="space-y-4">
-                  {reviews.map((review) => (
-                    <div key={review.id} className="border-t pt-4 first:border-t-0 first:pt-0" data-testid={`review-${review.id}`}>
-                      <div className="flex items-center justify-between mb-2">
-                        <p className="font-medium">{review.userName}</p>
-                        <div className="flex items-center gap-1">
-                          <Star className="w-4 h-4 fill-[hsl(var(--accent-success))] text-[hsl(var(--accent-success))]" />
-                          <span className="font-medium">{review.rating}</span>
+                  {reviews.map((review) => {
+                    const isOwnReview = user && review.userId === user.id;
+                    return (
+                      <div key={review.id} className="border-t pt-4 first:border-t-0 first:pt-0" data-testid={`review-${review.id}`}>
+                        <div className="flex items-center justify-between mb-2">
+                          <p className="font-medium">{review.userName}</p>
+                          <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-1">
+                              <Star className="w-4 h-4 fill-[hsl(var(--accent-success))] text-[hsl(var(--accent-success))]" />
+                              <span className="font-medium">{review.rating}</span>
+                            </div>
+                            {isOwnReview && (
+                              <div className="flex gap-1">
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  onClick={() => {
+                                    setEditingReviewId(review.id);
+                                    setReviewRating(review.rating);
+                                    setReviewComment(review.comment);
+                                    setIsReviewDialogOpen(true);
+                                  }}
+                                  data-testid={`button-edit-review-${review.id}`}
+                                >
+                                  Edit
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  onClick={() => handleDeleteReview(review.id)}
+                                  data-testid={`button-delete-review-${review.id}`}
+                                >
+                                  Delete
+                                </Button>
+                              </div>
+                            )}
+                          </div>
                         </div>
+                        <p className="text-sm text-muted-foreground mb-2">{review.comment}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {new Date(review.createdAt).toLocaleDateString(language)}
+                        </p>
                       </div>
-                      <p className="text-sm text-muted-foreground mb-2">{review.comment}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {new Date(review.createdAt).toLocaleDateString(language)}
-                      </p>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </Card>
@@ -912,10 +986,17 @@ export default function RestaurantDetailPage() {
       </div>
 
       {/* Review Dialog */}
-      <Dialog open={isReviewDialogOpen} onOpenChange={setIsReviewDialogOpen}>
+      <Dialog open={isReviewDialogOpen} onOpenChange={(open) => {
+        setIsReviewDialogOpen(open);
+        if (!open) {
+          setEditingReviewId(null);
+          setReviewRating(0);
+          setReviewComment("");
+        }
+      }}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>{t("review.write")}</DialogTitle>
+            <DialogTitle>{editingReviewId ? (language === "en" ? "Edit Review" : "리뷰 수정") : t("review.write")}</DialogTitle>
             <DialogDescription>{restaurantName}</DialogDescription>
           </DialogHeader>
           
