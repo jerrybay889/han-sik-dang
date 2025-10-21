@@ -15,6 +15,7 @@ const AIPage = lazy(() => import("@/pages/AIPage"));
 const ContentPage = lazy(() => import("@/pages/ContentPage"));
 const MyPage = lazy(() => import("@/pages/MyPage"));
 const RestaurantDetailPage = lazy(() => import("@/pages/RestaurantDetailPage"));
+const DashboardPage = lazy(() => import("@/pages/DashboardPage"));
 const AuthPage = lazy(() => import("@/pages/AuthPage"));
 const NotFound = lazy(() => import("@/pages/not-found"));
 
@@ -40,6 +41,7 @@ function Router() {
         <Route path="/content" component={ContentPage} />
         <Route path="/my" component={MyPage} />
         <Route path="/restaurant/:id" component={RestaurantDetailPage} />
+        <Route path="/dashboard" component={DashboardPage} />
         <Route path="/login" component={AuthPage} />
         <Route component={NotFound} />
       </Switch>
