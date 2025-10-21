@@ -290,6 +290,92 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get("/api/restaurants/:id/insights", async (req, res) => {
+    try {
+      const insights = await storage.getRestaurantInsights(req.params.id);
+      res.json(insights || null);
+    } catch (error) {
+      console.error("Get restaurant insights error:", error);
+      res.status(500).json({ error: "Failed to fetch restaurant insights" });
+    }
+  });
+
+  app.post("/api/admin/generate-insights/:restaurantId", async (req, res) => {
+    try {
+      const { restaurantId } = req.params;
+      
+      const existing = await storage.getRestaurantInsights(restaurantId);
+      if (existing) {
+        return res.json({ 
+          message: "Insights already exist",
+          insights: existing,
+          generated: false
+        });
+      }
+
+      const insightsData = await generateRestaurantInsights(restaurantId);
+      const insights = await storage.createRestaurantInsights(insightsData);
+      
+      res.json({ 
+        message: "Insights generated successfully",
+        insights,
+        generated: true
+      });
+    } catch (error) {
+      console.error("Generate insights error:", error);
+      res.status(500).json({ error: "Failed to generate insights" });
+    }
+  });
+
+  app.post("/api/admin/generate-all-insights", async (req, res) => {
+    try {
+      const restaurants = await storage.getAllRestaurants();
+      const results = [];
+      let generated = 0;
+      let skipped = 0;
+      let errors = 0;
+
+      for (const restaurant of restaurants) {
+        try {
+          const existing = await storage.getRestaurantInsights(restaurant.id);
+          if (existing) {
+            skipped++;
+            continue;
+          }
+
+          const insightsData = await generateRestaurantInsights(restaurant.id);
+          await storage.createRestaurantInsights(insightsData);
+          generated++;
+          results.push({ 
+            restaurantId: restaurant.id, 
+            name: restaurant.name,
+            status: "generated" 
+          });
+        } catch (error) {
+          errors++;
+          results.push({ 
+            restaurantId: restaurant.id, 
+            name: restaurant.name,
+            status: "error",
+            error: error instanceof Error ? error.message : "Unknown error"
+          });
+        }
+      }
+
+      res.json({ 
+        message: "Batch generation completed",
+        total: restaurants.length,
+        generated,
+        skipped,
+        errors,
+        results
+      });
+    } catch (error) {
+      console.error("Generate all insights error:", error);
+      res.status(500).json({ error: "Failed to generate all insights" });
+    }
+  });
+
   const httpServer = createServer(app);
 
   return httpServer;
@@ -413,4 +499,117 @@ Antwortstil:
   };
 
   return prompts[language] || prompts.en;
+}
+
+async function generateRestaurantInsights(restaurantId: string) {
+  const restaurant = await storage.getRestaurant(restaurantId);
+  if (!restaurant) {
+    throw new Error("Restaurant not found");
+  }
+
+  const reviews = await storage.getReviewsByRestaurant(restaurantId);
+  
+  const reviewSummary = reviews.length > 0 
+    ? reviews.map(r => `${r.rating}/5: ${r.comment}`).join('\n')
+    : "No reviews yet";
+
+  const promptKo = `다음 한식당에 대한 AI 인사이트를 생성해주세요:
+
+레스토랑 정보:
+- 이름: ${restaurant.name}
+- 카테고리: ${restaurant.category}
+- 위치: ${restaurant.district}
+- 설명: ${restaurant.description}
+- 평점: ${restaurant.rating}/5 (${restaurant.reviewCount}개 리뷰)
+- 가격대: ${'₩'.repeat(restaurant.priceRange)}
+- 비건: ${restaurant.isVegan ? '가능' : '불가능'}
+- 할랄: ${restaurant.isHalal ? '가능' : '불가능'}
+
+고객 리뷰:
+${reviewSummary}
+
+다음 4가지 정보를 정확히 생성해주세요:
+
+1. 리뷰 인사이트 (review_insights): 고객 리뷰들을 분석하여 이 레스토랑의 핵심 강점 3가지를 간결하게 정리 (100자 이내)
+
+2. 추천 상황 (best_for): 이 레스토랑이 가장 적합한 상황/목적 3가지를 쉼표로 구분하여 나열 (예: "데이트, 가족 모임, 비즈니스 미팅")
+
+3. 한국 음식 문화 팁 (cultural_tips): 외국인 방문객을 위한 이 레스토랑만의 특별한 문화적 팁이나 에티켓 (80자 이내, 없으면 빈 문자열)
+
+4. 첫 방문 팁 (first_timer_tips): 처음 방문하는 사람을 위한 주문 추천과 꿀팁 (120자 이내)
+
+JSON 형식으로만 답변:
+{
+  "reviewInsights": "...",
+  "bestFor": "...",
+  "culturalTips": "...",
+  "firstTimerTips": "..."
+}`;
+
+  const promptEn = `Generate AI insights for this Korean restaurant:
+
+Restaurant Information:
+- Name: ${restaurant.nameEn}
+- Category: ${restaurant.category}
+- Location: ${restaurant.district}
+- Description: ${restaurant.descriptionEn}
+- Rating: ${restaurant.rating}/5 (${restaurant.reviewCount} reviews)
+- Price Range: ${'₩'.repeat(restaurant.priceRange)}
+- Vegan: ${restaurant.isVegan ? 'Available' : 'Not available'}
+- Halal: ${restaurant.isHalal ? 'Available' : 'Not available'}
+
+Customer Reviews:
+${reviewSummary}
+
+Generate exactly 4 pieces of information:
+
+1. Review Insights (review_insights): Analyze customer reviews and summarize 3 key strengths concisely (under 100 chars)
+
+2. Best For (best_for): List 3 situations/purposes this restaurant is best suited for, comma-separated (e.g., "date night, family gathering, business meeting")
+
+3. Cultural Tips (cultural_tips): Special cultural tips or etiquette for foreign visitors specific to this restaurant (under 80 chars, empty string if none)
+
+4. First Timer Tips (first_timer_tips): Ordering recommendations and tips for first-time visitors (under 120 chars)
+
+Respond ONLY in JSON format:
+{
+  "reviewInsights": "...",
+  "bestFor": "...",
+  "culturalTips": "...",
+  "firstTimerTips": "..."
+}`;
+
+  const [resultKo, resultEn] = await Promise.all([
+    genAI.models.generateContent({
+      model: "gemini-2.0-flash-exp",
+      contents: promptKo,
+    }),
+    genAI.models.generateContent({
+      model: "gemini-2.0-flash-exp",
+      contents: promptEn,
+    }),
+  ]);
+
+  const textKo = resultKo.candidates?.[0]?.content?.parts?.[0]?.text || "{}";
+  const textEn = resultEn.candidates?.[0]?.content?.parts?.[0]?.text || "{}";
+
+  const cleanJson = (text: string) => {
+    const match = text.match(/\{[\s\S]*\}/);
+    return match ? match[0] : text;
+  };
+
+  const dataKo = JSON.parse(cleanJson(textKo));
+  const dataEn = JSON.parse(cleanJson(textEn));
+
+  return {
+    restaurantId,
+    reviewInsights: dataKo.reviewInsights || "",
+    reviewInsightsEn: dataEn.reviewInsights || "",
+    bestFor: dataKo.bestFor || "",
+    bestForEn: dataEn.bestFor || "",
+    culturalTips: dataKo.culturalTips || "",
+    culturalTipsEn: dataEn.culturalTips || "",
+    firstTimerTips: dataKo.firstTimerTips || "",
+    firstTimerTipsEn: dataEn.firstTimerTips || "",
+  };
 }
