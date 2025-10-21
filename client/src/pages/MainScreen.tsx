@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Search, MapPin, Star, Clock, TrendingUp, Play, Bot } from "lucide-react";
+import { Search, MapPin, Star, Clock, TrendingUp, Play, Bot, ChevronRight, Bell } from "lucide-react";
 import { AdSlot } from "@/components/AdSlot";
 import { BottomNav } from "@/components/BottomNav";
 import { LanguageSelector } from "@/components/LanguageSelector";
@@ -7,11 +7,12 @@ import { SEO } from "@/components/SEO";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { createWebsiteSchema, createOrganizationSchema } from "@/lib/structuredData";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
-import type { Restaurant } from "@shared/schema";
+import type { Restaurant, Announcement, EventBanner } from "@shared/schema";
 
 export default function MainScreen() {
   const { t, language } = useLanguage();
@@ -34,6 +35,14 @@ export default function MainScreen() {
       return response.json();
     },
     enabled: searchQuery.trim().length > 0,
+  });
+
+  const { data: announcements = [] } = useQuery<Announcement[]>({
+    queryKey: ["/api/announcements"],
+  });
+
+  const { data: eventBanners = [] } = useQuery<EventBanner[]>({
+    queryKey: ["/api/event-banners"],
   });
   
   const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
@@ -235,6 +244,48 @@ export default function MainScreen() {
           </div>
         </section>
 
+        {/* Event Banners */}
+        {eventBanners.length > 0 && (
+          <section className="py-4">
+            <div className="px-4 mb-3">
+              <h2 className="text-lg font-semibold">{t("events.title")}</h2>
+            </div>
+            <ScrollArea className="w-full whitespace-nowrap">
+              <div className="flex gap-4 px-4 pb-2">
+                {eventBanners.map((banner) => (
+                  <a
+                    key={banner.id}
+                    href={banner.linkUrl || "#"}
+                    target={banner.linkUrl ? "_blank" : undefined}
+                    rel={banner.linkUrl ? "noopener noreferrer" : undefined}
+                    className="flex-shrink-0"
+                    data-testid={`banner-event-${banner.id}`}
+                  >
+                    <Card className="w-[320px] overflow-hidden hover-elevate active-elevate-2 cursor-pointer">
+                      <div className="relative aspect-[2/1]">
+                        <img
+                          src={banner.imageUrl}
+                          alt={language === "en" ? banner.titleEn : banner.title}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <div className="p-4">
+                        <h3 className="font-semibold text-base mb-1">
+                          {language === "en" ? banner.titleEn : banner.title}
+                        </h3>
+                        <p className="text-sm text-muted-foreground line-clamp-2">
+                          {language === "en" ? banner.descriptionEn : banner.description}
+                        </p>
+                      </div>
+                    </Card>
+                  </a>
+                ))}
+              </div>
+              <ScrollBar orientation="horizontal" />
+            </ScrollArea>
+          </section>
+        )}
+
         {/* Mid Ad */}
         <div className="px-4 py-6">
           <AdSlot variant="rectangle" />
@@ -335,6 +386,52 @@ export default function MainScreen() {
               </div>
             </div>
           </Card>
+        </section>
+
+        {/* Announcements Section */}
+        <section className="px-4 py-4 mb-4">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <Bell className="w-5 h-5 text-primary" />
+              <h2 className="text-lg font-semibold">{t("announcements.title")}</h2>
+            </div>
+            <Button variant="ghost" size="sm" data-testid="button-see-all-announcements">
+              {t("announcements.viewAll")}
+            </Button>
+          </div>
+
+          {announcements.length === 0 ? (
+            <Card className="p-6 text-center">
+              <p className="text-sm text-muted-foreground">{t("announcements.noItems")}</p>
+            </Card>
+          ) : (
+            <div className="space-y-2">
+              {announcements.slice(0, 2).map((announcement) => (
+                <Card
+                  key={announcement.id}
+                  className="p-4 hover-elevate active-elevate-2 cursor-pointer"
+                  data-testid={`card-announcement-${announcement.id}`}
+                >
+                  <div className="flex items-start gap-3">
+                    {announcement.isPinned === 1 && (
+                      <Badge variant="secondary" className="text-xs flex-shrink-0">
+                        📌
+                      </Badge>
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-semibold text-sm line-clamp-2">
+                        {language === "en" ? announcement.titleEn : announcement.title}
+                      </h3>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {new Date(announcement.createdAt).toLocaleDateString(language === "en" ? "en-US" : "ko-KR")}
+                      </p>
+                    </div>
+                    <ChevronRight className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                  </div>
+                </Card>
+              ))}
+            </div>
+          )}
         </section>
       </div>
 
