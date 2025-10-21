@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { OptimizedImage } from "@/components/OptimizedImage";
 import { SEO } from "@/components/SEO";
 import { AdSense } from "@/components/AdSense";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -429,10 +430,13 @@ export default function RestaurantDetailPage() {
         <div className="max-w-md mx-auto">
           {/* Header Image */}
           <div className="relative">
-            <img
+            <OptimizedImage
               src={restaurant.imageUrl}
               alt={restaurantName}
-              className="w-full h-64 object-cover"
+              className="w-full h-64"
+              height={256}
+              priority={true}
+              objectFit="cover"
               data-testid="img-restaurant-hero"
             />
             <div className="absolute top-4 left-4 right-4 flex justify-between items-start">
@@ -677,10 +681,13 @@ export default function RestaurantDetailPage() {
                         <Card className="p-3 hover-elevate active-elevate-2">
                           <div className="flex gap-3">
                             <div className="relative flex-shrink-0 w-32 h-20 bg-muted rounded overflow-hidden">
-                              <img
+                              <OptimizedImage
                                 src={video.thumbnailUrl}
                                 alt={video.title}
-                                className="w-full h-full object-cover"
+                                className="w-full h-full"
+                                width={128}
+                                height={80}
+                                objectFit="cover"
                                 data-testid="img-video-thumbnail"
                               />
                               <div className="absolute inset-0 flex items-center justify-center bg-black/30">

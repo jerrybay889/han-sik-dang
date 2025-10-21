@@ -3,6 +3,7 @@ import { Search, MapPin, Star, Clock, TrendingUp, Play, Bot, ChevronRight, Bell 
 import { AdSlot } from "@/components/AdSlot";
 import { BottomNav } from "@/components/BottomNav";
 import { LanguageSelector } from "@/components/LanguageSelector";
+import { OptimizedImage } from "@/components/OptimizedImage";
 import { SEO } from "@/components/SEO";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -183,10 +184,12 @@ export default function MainScreen() {
                       data-testid={`card-featured-${restaurant.id}`}
                     >
                       <div className="relative aspect-[4/3]">
-                        <img
+                        <OptimizedImage
                           src={restaurant.imageUrl}
                           alt={restaurant.name}
-                          className="w-full h-full object-cover"
+                          className="w-full h-full"
+                          objectFit="cover"
+                          data-testid={`image-featured-${restaurant.id}`}
                         />
                         <div className="absolute top-2 right-2">
                           <Badge className="bg-[hsl(var(--primary))] text-primary-foreground">
@@ -275,10 +278,14 @@ export default function MainScreen() {
                       data-testid={`card-restaurant-${restaurant.id}`}
                     >
                       <div className="flex gap-3 p-3">
-                        <img
+                        <OptimizedImage
                           src={restaurant.imageUrl}
                           alt={restaurant.name}
-                          className="w-24 h-24 rounded-md object-cover"
+                          className="w-24 h-24 rounded-md"
+                          width={96}
+                          height={96}
+                          objectFit="cover"
+                          data-testid={`image-restaurant-${restaurant.id}`}
                         />
                         <div className="flex-1 min-w-0">
                           <h3 className="font-semibold text-base mb-1 truncate">
