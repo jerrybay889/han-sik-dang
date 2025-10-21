@@ -14,12 +14,15 @@ import {
   type InsertAnnouncement,
   type EventBanner,
   type InsertEventBanner,
+  type RestaurantInsights,
+  type InsertRestaurantInsights,
   users,
   restaurants,
   reviews,
   savedRestaurants,
   announcements,
   eventBanners,
+  restaurantInsights,
 } from "@shared/schema";
 
 const client = neon(process.env.DATABASE_URL!);
@@ -51,6 +54,10 @@ export interface IStorage {
   
   getActiveEventBanners(): Promise<EventBanner[]>;
   createEventBanner(banner: InsertEventBanner): Promise<EventBanner>;
+  
+  getRestaurantInsights(restaurantId: string): Promise<RestaurantInsights | undefined>;
+  createRestaurantInsights(insights: InsertRestaurantInsights): Promise<RestaurantInsights>;
+  updateRestaurantInsights(restaurantId: string, insights: Partial<InsertRestaurantInsights>): Promise<RestaurantInsights | undefined>;
 }
 
 export class DbStorage implements IStorage {
@@ -184,6 +191,25 @@ export class DbStorage implements IStorage {
 
   async createEventBanner(insertBanner: InsertEventBanner): Promise<EventBanner> {
     const result = await db.insert(eventBanners).values(insertBanner).returning();
+    return result[0];
+  }
+
+  async getRestaurantInsights(restaurantId: string): Promise<RestaurantInsights | undefined> {
+    const result = await db.select().from(restaurantInsights)
+      .where(eq(restaurantInsights.restaurantId, restaurantId));
+    return result[0];
+  }
+
+  async createRestaurantInsights(insertInsights: InsertRestaurantInsights): Promise<RestaurantInsights> {
+    const result = await db.insert(restaurantInsights).values(insertInsights).returning();
+    return result[0];
+  }
+
+  async updateRestaurantInsights(restaurantId: string, updates: Partial<InsertRestaurantInsights>): Promise<RestaurantInsights | undefined> {
+    const result = await db.update(restaurantInsights)
+      .set({ ...updates, lastUpdated: new Date() })
+      .where(eq(restaurantInsights.restaurantId, restaurantId))
+      .returning();
     return result[0];
   }
 }
