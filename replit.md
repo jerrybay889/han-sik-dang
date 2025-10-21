@@ -4,6 +4,17 @@
 
 han sik dang is a hybrid content platform and utility app for discovering Korean restaurants, featuring content monetization through advertising. It offers restaurant search, rich media content (videos, blogs), and a mobile-first, visually-driven design emphasizing Korean food culture. The platform is a full-stack TypeScript web application using React for the frontend and Express for the backend, designed with Progressive Web App (PWA) capabilities. The project aims for a content-first approach with integrated ad monetization and strong SEO.
 
+## Recent Changes
+
+**October 21, 2025 - PostgreSQL Migration & AI Insights Completion**
+-   ✅ Migrated from in-memory storage to PostgreSQL (Neon)
+-   ✅ Completed data seeding for 30 restaurant records (15 unique Seoul restaurants)
+-   ✅ Generated AI insights for all 30 restaurants using Google Gemini 2.5 Flash
+-   ✅ Integrated external reviews from Google, Naver, TripAdvisor
+-   ✅ Added YouTube video content for restaurant discovery
+-   ✅ AI chat concierge fully functional with complete restaurant context
+-   ✅ E2E testing verified: homepage, restaurant details, AI chat functionality
+
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.
@@ -25,14 +36,21 @@ Preferred communication style: Simple, everyday language.
 -   **Framework**: Express.js with TypeScript on Node.js (ESM).
 -   **Build System**: `esbuild` for production, `tsx` for development, Vite integration for HMR.
 -   **API Structure**: RESTful (`/api` prefix), logging middleware, standardized error handling, session management via `connect-pg-simple`.
--   **Storage**: Interface-based `IStorage` (currently in-memory `MemStorage`), designed for future PostgreSQL integration via Drizzle ORM.
+-   **Storage**: Interface-based `IStorage` implemented by `DbStorage` class using PostgreSQL via Drizzle ORM.
 -   **Key Decisions**: Separation of concerns, environment separation, type-safe API contracts via `shared/` directory, middleware-first processing.
 
 ### Data Storage
 
--   **Current**: In-memory, with preparation for PostgreSQL.
+-   **Current**: PostgreSQL (Neon) - **Migration Completed (October 2025)**
 -   **Schema**: Defined in `shared/schema.ts` using Drizzle ORM, with Zod validation.
 -   **Database**: `@neondatabase/serverless` for Neon compatibility, migration support.
+-   **Storage Implementation**: `DbStorage` class implementing `IStorage` interface for all CRUD operations.
+-   **Data Status**: 
+    - 30 restaurant records (15 unique Seoul restaurants)
+    - Complete menu data for all restaurants
+    - External reviews from Google, Naver, TripAdvisor
+    - YouTube video content integration
+    - **AI insights for all 30 restaurants** (review summaries, recommendations, cultural tips)
 -   **Key Decisions**: Interface-based abstraction, shared schema for type consistency, serverless-ready (Neon), migration-first.
 
 ### Authentication and Authorization
@@ -43,8 +61,14 @@ Preferred communication style: Simple, everyday language.
 ### AI Restaurant Insights
 
 -   **Mechanism**: Pre-generated AI insights for restaurants (review summaries, "best for" scenarios, cultural tips, first-timer tips) stored in a `restaurantInsights` table.
+-   **Status**: **All 30 restaurants have complete AI insights** (Korean & English) - Generated October 2025
 -   **API**: Endpoints for fetching insights and admin-triggered batch generation.
--   **AI Integration**: Uses Google Gemini API (`@google/genai`) for bilingual content generation.
+-   **AI Integration**: Uses Google Gemini 2.5 Flash (`@google/genai`) for bilingual content generation.
+-   **Content Generated**:
+    - Review summaries analyzing customer feedback
+    - "Best for" dining situations (traditional, business, romantic, etc.)
+    - Cultural dining etiquette tips
+    - First-timer recommendations
 -   **Optimization**: One-time generation reduces API costs; insights are cached and integrated into AI chat context for enhanced recommendations.
 
 ### Progressive Web App (PWA)
