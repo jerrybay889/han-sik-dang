@@ -91,7 +91,20 @@ async function seedAIInsights() {
     const restaurants = await storage.getAllRestaurants();
     console.log(`📊 Found ${restaurants.length} restaurants`);
 
+    let processed = 0;
+    let skipped = 0;
+    let created = 0;
+
     for (const restaurant of restaurants) {
+      // Check if insights already exist - skip if they do
+      const existingInsights = await storage.getRestaurantInsights(restaurant.id);
+      
+      if (existingInsights) {
+        console.log(`⏭️  Skipping ${restaurant.name} (insights already exist)`);
+        skipped++;
+        continue;
+      }
+
       console.log(`\n🏪 Generating AI insights for: ${restaurant.name}`);
 
       // Gather restaurant data
@@ -124,37 +137,21 @@ async function seedAIInsights() {
         console.log(`     - Review insights (KO): ${insights.reviewInsights.substring(0, 50)}...`);
         console.log(`     - Best for: ${insights.bestFor}`);
 
-        // Check if insights already exist
-        const existingInsights = await storage.getRestaurantInsights(restaurant.id);
-        
-        if (existingInsights) {
-          // Update existing insights
-          await storage.updateRestaurantInsights(restaurant.id, {
-            reviewInsights: insights.reviewInsights,
-            reviewInsightsEn: insights.reviewInsightsEn,
-            bestFor: insights.bestFor,
-            bestForEn: insights.bestForEn,
-            culturalTips: insights.culturalTips,
-            culturalTipsEn: insights.culturalTipsEn,
-            firstTimerTips: insights.firstTimerTips,
-            firstTimerTipsEn: insights.firstTimerTipsEn,
-          });
-          console.log(`  ✅ Updated existing restaurant insights`);
-        } else {
-          // Create new insights
-          await storage.createRestaurantInsights({
-            restaurantId: restaurant.id,
-            reviewInsights: insights.reviewInsights,
-            reviewInsightsEn: insights.reviewInsightsEn,
-            bestFor: insights.bestFor,
-            bestForEn: insights.bestForEn,
-            culturalTips: insights.culturalTips,
-            culturalTipsEn: insights.culturalTipsEn,
-            firstTimerTips: insights.firstTimerTips,
-            firstTimerTipsEn: insights.firstTimerTipsEn,
-          });
-          console.log(`  ✅ Created new restaurant insights`);
-        }
+        // Create new insights (we already checked it doesn't exist)
+        await storage.createRestaurantInsights({
+          restaurantId: restaurant.id,
+          reviewInsights: insights.reviewInsights,
+          reviewInsightsEn: insights.reviewInsightsEn,
+          bestFor: insights.bestFor,
+          bestForEn: insights.bestForEn,
+          culturalTips: insights.culturalTips,
+          culturalTipsEn: insights.culturalTipsEn,
+          firstTimerTips: insights.firstTimerTips,
+          firstTimerTipsEn: insights.firstTimerTipsEn,
+        });
+        console.log(`  ✅ Created new restaurant insights`);
+        created++;
+        processed++;
         
         // Add a small delay to avoid rate limiting
         await new Promise(resolve => setTimeout(resolve, 1000));
@@ -164,6 +161,7 @@ async function seedAIInsights() {
     }
 
     console.log("\n🎉 AI insights generation completed successfully!");
+    console.log(`📊 Summary: ${created} created, ${skipped} skipped, ${restaurants.length} total`);
   } catch (error) {
     console.error("❌ Error during AI insights seeding:", error);
     throw error;
