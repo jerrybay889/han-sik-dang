@@ -1,25 +1,29 @@
+import { AdSense } from "./AdSense";
+
 interface AdSlotProps {
-  variant: "banner" | "rectangle";
+  variant: "banner" | "rectangle" | "feed";
+  slot?: string;
   className?: string;
 }
 
-export function AdSlot({ variant, className = "" }: AdSlotProps) {
-  const height = variant === "banner" ? "90px" : "250px";
+export function AdSlot({ variant, slot, className = "" }: AdSlotProps) {
+  const defaultSlots = {
+    banner: "1234567890",
+    rectangle: "0987654321",
+    feed: "1357924680"
+  };
+
+  const adSlot = slot || defaultSlots[variant];
+  const format = variant === "banner" ? "horizontal" : variant === "rectangle" ? "rectangle" : "fluid";
+  const minHeight = variant === "banner" ? "90px" : variant === "rectangle" ? "250px" : "150px";
 
   return (
-    <div
-      className={`relative bg-[hsl(var(--ad-zone))] rounded-md flex items-center justify-center ${className}`}
-      style={{ minHeight: height }}
-      data-testid={`ad-${variant}`}
-    >
-      <div className="absolute top-2 right-2 text-[10px] text-muted-foreground">
-        Advertisement
-      </div>
-      <div className="text-center text-muted-foreground">
-        <div className="text-sm font-medium">광고 영역</div>
-        <div className="text-xs">Google AdSense</div>
-        <div className="text-xs opacity-60">{height}</div>
-      </div>
+    <div className={className} style={{ minHeight }}>
+      <AdSense 
+        slot={adSlot} 
+        format={format}
+        className="w-full"
+      />
     </div>
   );
 }
