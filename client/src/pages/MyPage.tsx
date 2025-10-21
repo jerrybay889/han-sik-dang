@@ -19,7 +19,7 @@ export default function MyPage() {
   const { user, isAuthenticated, isLoading: authLoading } = useAuth();
 
   const { data: savedRestaurants = [], isLoading: loadingSaved } = useQuery<Restaurant[]>({
-    queryKey: ["/api/saved", user?.id],
+    queryKey: ["/api/saved"],
     enabled: isAuthenticated,
   });
 

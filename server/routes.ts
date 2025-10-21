@@ -329,7 +329,7 @@ ${insights && insights.firstTimerTips ? `첫 방문 팁: ${insights.firstTimerTi
   });
 
   // Protected saved restaurants endpoints
-  app.get("/api/saved/:userId", isAuthenticated, async (req: any, res) => {
+  app.get("/api/saved", isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const savedRestaurants = await storage.getSavedRestaurants(userId);

@@ -249,9 +249,15 @@ export default function RestaurantDetailPage() {
         await apiRequest("POST", "/api/saved", { restaurantId });
       }
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/saved/check", restaurantId] });
-      queryClient.invalidateQueries({ queryKey: ["/api/saved", user?.id] });
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ 
+        queryKey: ["/api/saved/check", restaurantId],
+        refetchType: 'all'
+      });
+      await queryClient.invalidateQueries({ 
+        queryKey: ["/api/saved"],
+        refetchType: 'all'
+      });
       toast({
         title: isSaved ? (language === "en" ? "Removed from saved" : "저장 취소됨") : (language === "en" ? "Saved successfully" : "저장 완료"),
         description: isSaved 
