@@ -332,7 +332,9 @@ ${insights && insights.firstTimerTips ? `첫 방문 팁: ${insights.firstTimerTi
   app.get("/api/saved", isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
+      console.log(`[GET /api/saved] userId: ${userId}`);
       const savedRestaurants = await storage.getSavedRestaurants(userId);
+      console.log(`[GET /api/saved] Found ${savedRestaurants.length} saved restaurants for user ${userId}`);
       res.json(savedRestaurants);
     } catch (error) {
       console.error("Get saved restaurants error:", error);
@@ -344,10 +346,12 @@ ${insights && insights.firstTimerTips ? `첫 방문 팁: ${insights.firstTimerTi
     try {
       const userId = req.user.claims.sub;
       const { restaurantId } = req.body;
+      console.log(`[POST /api/saved] userId: ${userId}, restaurantId: ${restaurantId}`);
       if (!restaurantId) {
         return res.status(400).json({ error: "restaurantId is required" });
       }
       const saved = await storage.saveRestaurant({ userId, restaurantId });
+      console.log(`[POST /api/saved] Saved successfully:`, saved);
       res.json(saved);
     } catch (error) {
       console.error("Save restaurant error:", error);

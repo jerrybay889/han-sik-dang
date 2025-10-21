@@ -18,9 +18,22 @@ export default function MyPage() {
   const { t, language } = useLanguage();
   const { user, isAuthenticated, isLoading: authLoading } = useAuth();
 
-  const { data: savedRestaurants = [], isLoading: loadingSaved } = useQuery<Restaurant[]>({
+  const { data: savedRestaurants = [], isLoading: loadingSaved, error, isError, status, dataUpdatedAt } = useQuery<Restaurant[]>({
     queryKey: ["/api/saved"],
     enabled: isAuthenticated,
+    refetchOnMount: 'always',
+    staleTime: 0,
+  });
+
+  console.log('[MyPage] Query Status:', { 
+    isAuthenticated, 
+    user: user?.email, 
+    status, 
+    isLoading: loadingSaved,
+    isError,
+    error: error?.message,
+    dataUpdatedAt: new Date(dataUpdatedAt).toISOString(),
+    savedCount: savedRestaurants.length 
   });
 
   const { data: announcements = [] } = useQuery<Announcement[]>({
