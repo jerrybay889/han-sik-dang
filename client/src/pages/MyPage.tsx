@@ -10,7 +10,7 @@ import { AdSlot } from "@/components/AdSlot";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/hooks/useAuth";
 import { useQuery } from "@tanstack/react-query";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import type { Restaurant, Announcement, EventBanner } from "@shared/schema";
 import { useEffect } from "react";
@@ -18,19 +18,31 @@ import { useEffect } from "react";
 export default function MyPage() {
   const { t, language } = useLanguage();
   const { user, isAuthenticated, isLoading: authLoading } = useAuth();
+  const [location] = useLocation();
 
   const { data: savedRestaurants = [], isLoading: loadingSaved, error, isError, status, dataUpdatedAt, refetch } = useQuery<Restaurant[]>({
-    queryKey: ["/api/saved"],
-    enabled: isAuthenticated,
+    queryKey: ["/api/saved", isAuthenticated],
+    queryFn: async () => {
+      const res = await fetch("/api/saved", {
+        credentials: "include",
+      });
+      if (res.status === 401 || !res.ok) {
+        return [];
+      }
+      const data = await res.json();
+      console.log('[MyPage queryFn] Fetched saved restaurants:', data.length);
+      return data;
+    },
     refetchOnMount: 'always',
     staleTime: 0,
   });
 
   useEffect(() => {
     if (isAuthenticated && !authLoading) {
+      console.log('[MyPage useEffect] Refetching saved restaurants, location:', location);
       refetch();
     }
-  }, [isAuthenticated, authLoading, refetch]);
+  }, [isAuthenticated, authLoading, location, refetch]);
 
   console.log('[MyPage] Query Status:', { 
     isAuthenticated, 
