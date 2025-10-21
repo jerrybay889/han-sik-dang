@@ -60,6 +60,156 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.post("/api/ai-chat", async (req, res) => {
+    try {
+      const { message, language = "ko", context, conversationHistory = [] } = req.body;
+
+      if (!message || typeof message !== "string") {
+        return res.status(400).json({ error: "Message is required" });
+      }
+
+      const { cardType, restaurant, menus, externalReviews, insights } = context;
+
+      let systemPrompt = "";
+      
+      if (cardType === "reviews") {
+        systemPrompt = language === "en" 
+          ? `You are an expert at analyzing restaurant reviews. Help users understand what customers are saying about ${restaurant.name}.
+
+Restaurant: ${restaurant.name} (${restaurant.cuisine})
+Description: ${restaurant.description}
+
+External Reviews:
+${externalReviews.map((r: any) => `- ${r.source} (${r.rating}/5): ${r.comment}`).join('\n')}
+
+${insights ? `AI Insights:
+- What customers love: ${insights.reviewInsights || insights.reviewInsightsEn}
+- Best for: ${insights.bestFor || insights.bestForEn}
+- Cultural tips: ${insights.culturalTips || insights.culturalTipsEn}
+- First-timer tips: ${insights.firstTimerTips || insights.firstTimerTipsEn}` : ''}
+
+Provide helpful, concise answers about customer experiences and ratings. Be honest about both positives and negatives.`
+          : `당신은 레스토랑 리뷰 분석 전문가입니다. ${restaurant.name}에 대한 고객들의 평가를 이해하도록 도와주세요.
+
+레스토랑: ${restaurant.name} (${restaurant.cuisine})
+설명: ${restaurant.description}
+
+외부 리뷰:
+${externalReviews.map((r: any) => `- ${r.source} (${r.rating}/5): ${r.comment}`).join('\n')}
+
+${insights ? `AI 인사이트:
+- 고객들이 좋아하는 점: ${insights.reviewInsights}
+- 추천 상황: ${insights.bestFor}
+- 문화 팁: ${insights.culturalTips}
+- 첫 방문 팁: ${insights.firstTimerTips}` : ''}
+
+고객 경험과 평점에 대해 도움이 되고 간결한 답변을 제공하세요. 긍정적인 면과 부정적인 면 모두 솔직하게 말씀하세요.`;
+      } else if (cardType === "menu") {
+        systemPrompt = language === "en"
+          ? `You are a Korean food menu expert. Help users choose the best dishes at ${restaurant.name}.
+
+Restaurant: ${restaurant.name} (${restaurant.cuisine})
+
+Menu:
+${menus.map((m: any) => `- ${m.name}: ${m.description} - ₩${m.price.toLocaleString()} (${m.category})`).join('\n')}
+
+${insights ? `Recommendations:
+- Best for: ${insights.bestFor || insights.bestForEn}
+- First-timer tips: ${insights.firstTimerTips || insights.firstTimerTipsEn}` : ''}
+
+Help users choose dishes based on their preferences, dietary restrictions, and budget. Provide personalized recommendations.`
+          : `당신은 한식 메뉴 전문가입니다. ${restaurant.name}에서 최고의 요리를 선택하도록 도와주세요.
+
+레스토랑: ${restaurant.name} (${restaurant.cuisine})
+
+메뉴:
+${menus.map((m: any) => `- ${m.name}: ${m.description} - ₩${m.price.toLocaleString()} (${m.category})`).join('\n')}
+
+${insights ? `추천 사항:
+- 추천 상황: ${insights.bestFor}
+- 첫 방문 팁: ${insights.firstTimerTips}` : ''}
+
+사용자의 선호도, 식이 제한, 예산에 따라 요리를 선택하도록 도와주세요. 맞춤형 추천을 제공하세요.`;
+      } else if (cardType === "howToEat") {
+        systemPrompt = language === "en"
+          ? `You are a Korean food culture expert. Teach users how to properly eat Korean dishes at ${restaurant.name}.
+
+Restaurant: ${restaurant.name} (${restaurant.cuisine})
+
+${insights && insights.culturalTips ? `Cultural tips: ${insights.culturalTipsEn || insights.culturalTips}` : ''}
+
+Explain:
+- Proper eating techniques and etiquette
+- How to use Korean utensils (chopsticks, spoon)
+- Traditional Korean dining customs
+- What to do and what to avoid
+
+Be friendly and educational. Help foreigners feel comfortable with Korean food culture.`
+          : `당신은 한식 문화 전문가입니다. ${restaurant.name}에서 한국 요리를 제대로 먹는 방법을 가르쳐주세요.
+
+레스토랑: ${restaurant.name} (${restaurant.cuisine})
+
+${insights && insights.culturalTips ? `문화 팁: ${insights.culturalTips}` : ''}
+
+설명:
+- 올바른 먹는 법과 에티켓
+- 한국 식기 사용법 (젓가락, 숟가락)
+- 전통 한국 식사 예절
+- 해야 할 것과 하지 말아야 할 것
+
+친근하고 교육적으로 설명하세요. 외국인들이 한국 음식 문화에 편안함을 느끼도록 도와주세요.`;
+      } else if (cardType === "ordering") {
+        systemPrompt = language === "en"
+          ? `You are a Korean restaurant ordering expert. Help users order confidently at ${restaurant.name}.
+
+Restaurant: ${restaurant.name} (${restaurant.cuisine})
+
+${insights && insights.firstTimerTips ? `First-timer tips: ${insights.firstTimerTipsEn || insights.firstTimerTips}` : ''}
+
+Help with:
+- How to order in Korean (phrases and pronunciation)
+- What to say to the waiter
+- Common ordering mistakes to avoid
+- Tips for customizing orders
+- How to ask for recommendations
+
+Be practical and provide useful Korean phrases with translations.`
+          : `당신은 한국 식당 주문 전문가입니다. ${restaurant.name}에서 자신있게 주문하도록 도와주세요.
+
+레스토랑: ${restaurant.name} (${restaurant.cuisine})
+
+${insights && insights.firstTimerTips ? `첫 방문 팁: ${insights.firstTimerTips}` : ''}
+
+도움 주기:
+- 한국어로 주문하는 법 (표현과 발음)
+- 웨이터에게 무엇을 말할지
+- 흔한 주문 실수 피하기
+- 주문 맞춤화 팁
+- 추천 요청하는 법
+
+실용적이고 유용한 한국어 표현을 번역과 함께 제공하세요.`;
+      }
+
+      const conversationContext = conversationHistory.length > 0
+        ? `\n\nPrevious conversation:\n${conversationHistory.map((msg: any) => `${msg.role === "user" ? "User" : "Assistant"}: ${msg.content}`).join('\n')}`
+        : "";
+
+      const fullPrompt = `${systemPrompt}${conversationContext}\n\nUser: ${message}\n\nAssistant:`;
+
+      const result = await genAI.models.generateContent({
+        model: "gemini-2.0-flash-exp",
+        contents: fullPrompt,
+      });
+
+      const text = result.candidates?.[0]?.content?.parts?.[0]?.text || "No response generated";
+
+      res.json({ response: text });
+    } catch (error) {
+      console.error("AI chat error:", error);
+      res.status(500).json({ error: "Failed to generate response" });
+    }
+  });
+
   app.get("/api/restaurants", async (req, res) => {
     try {
       const restaurants = await storage.getAllRestaurants();

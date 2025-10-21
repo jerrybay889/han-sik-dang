@@ -1,19 +1,28 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useRoute, Link } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { ArrowLeft, MapPin, Phone, Clock, Star, DollarSign, Users, Heart, Sparkles, Lightbulb, UtensilsCrossed, Play, Eye, Calendar } from "lucide-react";
+import { ArrowLeft, MapPin, Phone, Clock, Star, DollarSign, Users, Heart, Sparkles, Lightbulb, UtensilsCrossed, Play, Eye, Calendar, MessageSquare, MessageCircle, Send, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { SEO } from "@/components/SEO";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import type { Restaurant, Review, RestaurantInsights, Menu, YoutubeVideo } from "@shared/schema";
+import type { Restaurant, Review, RestaurantInsights, Menu, YoutubeVideo, ExternalReview } from "@shared/schema";
 
 const TEMP_USER_ID = "guest-user";
+
+type AICardType = "reviews" | "menu" | "howToEat" | "ordering";
+
+interface ChatMessage {
+  role: "user" | "assistant";
+  content: string;
+}
 
 export default function RestaurantDetailPage() {
   const { t, language } = useLanguage();
@@ -24,6 +33,13 @@ export default function RestaurantDetailPage() {
   const [isReviewDialogOpen, setIsReviewDialogOpen] = useState(false);
   const [reviewRating, setReviewRating] = useState(0);
   const [reviewComment, setReviewComment] = useState("");
+  
+  const [isAIChatOpen, setIsAIChatOpen] = useState(false);
+  const [currentAICard, setCurrentAICard] = useState<AICardType | null>(null);
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
+  const [chatInput, setChatInput] = useState("");
+  const [isSendingMessage, setIsSendingMessage] = useState(false);
+  const chatScrollRef = useRef<HTMLDivElement>(null);
 
   const { data: restaurant, isLoading: loadingRestaurant } = useQuery<Restaurant>({
     queryKey: ["/api/restaurants", restaurantId],
@@ -55,7 +71,89 @@ export default function RestaurantDetailPage() {
     enabled: !!restaurantId,
   });
 
+  const { data: externalReviews = [] } = useQuery<ExternalReview[]>({
+    queryKey: ["/api/restaurants", restaurantId, "external-reviews"],
+    enabled: !!restaurantId,
+  });
+
   const isSaved = savedStatus?.isSaved || false;
+
+  useEffect(() => {
+    if (chatScrollRef.current) {
+      chatScrollRef.current.scrollTop = chatScrollRef.current.scrollHeight;
+    }
+  }, [chatMessages]);
+
+  const openAIChat = (cardType: AICardType) => {
+    setCurrentAICard(cardType);
+    setIsAIChatOpen(true);
+    setChatMessages([]);
+    setChatInput("");
+  };
+
+  const closeAIChat = () => {
+    setIsAIChatOpen(false);
+    setCurrentAICard(null);
+    setChatMessages([]);
+    setChatInput("");
+  };
+
+  const sendChatMessage = async () => {
+    if (!chatInput.trim() || isSendingMessage || !restaurant || !currentAICard) return;
+
+    const userMessage = chatInput.trim();
+    setChatInput("");
+    setChatMessages(prev => [...prev, { role: "user", content: userMessage }]);
+    setIsSendingMessage(true);
+
+    try {
+      const context = {
+        cardType: currentAICard,
+        restaurant: {
+          id: restaurant.id,
+          name: language === "en" ? restaurant.nameEn : restaurant.name,
+          cuisine: restaurant.cuisine,
+          description: language === "en" ? restaurant.descriptionEn : restaurant.description,
+        },
+        menus: menus.map(m => ({
+          name: language === "en" ? m.nameEn : m.name,
+          description: language === "en" ? m.descriptionEn : m.description,
+          price: m.price,
+          category: m.category,
+        })),
+        externalReviews: externalReviews.map(r => ({
+          source: r.source,
+          rating: r.rating,
+          comment: language === "en" ? (r.commentEn || r.comment) : r.comment,
+        })),
+        insights,
+      };
+
+      const response = await fetch("/api/ai-chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          message: userMessage,
+          language,
+          context,
+          conversationHistory: chatMessages,
+        }),
+      });
+
+      if (!response.ok) throw new Error("Failed to send message");
+
+      const data = await response.json();
+      setChatMessages(prev => [...prev, { role: "assistant", content: data.response }]);
+    } catch (error) {
+      toast({
+        title: language === "en" ? "Error" : "오류",
+        description: language === "en" ? "Failed to send message" : "메시지 전송에 실패했습니다",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSendingMessage(false);
+    }
+  };
 
   const saveMutation = useMutation({
     mutationFn: async () => {
@@ -428,6 +526,91 @@ export default function RestaurantDetailPage() {
               </Card>
             )}
 
+            {/* AI Assistant Cards */}
+            <div className="mb-6">
+              <div className="flex items-center gap-2 mb-4">
+                <Sparkles className="w-5 h-5 text-primary" />
+                <h2 className="font-semibold">{language === "en" ? "AI Assistant" : "AI 도우미"}</h2>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                {/* Review Analysis Card */}
+                <Card 
+                  className="p-4 hover-elevate active-elevate-2 cursor-pointer"
+                  onClick={() => openAIChat("reviews")}
+                  data-testid="card-ai-reviews"
+                >
+                  <div className="flex flex-col items-center text-center gap-2">
+                    <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+                      <MessageSquare className="w-6 h-6 text-primary" />
+                    </div>
+                    <h3 className="font-semibold text-sm">
+                      {language === "en" ? "Review Analysis" : "리뷰 분석"}
+                    </h3>
+                    <p className="text-xs text-muted-foreground">
+                      {language === "en" ? "Ask about reviews" : "리뷰 궁금한 점"}
+                    </p>
+                  </div>
+                </Card>
+
+                {/* Menu Recommendations Card */}
+                <Card 
+                  className="p-4 hover-elevate active-elevate-2 cursor-pointer"
+                  onClick={() => openAIChat("menu")}
+                  data-testid="card-ai-menu"
+                >
+                  <div className="flex flex-col items-center text-center gap-2">
+                    <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+                      <UtensilsCrossed className="w-6 h-6 text-primary" />
+                    </div>
+                    <h3 className="font-semibold text-sm">
+                      {language === "en" ? "Menu Guide" : "메뉴 추천"}
+                    </h3>
+                    <p className="text-xs text-muted-foreground">
+                      {language === "en" ? "Get menu tips" : "메뉴 추천받기"}
+                    </p>
+                  </div>
+                </Card>
+
+                {/* How to Eat Card */}
+                <Card 
+                  className="p-4 hover-elevate active-elevate-2 cursor-pointer"
+                  onClick={() => openAIChat("howToEat")}
+                  data-testid="card-ai-how-to-eat"
+                >
+                  <div className="flex flex-col items-center text-center gap-2">
+                    <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+                      <Lightbulb className="w-6 h-6 text-primary" />
+                    </div>
+                    <h3 className="font-semibold text-sm">
+                      {language === "en" ? "How to Eat" : "먹는 방법"}
+                    </h3>
+                    <p className="text-xs text-muted-foreground">
+                      {language === "en" ? "Learn eating tips" : "먹는 법 배우기"}
+                    </p>
+                  </div>
+                </Card>
+
+                {/* Ordering Tips Card */}
+                <Card 
+                  className="p-4 hover-elevate active-elevate-2 cursor-pointer"
+                  onClick={() => openAIChat("ordering")}
+                  data-testid="card-ai-ordering"
+                >
+                  <div className="flex flex-col items-center text-center gap-2">
+                    <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+                      <MessageCircle className="w-6 h-6 text-primary" />
+                    </div>
+                    <h3 className="font-semibold text-sm">
+                      {language === "en" ? "Ordering Tips" : "주문 요령"}
+                    </h3>
+                    <p className="text-xs text-muted-foreground">
+                      {language === "en" ? "Order like a local" : "현지인처럼 주문"}
+                    </p>
+                  </div>
+                </Card>
+              </div>
+            </div>
+
             {/* AI Insights Section */}
             {insights && (
               <Card className="p-4 mb-6 border-primary/20">
@@ -640,6 +823,131 @@ export default function RestaurantDetailPage() {
               {reviewMutation.isPending ? "..." : t("review.submit")}
             </Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* AI Chat Dialog */}
+      <Dialog open={isAIChatOpen} onOpenChange={closeAIChat}>
+        <DialogContent className="max-w-md h-[80vh] flex flex-col p-0">
+          <DialogHeader className="px-4 pt-4 pb-3 border-b">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                {currentAICard === "reviews" && <MessageSquare className="w-5 h-5 text-primary" />}
+                {currentAICard === "menu" && <UtensilsCrossed className="w-5 h-5 text-primary" />}
+                {currentAICard === "howToEat" && <Lightbulb className="w-5 h-5 text-primary" />}
+                {currentAICard === "ordering" && <MessageCircle className="w-5 h-5 text-primary" />}
+                <DialogTitle>
+                  {currentAICard === "reviews" && (language === "en" ? "Review Analysis" : "리뷰 분석")}
+                  {currentAICard === "menu" && (language === "en" ? "Menu Guide" : "메뉴 추천")}
+                  {currentAICard === "howToEat" && (language === "en" ? "How to Eat" : "먹는 방법")}
+                  {currentAICard === "ordering" && (language === "en" ? "Ordering Tips" : "주문 요령")}
+                </DialogTitle>
+              </div>
+              <Button
+                size="icon"
+                variant="ghost"
+                onClick={closeAIChat}
+                data-testid="button-close-ai-chat"
+              >
+                <X className="w-4 h-4" />
+              </Button>
+            </div>
+            <DialogDescription className="text-xs">
+              {language === "en" 
+                ? "Chat with AI assistant about " + restaurantName
+                : restaurantName + " 에 대해 AI와 대화하기"}
+            </DialogDescription>
+          </DialogHeader>
+
+          {/* Chat Messages */}
+          <div 
+            ref={chatScrollRef}
+            className="flex-1 overflow-y-auto px-4 py-3 space-y-3"
+            data-testid="chat-messages-container"
+          >
+            {chatMessages.length === 0 ? (
+              <div className="flex flex-col items-center justify-center h-full text-center py-8">
+                <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-3">
+                  <Sparkles className="w-8 h-8 text-primary" />
+                </div>
+                <p className="text-sm text-muted-foreground mb-2">
+                  {language === "en" 
+                    ? "Start a conversation with AI" 
+                    : "AI와 대화를 시작하세요"}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {currentAICard === "reviews" && (language === "en" 
+                    ? "Ask about customer reviews and ratings" 
+                    : "고객 리뷰와 평점에 대해 물어보세요")}
+                  {currentAICard === "menu" && (language === "en" 
+                    ? "Get personalized menu recommendations" 
+                    : "맞춤형 메뉴 추천을 받아보세요")}
+                  {currentAICard === "howToEat" && (language === "en" 
+                    ? "Learn how to eat Korean food properly" 
+                    : "한국 음식 먹는 법을 배워보세요")}
+                  {currentAICard === "ordering" && (language === "en" 
+                    ? "Learn ordering tips and phrases" 
+                    : "주문 팁과 표현을 배워보세요")}
+                </p>
+              </div>
+            ) : (
+              chatMessages.map((message, index) => (
+                <div
+                  key={index}
+                  className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}
+                  data-testid={`chat-message-${index}`}
+                >
+                  <div
+                    className={`max-w-[80%] rounded-lg px-3 py-2 ${
+                      message.role === "user"
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-muted"
+                    }`}
+                  >
+                    <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                  </div>
+                </div>
+              ))
+            )}
+            {isSendingMessage && (
+              <div className="flex justify-start">
+                <div className="max-w-[80%] rounded-lg px-3 py-2 bg-muted">
+                  <div className="flex gap-1">
+                    <div className="w-2 h-2 rounded-full bg-muted-foreground animate-bounce" style={{ animationDelay: "0ms" }} />
+                    <div className="w-2 h-2 rounded-full bg-muted-foreground animate-bounce" style={{ animationDelay: "150ms" }} />
+                    <div className="w-2 h-2 rounded-full bg-muted-foreground animate-bounce" style={{ animationDelay: "300ms" }} />
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Chat Input */}
+          <div className="px-4 pb-4 pt-3 border-t">
+            <div className="flex gap-2">
+              <Input
+                placeholder={language === "en" ? "Type your message..." : "메시지를 입력하세요..."}
+                value={chatInput}
+                onChange={(e) => setChatInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault();
+                    sendChatMessage();
+                  }
+                }}
+                disabled={isSendingMessage}
+                data-testid="input-chat-message"
+              />
+              <Button
+                size="icon"
+                onClick={sendChatMessage}
+                disabled={!chatInput.trim() || isSendingMessage}
+                data-testid="button-send-message"
+              >
+                <Send className="w-4 h-4" />
+              </Button>
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
     </>
