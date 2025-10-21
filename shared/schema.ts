@@ -256,3 +256,76 @@ export const insertRestaurantInsightsSchema = createInsertSchema(restaurantInsig
 
 export type InsertRestaurantInsights = z.infer<typeof insertRestaurantInsightsSchema>;
 export type RestaurantInsights = typeof restaurantInsights.$inferSelect;
+
+// Restaurant Owners - Links users to restaurants they manage
+export const restaurantOwners = pgTable("restaurant_owners", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  restaurantId: varchar("restaurant_id").notNull().references(() => restaurants.id),
+  role: text("role").notNull().default("owner"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+}, (table) => [
+  index("idx_restaurant_owners_user_id").on(table.userId),
+  index("idx_restaurant_owners_restaurant_id").on(table.restaurantId),
+  unique().on(table.userId, table.restaurantId),
+]);
+
+export const insertRestaurantOwnerSchema = createInsertSchema(restaurantOwners).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertRestaurantOwner = z.infer<typeof insertRestaurantOwnerSchema>;
+export type RestaurantOwner = typeof restaurantOwners.$inferSelect;
+
+// Review Responses - Restaurant owner responses to reviews
+export const reviewResponses = pgTable("review_responses", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  reviewId: varchar("review_id").notNull().references(() => reviews.id),
+  restaurantId: varchar("restaurant_id").notNull().references(() => restaurants.id),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  response: text("response").notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+}, (table) => [
+  index("idx_review_responses_review_id").on(table.reviewId),
+  index("idx_review_responses_restaurant_id").on(table.restaurantId),
+  unique().on(table.reviewId),
+]);
+
+export const insertReviewResponseSchema = createInsertSchema(reviewResponses).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertReviewResponse = z.infer<typeof insertReviewResponseSchema>;
+export type ReviewResponse = typeof reviewResponses.$inferSelect;
+
+// Promotions - Restaurant promotional offers
+export const promotions = pgTable("promotions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  restaurantId: varchar("restaurant_id").notNull().references(() => restaurants.id),
+  title: text("title").notNull(),
+  titleEn: text("title_en").notNull(),
+  description: text("description").notNull(),
+  descriptionEn: text("description_en").notNull(),
+  discountType: text("discount_type").notNull(),
+  discountValue: integer("discount_value"),
+  startDate: timestamp("start_date").notNull(),
+  endDate: timestamp("end_date").notNull(),
+  isActive: integer("is_active").notNull().default(1),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+}, (table) => [
+  index("idx_promotions_restaurant_id").on(table.restaurantId),
+  index("idx_promotions_is_active").on(table.isActive),
+  index("idx_promotions_dates").on(table.startDate, table.endDate),
+]);
+
+export const insertPromotionSchema = createInsertSchema(promotions).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertPromotion = z.infer<typeof insertPromotionSchema>;
+export type Promotion = typeof promotions.$inferSelect;

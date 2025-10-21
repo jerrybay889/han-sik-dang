@@ -22,6 +22,12 @@ import {
   type InsertYoutubeVideo,
   type ExternalReview,
   type InsertExternalReview,
+  type RestaurantOwner,
+  type InsertRestaurantOwner,
+  type ReviewResponse,
+  type InsertReviewResponse,
+  type Promotion,
+  type InsertPromotion,
   users,
   restaurants,
   reviews,
@@ -32,6 +38,9 @@ import {
   menus,
   youtubeVideos,
   externalReviews,
+  restaurantOwners,
+  reviewResponses,
+  promotions,
 } from "@shared/schema";
 
 const client = neon(process.env.DATABASE_URL!);
@@ -79,6 +88,34 @@ export interface IStorage {
   
   getExternalReviewsByRestaurant(restaurantId: string): Promise<ExternalReview[]>;
   createExternalReview(review: InsertExternalReview): Promise<ExternalReview>;
+  
+  // Restaurant Owner operations
+  getRestaurantsByOwner(userId: string): Promise<Restaurant[]>;
+  isRestaurantOwner(userId: string, restaurantId: string): Promise<boolean>;
+  createRestaurantOwner(owner: InsertRestaurantOwner): Promise<RestaurantOwner>;
+  
+  // Review Response operations
+  getResponseByReviewId(reviewId: string): Promise<ReviewResponse | undefined>;
+  getResponsesByRestaurant(restaurantId: string): Promise<ReviewResponse[]>;
+  createReviewResponse(response: InsertReviewResponse): Promise<ReviewResponse>;
+  updateReviewResponse(id: string, userId: string, restaurantId: string, responseText: string): Promise<ReviewResponse | undefined>;
+  deleteReviewResponse(id: string, userId: string, restaurantId: string): Promise<boolean>;
+  
+  // Promotion operations
+  getPromotionsByRestaurant(restaurantId: string): Promise<Promotion[]>;
+  getActivePromotionsByRestaurant(restaurantId: string): Promise<Promotion[]>;
+  createPromotion(promotion: InsertPromotion): Promise<Promotion>;
+  updatePromotion(id: string, userId: string, restaurantId: string, data: Partial<InsertPromotion>): Promise<Promotion | undefined>;
+  deletePromotion(id: string, userId: string, restaurantId: string): Promise<boolean>;
+  
+  // Dashboard statistics
+  getRestaurantDashboardStats(restaurantId: string): Promise<{
+    totalReviews: number;
+    averageRating: number;
+    ratingDistribution: { rating: number; count: number }[];
+    recentReviews: Review[];
+    monthlyReviewCounts: { month: string; count: number }[];
+  }>;
 }
 
 export class DbStorage implements IStorage {
@@ -305,6 +342,224 @@ export class DbStorage implements IStorage {
   async createExternalReview(insertReview: InsertExternalReview): Promise<ExternalReview> {
     const result = await db.insert(externalReviews).values(insertReview).returning();
     return result[0];
+  }
+
+  // Restaurant Owner operations
+  async getRestaurantsByOwner(userId: string): Promise<Restaurant[]> {
+    const result = await db
+      .select({ restaurant: restaurants })
+      .from(restaurantOwners)
+      .innerJoin(restaurants, eq(restaurantOwners.restaurantId, restaurants.id))
+      .where(eq(restaurantOwners.userId, userId));
+    return result.map(r => r.restaurant);
+  }
+
+  async isRestaurantOwner(userId: string, restaurantId: string): Promise<boolean> {
+    const result = await db
+      .select()
+      .from(restaurantOwners)
+      .where(
+        sql`${restaurantOwners.userId} = ${userId} AND ${restaurantOwners.restaurantId} = ${restaurantId}`
+      );
+    return result.length > 0;
+  }
+
+  async createRestaurantOwner(owner: InsertRestaurantOwner): Promise<RestaurantOwner> {
+    const result = await db.insert(restaurantOwners).values(owner).returning();
+    return result[0];
+  }
+
+  // Review Response operations
+  async getResponseByReviewId(reviewId: string): Promise<ReviewResponse | undefined> {
+    const result = await db
+      .select()
+      .from(reviewResponses)
+      .where(eq(reviewResponses.reviewId, reviewId));
+    return result[0];
+  }
+
+  async getResponsesByRestaurant(restaurantId: string): Promise<ReviewResponse[]> {
+    return await db
+      .select()
+      .from(reviewResponses)
+      .where(eq(reviewResponses.restaurantId, restaurantId))
+      .orderBy(desc(reviewResponses.createdAt));
+  }
+
+  async createReviewResponse(response: InsertReviewResponse): Promise<ReviewResponse> {
+    const result = await db.insert(reviewResponses).values(response).returning();
+    return result[0];
+  }
+
+  async updateReviewResponse(
+    id: string,
+    userId: string,
+    restaurantId: string,
+    responseText: string
+  ): Promise<ReviewResponse | undefined> {
+    // First verify ownership
+    const existing = await db
+      .select()
+      .from(reviewResponses)
+      .where(eq(reviewResponses.id, id));
+    
+    if (existing.length === 0 || existing[0].userId !== userId || existing[0].restaurantId !== restaurantId) {
+      return undefined;
+    }
+
+    const result = await db
+      .update(reviewResponses)
+      .set({ response: responseText, updatedAt: new Date() })
+      .where(eq(reviewResponses.id, id))
+      .returning();
+    return result[0];
+  }
+
+  async deleteReviewResponse(id: string, userId: string, restaurantId: string): Promise<boolean> {
+    // First verify ownership
+    const existing = await db
+      .select()
+      .from(reviewResponses)
+      .where(eq(reviewResponses.id, id));
+    
+    if (existing.length === 0 || existing[0].userId !== userId || existing[0].restaurantId !== restaurantId) {
+      return false;
+    }
+
+    await db.delete(reviewResponses).where(eq(reviewResponses.id, id));
+    return true;
+  }
+
+  // Promotion operations
+  async getPromotionsByRestaurant(restaurantId: string): Promise<Promotion[]> {
+    return await db
+      .select()
+      .from(promotions)
+      .where(eq(promotions.restaurantId, restaurantId))
+      .orderBy(desc(promotions.createdAt));
+  }
+
+  async getActivePromotionsByRestaurant(restaurantId: string): Promise<Promotion[]> {
+    const now = new Date();
+    return await db
+      .select()
+      .from(promotions)
+      .where(
+        sql`${promotions.restaurantId} = ${restaurantId} AND ${promotions.isActive} = 1 AND ${promotions.startDate} <= ${now} AND ${promotions.endDate} >= ${now}`
+      )
+      .orderBy(desc(promotions.createdAt));
+  }
+
+  async createPromotion(promotion: InsertPromotion): Promise<Promotion> {
+    const result = await db.insert(promotions).values(promotion).returning();
+    return result[0];
+  }
+
+  async updatePromotion(
+    id: string,
+    userId: string,
+    restaurantId: string,
+    data: Partial<InsertPromotion>
+  ): Promise<Promotion | undefined> {
+    // Verify ownership first
+    const isOwner = await this.isRestaurantOwner(userId, restaurantId);
+    if (!isOwner) {
+      return undefined;
+    }
+
+    const existing = await db
+      .select()
+      .from(promotions)
+      .where(eq(promotions.id, id));
+    
+    if (existing.length === 0 || existing[0].restaurantId !== restaurantId) {
+      return undefined;
+    }
+
+    const result = await db
+      .update(promotions)
+      .set(data)
+      .where(eq(promotions.id, id))
+      .returning();
+    return result[0];
+  }
+
+  async deletePromotion(id: string, userId: string, restaurantId: string): Promise<boolean> {
+    // Verify ownership first
+    const isOwner = await this.isRestaurantOwner(userId, restaurantId);
+    if (!isOwner) {
+      return false;
+    }
+
+    const existing = await db
+      .select()
+      .from(promotions)
+      .where(eq(promotions.id, id));
+    
+    if (existing.length === 0 || existing[0].restaurantId !== restaurantId) {
+      return false;
+    }
+
+    await db.delete(promotions).where(eq(promotions.id, id));
+    return true;
+  }
+
+  // Dashboard statistics
+  async getRestaurantDashboardStats(restaurantId: string): Promise<{
+    totalReviews: number;
+    averageRating: number;
+    ratingDistribution: { rating: number; count: number }[];
+    recentReviews: Review[];
+    monthlyReviewCounts: { month: string; count: number }[];
+  }> {
+    // Get total reviews and average rating
+    const reviewStats = await db
+      .select({
+        totalReviews: sql<number>`cast(count(*) as int)`,
+        averageRating: sql<number>`cast(avg(${reviews.rating}) as real)`,
+      })
+      .from(reviews)
+      .where(eq(reviews.restaurantId, restaurantId));
+
+    // Get rating distribution
+    const ratingDist = await db
+      .select({
+        rating: reviews.rating,
+        count: sql<number>`cast(count(*) as int)`,
+      })
+      .from(reviews)
+      .where(eq(reviews.restaurantId, restaurantId))
+      .groupBy(reviews.rating)
+      .orderBy(desc(reviews.rating));
+
+    // Get recent reviews (last 10)
+    const recentReviews = await db
+      .select()
+      .from(reviews)
+      .where(eq(reviews.restaurantId, restaurantId))
+      .orderBy(desc(reviews.createdAt))
+      .limit(10);
+
+    // Get monthly review counts (last 6 months)
+    const monthlyStats = await db
+      .select({
+        month: sql<string>`to_char(${reviews.createdAt}, 'YYYY-MM')`,
+        count: sql<number>`cast(count(*) as int)`,
+      })
+      .from(reviews)
+      .where(
+        sql`${reviews.restaurantId} = ${restaurantId} AND ${reviews.createdAt} >= NOW() - INTERVAL '6 months'`
+      )
+      .groupBy(sql`to_char(${reviews.createdAt}, 'YYYY-MM')`)
+      .orderBy(sql`to_char(${reviews.createdAt}, 'YYYY-MM')`);
+
+    return {
+      totalReviews: reviewStats[0]?.totalReviews || 0,
+      averageRating: reviewStats[0]?.averageRating || 0,
+      ratingDistribution: ratingDist,
+      recentReviews: recentReviews,
+      monthlyReviewCounts: monthlyStats,
+    };
   }
 }
 
