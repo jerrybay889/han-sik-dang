@@ -85,11 +85,90 @@ export default function RestaurantDetailPage() {
     }
   }, [chatMessages]);
 
+  const getInitialPrompt = (cardType: AICardType): string => {
+    if (cardType === "reviews") {
+      return language === "en" 
+        ? "Please analyze the reviews for this restaurant and tell me what customers love most about it."
+        : "이 레스토랑의 리뷰를 분석해서 고객들이 가장 좋아하는 점을 알려주세요.";
+    } else if (cardType === "menu") {
+      return language === "en"
+        ? "What are the most popular and recommended menu items here? Please provide recommendations."
+        : "이 곳에서 가장 인기 있고 추천하는 메뉴는 무엇인가요? 추천해주세요.";
+    } else if (cardType === "howToEat") {
+      return language === "en"
+        ? "How should I eat Korean food at this restaurant? Please teach me the proper way and etiquette."
+        : "이 레스토랑에서 한국 음식을 어떻게 먹어야 하나요? 올바른 방법과 에티켓을 알려주세요.";
+    } else if (cardType === "ordering") {
+      return language === "en"
+        ? "What Korean phrases should I know for ordering at this restaurant? Please teach me useful expressions."
+        : "이 레스토랑에서 주문할 때 알아야 할 한국어 표현을 알려주세요. 유용한 표현을 가르쳐주세요.";
+    }
+    return "";
+  };
+
+  const sendInitialMessage = async (cardType: AICardType) => {
+    if (!restaurant) return;
+
+    const initialPrompt = getInitialPrompt(cardType);
+    if (!initialPrompt) return;
+
+    setIsSendingMessage(true);
+
+    try {
+      const context = {
+        cardType,
+        restaurant: {
+          id: restaurant.id,
+          name: language === "en" ? restaurant.nameEn : restaurant.name,
+          cuisine: restaurant.cuisine,
+          description: language === "en" ? restaurant.descriptionEn : restaurant.description,
+        },
+        menus: menus.map(m => ({
+          name: language === "en" ? m.nameEn : m.name,
+          description: language === "en" ? m.descriptionEn : m.description,
+          price: m.price,
+          category: m.category,
+        })),
+        externalReviews: externalReviews.map(r => ({
+          source: r.source,
+          rating: r.rating,
+          comment: language === "en" ? (r.commentEn || r.comment) : r.comment,
+        })),
+        insights,
+      };
+
+      const response = await fetch("/api/ai-chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          message: initialPrompt,
+          language,
+          context,
+          conversationHistory: [],
+        }),
+      });
+
+      if (!response.ok) throw new Error("Failed to send initial message");
+
+      const data = await response.json();
+      setChatMessages([{ role: "assistant", content: data.response }]);
+    } catch (error) {
+      toast({
+        title: language === "en" ? "Error" : "오류",
+        description: language === "en" ? "Failed to load AI analysis" : "AI 분석을 불러오는데 실패했습니다",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSendingMessage(false);
+    }
+  };
+
   const openAIChat = (cardType: AICardType) => {
     setCurrentAICard(cardType);
     setIsAIChatOpen(true);
     setChatMessages([]);
     setChatInput("");
+    sendInitialMessage(cardType);
   };
 
   const closeAIChat = () => {
