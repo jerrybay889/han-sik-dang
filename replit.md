@@ -6,14 +6,16 @@ han sik dang is a hybrid content platform and utility app for discovering Korean
 
 ## Recent Changes
 
-**October 21, 2025 - PostgreSQL Migration & AI Insights Completion**
+**October 21, 2025 - Full Platform Launch Ready**
 -   ✅ Migrated from in-memory storage to PostgreSQL (Neon)
 -   ✅ Completed data seeding for 30 restaurant records (15 unique Seoul restaurants)
 -   ✅ Generated AI insights for all 30 restaurants using Google Gemini 2.5 Flash
 -   ✅ Integrated external reviews from Google, Naver, TripAdvisor
 -   ✅ Added YouTube video content for restaurant discovery
 -   ✅ AI chat concierge fully functional with complete restaurant context
--   ✅ E2E testing verified: homepage, restaurant details, AI chat functionality
+-   ✅ User review system (create, edit, delete) with ownership validation
+-   ✅ Google Analytics 4 integration for user tracking and analytics
+-   ✅ E2E testing verified: homepage, restaurant details, AI chat, review creation
 
 ## User Preferences
 
@@ -55,8 +57,35 @@ Preferred communication style: Simple, everyday language.
 
 ### Authentication and Authorization
 
--   **Foundation**: User schema, storage interface methods (`getUser`, `createUser`), session management with `connect-pg-simple`.
--   **Key Decisions**: Cookie-based sessions, prepared password storage, 401 handling, PostgreSQL integration for session store.
+-   **System**: Replit Auth with OIDC (OpenID Connect)
+-   **Implementation**: Passport.js strategy, session-based authentication via `connect-pg-simple`
+-   **User Management**: Auto-upsert on login (claims.sub → users.id), JWT refresh token support
+-   **Storage**: User schema with id (OIDC sub), email, firstName, lastName, profileImageUrl
+-   **Key Decisions**: Cookie-based sessions, PostgreSQL session store, isAuthenticated middleware
+
+### User Reviews
+
+-   **Features**: Create, read, update, delete reviews with ownership validation
+-   **Schema**: reviews table with userId (FK to users), restaurantId (FK to restaurants), rating (1-5 stars), comment, timestamps
+-   **API Endpoints**:
+    - POST /api/reviews (auth required) - Create review
+    - PATCH /api/reviews/:id (auth + ownership) - Update review
+    - DELETE /api/reviews/:id (auth + ownership) - Delete review
+    - GET /api/reviews/:restaurantId - Get all reviews for restaurant
+-   **Auto-updates**: Restaurant rating recalculated on review create/update/delete
+-   **Frontend**: Dialog-based review editor, star rating input, ownership-based Edit/Delete buttons
+-   **Key Decisions**: User-owned reviews only, automatic rating aggregation, React Query cache invalidation
+
+### Analytics and Tracking
+
+-   **Platform**: Google Analytics 4 (GA4)
+-   **Implementation**: Custom analytics.ts utility with gtag integration
+-   **Tracking**:
+    - Automatic page view tracking on route changes (useAnalytics hook)
+    - Custom event tracking via trackEvent function
+    - Initialization on app mount with VITE_GA_MEASUREMENT_ID
+-   **Files**: client/src/lib/analytics.ts, client/src/hooks/use-analytics.tsx, client/env.d.ts
+-   **Configuration**: Requires VITE_GA_MEASUREMENT_ID secret (optional, graceful degradation if missing)
 
 ### AI Restaurant Insights
 
