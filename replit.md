@@ -6,6 +6,22 @@ han sik dang is a hybrid content platform and utility app for discovering Korean
 
 ## Recent Changes
 
+**October 22, 2025 - Maps & Filtering System**
+-   ✅ **Naver Maps Integration**: Interactive maps on restaurant detail pages with dynamic 4-language support (en, ko, zh, ja)
+    - NaverMap component with markers and "Get Directions" integration
+    - Client ID configured (maxwn48tuf) in index.html with dynamic language switching
+    - Maps API loads based on user's language preference
+-   ✅ **GPS Location Services**: "Nearby" filter using browser Geolocation API
+    - Distance calculation utilities (Haversine formula)
+    - Filter restaurants within 5km of user location
+    - Automatic sort by distance when GPS enabled
+-   ✅ **Advanced Filtering**: Multi-criteria filtering system
+    - Price range filter (₩, ₩₩, ₩₩₩)
+    - Cuisine type filter (dynamic from restaurant data)
+    - Sort options: rating, reviews, distance
+    - Frontend-based filtering with React useMemo for performance
+-   ✅ **UI Components**: Filter bar on main page with ScrollArea for mobile responsiveness
+
 **October 21, 2025 - Platform Updates**
 -   ✅ **Phase 1 (Advertising)**: Google AdSense integration complete with strategic ad placement
 -   ✅ **Phase 2 (Multilingual)**: 9-language support (Korean, English, Japanese, Chinese Simplified/Traditional, Spanish, French, German, Vietnamese)
