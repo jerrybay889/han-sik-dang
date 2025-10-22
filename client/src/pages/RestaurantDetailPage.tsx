@@ -50,6 +50,8 @@ export default function RestaurantDetailPage() {
   const [isSendingMessage, setIsSendingMessage] = useState(false);
   const chatScrollRef = useRef<HTMLDivElement>(null);
   const [isGalleryOpen, setIsGalleryOpen] = useState(false);
+  const [showAllMenus, setShowAllMenus] = useState(false);
+  const [showAllVideos, setShowAllVideos] = useState(false);
 
   const { data: restaurant, isLoading: loadingRestaurant } = useQuery<Restaurant>({
     queryKey: ["/api/restaurants", restaurantId],
@@ -848,46 +850,60 @@ export default function RestaurantDetailPage() {
                     ))}
                   </div>
                 ) : (
-                  <div className="space-y-3">
-                    {menus.map((menu) => (
-                      <Card key={menu.id} className="p-3 hover-elevate" data-testid={`menu-item-${menu.id}`}>
-                        <div className="flex justify-between items-start gap-3">
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 mb-1 flex-wrap">
-                              <h3 className="font-semibold" data-testid="text-menu-name">
-                                {language === "en" ? menu.nameEn : menu.name}
-                              </h3>
-                              {menu.isPopular === 1 && (
-                                <Badge variant="secondary" className="text-xs">
-                                  {language === "en" ? "Popular" : "인기"}
-                                </Badge>
+                  <>
+                    <div className="space-y-3">
+                      {(showAllMenus ? menus : menus.slice(0, 5)).map((menu) => (
+                        <Card key={menu.id} className="p-3 hover-elevate" data-testid={`menu-item-${menu.id}`}>
+                          <div className="flex justify-between items-start gap-3">
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1 flex-wrap">
+                                <h3 className="font-semibold" data-testid="text-menu-name">
+                                  {language === "en" ? menu.nameEn : menu.name}
+                                </h3>
+                                {menu.isPopular === 1 && (
+                                  <Badge variant="secondary" className="text-xs">
+                                    {language === "en" ? "Popular" : "인기"}
+                                  </Badge>
+                                )}
+                                {menu.isRecommended === 1 && (
+                                  <Badge variant="outline" className="text-xs border-primary text-primary">
+                                    {language === "en" ? "Recommended" : "추천"}
+                                  </Badge>
+                                )}
+                              </div>
+                              {menu.description && (
+                                <p className="text-sm text-muted-foreground mb-1" data-testid="text-menu-description">
+                                  {language === "en" ? menu.descriptionEn : menu.description}
+                                </p>
                               )}
-                              {menu.isRecommended === 1 && (
-                                <Badge variant="outline" className="text-xs border-primary text-primary">
-                                  {language === "en" ? "Recommended" : "추천"}
-                                </Badge>
+                              {menu.category && (
+                                <p className="text-xs text-muted-foreground">
+                                  {menu.category}
+                                </p>
                               )}
                             </div>
-                            {menu.description && (
-                              <p className="text-sm text-muted-foreground mb-1" data-testid="text-menu-description">
-                                {language === "en" ? menu.descriptionEn : menu.description}
+                            <div className="flex-shrink-0">
+                              <p className="font-semibold text-primary" data-testid="text-menu-price">
+                                ₩{menu.price.toLocaleString()}
                               </p>
-                            )}
-                            {menu.category && (
-                              <p className="text-xs text-muted-foreground">
-                                {menu.category}
-                              </p>
-                            )}
+                            </div>
                           </div>
-                          <div className="flex-shrink-0">
-                            <p className="font-semibold text-primary" data-testid="text-menu-price">
-                              ₩{menu.price.toLocaleString()}
-                            </p>
-                          </div>
-                        </div>
-                      </Card>
-                    ))}
-                  </div>
+                        </Card>
+                      ))}
+                    </div>
+                    {menus.length > 5 && (
+                      <Button
+                        variant="outline"
+                        className="w-full mt-3"
+                        onClick={() => setShowAllMenus(!showAllMenus)}
+                        data-testid="button-toggle-menus"
+                      >
+                        {showAllMenus 
+                          ? (language === "en" ? "Show Less" : "접기")
+                          : (language === "en" ? `Show All (${menus.length})` : `전체보기 (${menus.length}개)`)}
+                      </Button>
+                    )}
+                  </>
                 )}
               </Card>
             )}
