@@ -36,6 +36,94 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Debug endpoint - Make current user a restaurant owner
+  app.post('/api/debug/make-me-owner', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      // Get a random restaurant (or the first one)
+      const restaurants = await storage.getAllRestaurants();
+      if (restaurants.length === 0) {
+        return res.status(404).json({ message: "No restaurants found" });
+      }
+
+      // Use the first restaurant for testing
+      const restaurant = restaurants[0];
+
+      // Check if already an owner
+      const existingOwnership = await storage.getRestaurantsByOwner(userId);
+      if (existingOwnership.length > 0) {
+        return res.json({ 
+          message: "You are already an owner!", 
+          restaurants: existingOwnership.map((r: any) => ({ id: r.id, name: r.name, nameEn: r.nameEn }))
+        });
+      }
+
+      // Add as owner
+      await storage.createRestaurantOwner({
+        userId,
+        restaurantId: restaurant.id,
+        role: "owner",
+      });
+
+      res.json({ 
+        message: "Successfully made you an owner!",
+        restaurant: {
+          id: restaurant.id,
+          name: restaurant.name,
+          nameEn: restaurant.nameEn
+        }
+      });
+    } catch (error) {
+      console.error("Error making user an owner:", error);
+      res.status(500).json({ message: "Failed to make you an owner" });
+    }
+  });
+
+  // Debug endpoint - Make current user an admin
+  app.post('/api/debug/make-me-admin', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      // Get current user
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // Check if already admin
+      if (user.isAdmin === 1) {
+        return res.json({ 
+          message: "You are already an admin!",
+          user: {
+            email: user.email,
+            isAdmin: true
+          }
+        });
+      }
+
+      // Update user to admin
+      await storage.updateUserAdminStatus(userId, 1);
+
+      res.json({ 
+        message: "Successfully made you an admin!",
+        user: {
+          email: user.email,
+          isAdmin: true
+        }
+      });
+    } catch (error) {
+      console.error("Error making user an admin:", error);
+      res.status(500).json({ message: "Failed to make you an admin" });
+    }
+  });
+
   app.post("/api/ai/chat", async (req, res) => {
     try {
       const { message, language = "ko" } = req.body;
