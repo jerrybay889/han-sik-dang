@@ -30,7 +30,7 @@ Preferred communication style: Simple, everyday language.
 -   **Authentication**: Replit Auth with OIDC via Passport.js, session-based (`connect-pg-simple`), auto-upsert on login, JWT refresh token support.
 -   **Authorization**: Role-based access control with `isAdmin` field and middleware for admin routes.
 -   **Admin Dashboard**: Master admin dashboard with 15+ API endpoints (`/api/admin/*`) for managing restaurants, users, reviews, announcements, and event banners, including platform statistics with charts.
--   **Restaurant Dashboard (Backend)**: Backend infrastructure for B2B restaurant management with 12 authenticated API endpoints for ownership verification, review responses, promotions, image management, and analytics.
+-   **Restaurant Dashboard**: Complete B2B restaurant management system with frontend UI and backend API (15+ authenticated endpoints) for ownership verification, review response management (CRUD operations), promotions, image management, and analytics.
 
 ### Data Storage
 
@@ -47,6 +47,44 @@ Preferred communication style: Simple, everyday language.
 ### Analytics
 
 -   **Platform**: Google Analytics 4 (GA4) with custom utility for tracking page views and events.
+
+## Restaurant Owner Dashboard Features
+
+The restaurant owner dashboard is a complete B2B management system accessible at `/dashboard` for authenticated restaurant owners.
+
+### Key Features
+
+1. **Restaurant Selection & Statistics**
+   - Multi-restaurant support for owners with multiple locations
+   - Real-time statistics: total reviews, average rating, rating trend
+   - Visual indicators for rating changes
+
+2. **Review Response Management** (Recently Completed)
+   - View all customer reviews with existing responses
+   - Create new responses to reviews
+   - Edit existing responses
+   - Delete responses
+   - Real-time UI updates using React Query refetchQueries
+   - Professional response templates and guidelines
+
+3. **Promotions Management**
+   - Create bilingual promotions (Korean/English)
+   - Set promotion active dates
+   - Enable/disable promotions
+   - Track promotion status
+
+4. **Image Management**
+   - Upload restaurant images with drag-and-drop
+   - Image preview and management
+   - Showcase restaurant ambiance
+
+### Technical Implementation
+
+- **Frontend**: React with TanStack Query v5 for state management
+- **Cache Strategy**: refetchQueries for immediate UI updates after mutations
+- **API Endpoints**: 15+ authenticated endpoints with ownership verification
+- **Authentication**: Replit Auth (OIDC) with session-based authorization
+- **Data Validation**: Zod schemas for all request/response payloads
 
 ## External Dependencies
 
