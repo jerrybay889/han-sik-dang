@@ -17,6 +17,12 @@ const MyPage = lazy(() => import("@/pages/MyPage"));
 const RestaurantDetailPage = lazy(() => import("@/pages/RestaurantDetailPage"));
 const DashboardPage = lazy(() => import("@/pages/DashboardPage"));
 const AuthPage = lazy(() => import("@/pages/AuthPage"));
+const AdminLayout = lazy(() => import("@/pages/admin/AdminLayout"));
+const AdminDashboard = lazy(() => import("@/pages/admin/AdminDashboard"));
+const AdminRestaurants = lazy(() => import("@/pages/admin/AdminRestaurants"));
+const AdminUsers = lazy(() => import("@/pages/admin/AdminUsers"));
+const AdminReviews = lazy(() => import("@/pages/admin/AdminReviews"));
+const AdminContent = lazy(() => import("@/pages/admin/AdminContent"));
 const NotFound = lazy(() => import("@/pages/not-found"));
 
 function LoadingFallback() {
@@ -43,6 +49,44 @@ function Router() {
         <Route path="/restaurant/:id" component={RestaurantDetailPage} />
         <Route path="/dashboard" component={DashboardPage} />
         <Route path="/login" component={AuthPage} />
+        
+        {/* Admin Routes */}
+        <Route path="/admin">
+          {() => (
+            <AdminLayout>
+              <AdminDashboard />
+            </AdminLayout>
+          )}
+        </Route>
+        <Route path="/admin/restaurants">
+          {() => (
+            <AdminLayout>
+              <AdminRestaurants />
+            </AdminLayout>
+          )}
+        </Route>
+        <Route path="/admin/users">
+          {() => (
+            <AdminLayout>
+              <AdminUsers />
+            </AdminLayout>
+          )}
+        </Route>
+        <Route path="/admin/reviews">
+          {() => (
+            <AdminLayout>
+              <AdminReviews />
+            </AdminLayout>
+          )}
+        </Route>
+        <Route path="/admin/content">
+          {() => (
+            <AdminLayout>
+              <AdminContent />
+            </AdminLayout>
+          )}
+        </Route>
+        
         <Route component={NotFound} />
       </Switch>
     </Suspense>

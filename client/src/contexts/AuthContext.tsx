@@ -1,15 +1,12 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
-
-export interface User {
-  id: string;
-  username: string;
-}
+import type { User } from "@shared/schema";
 
 interface AuthContextType {
   user: User | null;
   login: (user: User) => void;
   logout: () => void;
   isLoading: boolean;
+  refetch: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -18,31 +15,37 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-    if (storedUser) {
-      try {
-        setUser(JSON.parse(storedUser));
-      } catch (error) {
-        console.error("Failed to parse stored user:", error);
-        localStorage.removeItem("user");
+  const fetchUser = async () => {
+    try {
+      const response = await fetch("/api/auth/user");
+      if (response.ok) {
+        const userData = await response.json();
+        setUser(userData);
+      } else {
+        setUser(null);
       }
+    } catch (error) {
+      console.error("Failed to fetch user:", error);
+      setUser(null);
+    } finally {
+      setIsLoading(false);
     }
-    setIsLoading(false);
+  };
+
+  useEffect(() => {
+    fetchUser();
   }, []);
 
   const login = (newUser: User) => {
     setUser(newUser);
-    localStorage.setItem("user", JSON.stringify(newUser));
   };
 
   const logout = () => {
     setUser(null);
-    localStorage.removeItem("user");
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, isLoading }}>
+    <AuthContext.Provider value={{ user, login, logout, isLoading, refetch: fetchUser }}>
       {children}
     </AuthContext.Provider>
   );
