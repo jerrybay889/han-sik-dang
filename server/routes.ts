@@ -1037,6 +1037,81 @@ ${insights && insights.firstTimerTips ? `첫 방문 팁: ${insights.firstTimerTi
     }
   });
 
+  // ===== Restaurant Images Routes =====
+  
+  // Get all images for a restaurant (public)
+  app.get("/api/restaurants/:id/images", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const images = await storage.getRestaurantImages(id);
+      res.json(images);
+    } catch (error) {
+      console.error("Get restaurant images error:", error);
+      res.status(500).json({ error: "Failed to get restaurant images" });
+    }
+  });
+
+  // Add image to restaurant (owner only)
+  app.post("/api/restaurants/:id/images", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+
+      const { id } = req.params;
+      const { imageUrl, displayOrder } = req.body;
+
+      // Verify ownership
+      const isOwner = await storage.isRestaurantOwner(userId, id);
+      if (!isOwner) {
+        return res.status(403).json({ error: "You don't have permission to manage this restaurant" });
+      }
+
+      if (!imageUrl) {
+        return res.status(400).json({ error: "Missing imageUrl" });
+      }
+
+      const image = await storage.createRestaurantImage({
+        restaurantId: id,
+        imageUrl,
+        displayOrder: displayOrder || 0,
+      });
+
+      res.status(201).json(image);
+    } catch (error) {
+      console.error("Create restaurant image error:", error);
+      res.status(500).json({ error: "Failed to add restaurant image" });
+    }
+  });
+
+  // Delete restaurant image (owner only)
+  app.delete("/api/restaurant-images/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+
+      const { id } = req.params;
+      const { restaurantId } = req.body;
+
+      if (!restaurantId) {
+        return res.status(400).json({ error: "Missing restaurantId" });
+      }
+
+      const deleted = await storage.deleteRestaurantImage(id, userId, restaurantId);
+      if (!deleted) {
+        return res.status(404).json({ error: "Image not found or unauthorized" });
+      }
+
+      res.status(204).send();
+    } catch (error) {
+      console.error("Delete restaurant image error:", error);
+      res.status(500).json({ error: "Failed to delete restaurant image" });
+    }
+  });
+
   const httpServer = createServer(app);
 
   return httpServer;

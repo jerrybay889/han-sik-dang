@@ -329,3 +329,23 @@ export const insertPromotionSchema = createInsertSchema(promotions).omit({
 
 export type InsertPromotion = z.infer<typeof insertPromotionSchema>;
 export type Promotion = typeof promotions.$inferSelect;
+
+// Restaurant Images - Multiple images per restaurant
+export const restaurantImages = pgTable("restaurant_images", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  restaurantId: varchar("restaurant_id").notNull().references(() => restaurants.id),
+  imageUrl: text("image_url").notNull(),
+  displayOrder: integer("display_order").notNull().default(0),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+}, (table) => [
+  index("idx_restaurant_images_restaurant_id").on(table.restaurantId),
+  index("idx_restaurant_images_display_order").on(table.displayOrder),
+]);
+
+export const insertRestaurantImageSchema = createInsertSchema(restaurantImages).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertRestaurantImage = z.infer<typeof insertRestaurantImageSchema>;
+export type RestaurantImage = typeof restaurantImages.$inferSelect;

@@ -28,6 +28,8 @@ import {
   type InsertReviewResponse,
   type Promotion,
   type InsertPromotion,
+  type RestaurantImage,
+  type InsertRestaurantImage,
   users,
   restaurants,
   reviews,
@@ -41,6 +43,7 @@ import {
   restaurantOwners,
   reviewResponses,
   promotions,
+  restaurantImages,
 } from "@shared/schema";
 
 const client = neon(process.env.DATABASE_URL!);
@@ -116,6 +119,12 @@ export interface IStorage {
     recentReviews: Review[];
     monthlyReviewCounts: { month: string; count: number }[];
   }>;
+  
+  // Restaurant Image operations
+  getRestaurantImages(restaurantId: string): Promise<RestaurantImage[]>;
+  createRestaurantImage(image: InsertRestaurantImage): Promise<RestaurantImage>;
+  deleteRestaurantImage(id: string, userId: string, restaurantId: string): Promise<boolean>;
+  updateImageOrder(id: string, displayOrder: number): Promise<void>;
 }
 
 export class DbStorage implements IStorage {
@@ -560,6 +569,42 @@ export class DbStorage implements IStorage {
       recentReviews: recentReviews,
       monthlyReviewCounts: monthlyStats,
     };
+  }
+
+  // Restaurant Image operations
+  async getRestaurantImages(restaurantId: string): Promise<RestaurantImage[]> {
+    const result = await db
+      .select()
+      .from(restaurantImages)
+      .where(eq(restaurantImages.restaurantId, restaurantId))
+      .orderBy(restaurantImages.displayOrder);
+    return result;
+  }
+
+  async createRestaurantImage(image: InsertRestaurantImage): Promise<RestaurantImage> {
+    const result = await db.insert(restaurantImages).values(image).returning();
+    return result[0];
+  }
+
+  async deleteRestaurantImage(id: string, userId: string, restaurantId: string): Promise<boolean> {
+    // Verify ownership
+    const isOwner = await this.isRestaurantOwner(userId, restaurantId);
+    if (!isOwner) {
+      return false;
+    }
+
+    const result = await db
+      .delete(restaurantImages)
+      .where(eq(restaurantImages.id, id))
+      .returning();
+    return result.length > 0;
+  }
+
+  async updateImageOrder(id: string, displayOrder: number): Promise<void> {
+    await db
+      .update(restaurantImages)
+      .set({ displayOrder })
+      .where(eq(restaurantImages.id, id));
   }
 }
 
