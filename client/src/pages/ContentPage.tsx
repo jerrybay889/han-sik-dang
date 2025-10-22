@@ -99,7 +99,7 @@ export default function ContentPage() {
       <div className="min-h-screen bg-background pb-[72px]">
         {/* Header */}
       <header className="sticky top-0 z-50 bg-card border-b border-border">
-        <div className="max-w-md mx-auto px-4 py-4">
+        <div className="max-w-7xl mx-auto px-4 xl:px-6 py-4">
           <div className="flex items-center justify-between">
             <img
               src="/attached_assets/배경제거 -Gemini_Generated_Image_1ac1sb1ac1sb1ac1_ALTools_AIRemoveBG_1760940109625.png"
@@ -116,7 +116,7 @@ export default function ContentPage() {
         </div>
       </header>
 
-      <div className="max-w-md mx-auto">
+      <div className="max-w-7xl mx-auto">
         {/* Top Ad */}
         <div className="px-4 pt-4">
           <AdSlot variant="banner" />
@@ -136,15 +136,15 @@ export default function ContentPage() {
             </Button>
           </div>
 
-          <div className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
             {videos.map((video) => (
               <Card
                 key={video.id}
                 className="overflow-hidden hover-elevate active-elevate-2 cursor-pointer"
                 data-testid={`card-video-${video.id}`}
               >
-                <div className="flex gap-3 p-3">
-                  <div className="relative w-40 flex-shrink-0 aspect-video rounded-md overflow-hidden">
+                <div className="flex flex-col">
+                  <div className="relative w-full aspect-video overflow-hidden">
                     <img
                       src={video.thumbnail}
                       alt={video.title}
@@ -155,11 +155,11 @@ export default function ContentPage() {
                         <Play className="w-6 h-6 text-primary fill-primary ml-0.5" />
                       </div>
                     </div>
-                    <div className="absolute bottom-1 right-1 bg-black/80 text-white text-xs px-1.5 py-0.5 rounded">
+                    <div className="absolute bottom-2 right-2 bg-black/80 text-white text-xs px-1.5 py-0.5 rounded">
                       {video.duration}
                     </div>
                   </div>
-                  <div className="flex-1 min-w-0">
+                  <div className="p-3">
                     <h3 className="font-semibold text-sm mb-1 line-clamp-2">
                       {language === "en" ? video.titleEn : video.title}
                     </h3>
@@ -242,7 +242,7 @@ export default function ContentPage() {
             </Button>
           </div>
 
-          <div className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
             {blogs.map((blog) => (
               <Card
                 key={blog.id}
