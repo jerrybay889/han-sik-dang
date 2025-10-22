@@ -250,7 +250,7 @@ export default function MainScreen() {
           </section>
         )}
 
-        {/* Trending Section / Search Results */}
+        {/* Trending Section / Search Results - Split with Video & Blog in between */}
         <section className="px-4 py-4">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
@@ -291,7 +291,7 @@ export default function MainScreen() {
                 </p>
               </Card>
             ) : (
-              displayRestaurants.map((restaurant, index) => (
+              displayRestaurants.slice(0, 8).map((restaurant, index) => (
                 <>
                   <Link key={restaurant.id} href={`/restaurant/${restaurant.id}`}>
                     <Card
@@ -338,7 +338,7 @@ export default function MainScreen() {
                       </div>
                     </Card>
                   </Link>
-                  {(index + 1) % 4 === 0 && index < displayRestaurants.length - 1 && (
+                  {(index + 1) % 4 === 0 && index < 7 && (
                     <div key={`ad-${index}`}>
                       <AdSlot variant="feed" className="my-2" />
                     </div>
@@ -348,6 +348,230 @@ export default function MainScreen() {
             )}
           </div>
         </section>
+
+        {/* Video Section - Moved up */}
+        {!searchQuery && (
+          <section className="px-4 py-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <div className="w-6 h-6 rounded bg-[hsl(var(--video-indicator))] flex items-center justify-center">
+                  <Play className="w-4 h-4 text-white fill-white" />
+                </div>
+                <h2 className="text-lg font-semibold">{t("content.videos")}</h2>
+              </div>
+              <Link href="/content">
+                <Button variant="ghost" size="sm" data-testid="button-see-all-videos">
+                  {t("content.seeAll")}
+                </Button>
+              </Link>
+            </div>
+
+            <div className="flex gap-4 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide">
+              {sampleVideos.map((video) => (
+                <div
+                  key={video.id}
+                  className="flex-shrink-0 w-[280px] cursor-pointer hover-elevate active-elevate-2 rounded-xl"
+                  data-testid={`card-video-${video.id}`}
+                >
+                  <div className="relative aspect-video rounded-xl overflow-hidden mb-2">
+                    <img
+                      src={video.thumbnail}
+                      alt={video.title}
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
+                      <div className="w-16 h-16 rounded-full bg-white/90 flex items-center justify-center">
+                        <Play className="w-8 h-8 text-primary fill-primary ml-1" />
+                      </div>
+                    </div>
+                    <div className="absolute bottom-2 right-2 bg-black/80 text-white text-xs px-2 py-1 rounded">
+                      {video.duration}
+                    </div>
+                  </div>
+                  <h3 className="font-semibold text-sm mb-1 line-clamp-2">
+                    {language === "en" ? video.titleEn : video.title}
+                  </h3>
+                  {language !== "en" && language !== "ko" && (
+                    <p className="text-xs text-muted-foreground mb-1">
+                      {video.titleEn}
+                    </p>
+                  )}
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <span>{video.views} {t("content.views")}</span>
+                    <span>•</span>
+                    <span>2 days ago</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* Continue Trending Section - Part 2 */}
+        {!searchQuery && displayRestaurants.length > 8 && (
+          <section className="px-4 py-4">
+            <div className="space-y-4">
+              {displayRestaurants.slice(8, 16).map((restaurant, index) => (
+                <>
+                  <Link key={restaurant.id} href={`/restaurant/${restaurant.id}`}>
+                    <Card
+                      className="overflow-hidden hover-elevate active-elevate-2 cursor-pointer"
+                      data-testid={`card-restaurant-${restaurant.id}`}
+                      onMouseEnter={() => prefetchRestaurant(restaurant.id)}
+                    >
+                      <div className="flex gap-3 p-3">
+                        <OptimizedImage
+                          src={restaurant.imageUrl}
+                          alt={restaurant.name}
+                          className="w-24 h-24 rounded-md"
+                          width={96}
+                          height={96}
+                          objectFit="cover"
+                          data-testid={`image-restaurant-${restaurant.id}`}
+                        />
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-semibold text-base mb-1 truncate">
+                            {language === "en" ? restaurant.nameEn : restaurant.name}
+                          </h3>
+                          <p className="text-sm text-muted-foreground mb-2 truncate">
+                            {language === "en" ? restaurant.name : restaurant.nameEn}
+                          </p>
+                          <div className="flex items-center gap-2 mb-2 flex-wrap">
+                            <Badge variant="secondary" className="text-xs">
+                              {restaurant.cuisine}
+                            </Badge>
+                            {restaurant.rating > 0 && (
+                              <div className="flex items-center gap-1 text-sm">
+                                <Star className="w-4 h-4 fill-[hsl(var(--accent-success))] text-[hsl(var(--accent-success))]" />
+                                <span className="font-medium">{restaurant.rating}</span>
+                                <span className="text-muted-foreground">
+                                  ({restaurant.reviewCount})
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-1 text-xs text-muted-foreground truncate">
+                            <MapPin className="w-3 h-3 flex-shrink-0" />
+                            <span className="truncate">{restaurant.district}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </Card>
+                  </Link>
+                  {(index + 1) % 4 === 0 && (index + 8) < displayRestaurants.length - 1 && (
+                    <div key={`ad-${index + 8}`}>
+                      <AdSlot variant="feed" className="my-2" />
+                    </div>
+                  )}
+                </>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* Blog Section - Moved up */}
+        {!searchQuery && (
+          <section className="px-4 py-6 mb-4">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <div className="w-6 h-6 rounded bg-[hsl(var(--blog-indicator))] flex items-center justify-center text-white text-xs font-bold">
+                  B
+                </div>
+                <h2 className="text-lg font-semibold">{t("content.blogs")}</h2>
+              </div>
+              <Link href="/content">
+                <Button variant="ghost" size="sm" data-testid="button-see-all-blogs">
+                  {t("content.seeAll")}
+                </Button>
+              </Link>
+            </div>
+
+            <Card className="overflow-hidden hover-elevate active-elevate-2 cursor-pointer" data-testid="card-blog-featured">
+              <img
+                src="https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=800"
+                alt="Blog post"
+                className="w-full h-48 object-cover"
+              />
+              <div className="p-4">
+                <h3 className="font-semibold text-base mb-2 line-clamp-2">
+                  홍대 한식당 완벽 가이드 - 외국인 관광객을 위한 추천
+                </h3>
+                <p className="text-sm text-muted-foreground mb-3 line-clamp-3">
+                  Complete guide to Korean restaurants in Hongdae area. 
+                  From traditional dishes to modern fusion cuisine...
+                </p>
+                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                  <Clock className="w-3 h-3" />
+                  <span>5 {t("content.readTime")}</span>
+                  <span>•</span>
+                  <span>1 day ago</span>
+                </div>
+              </div>
+            </Card>
+          </section>
+        )}
+
+        {/* Continue Trending Section - Part 3 (remaining) */}
+        {!searchQuery && displayRestaurants.length > 16 && (
+          <section className="px-4 py-4">
+            <div className="space-y-4">
+              {displayRestaurants.slice(16).map((restaurant, index) => (
+                <>
+                  <Link key={restaurant.id} href={`/restaurant/${restaurant.id}`}>
+                    <Card
+                      className="overflow-hidden hover-elevate active-elevate-2 cursor-pointer"
+                      data-testid={`card-restaurant-${restaurant.id}`}
+                      onMouseEnter={() => prefetchRestaurant(restaurant.id)}
+                    >
+                      <div className="flex gap-3 p-3">
+                        <OptimizedImage
+                          src={restaurant.imageUrl}
+                          alt={restaurant.name}
+                          className="w-24 h-24 rounded-md"
+                          width={96}
+                          height={96}
+                          objectFit="cover"
+                          data-testid={`image-restaurant-${restaurant.id}`}
+                        />
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-semibold text-base mb-1 truncate">
+                            {language === "en" ? restaurant.nameEn : restaurant.name}
+                          </h3>
+                          <p className="text-sm text-muted-foreground mb-2 truncate">
+                            {language === "en" ? restaurant.name : restaurant.nameEn}
+                          </p>
+                          <div className="flex items-center gap-2 mb-2 flex-wrap">
+                            <Badge variant="secondary" className="text-xs">
+                              {restaurant.cuisine}
+                            </Badge>
+                            {restaurant.rating > 0 && (
+                              <div className="flex items-center gap-1 text-sm">
+                                <Star className="w-4 h-4 fill-[hsl(var(--accent-success))] text-[hsl(var(--accent-success))]" />
+                                <span className="font-medium">{restaurant.rating}</span>
+                                <span className="text-muted-foreground">
+                                  ({restaurant.reviewCount})
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-1 text-xs text-muted-foreground truncate">
+                            <MapPin className="w-3 h-3 flex-shrink-0" />
+                            <span className="truncate">{restaurant.district}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </Card>
+                  </Link>
+                  {(index + 1) % 4 === 0 && (index + 16) < displayRestaurants.length - 1 && (
+                    <div key={`ad-${index + 16}`}>
+                      <AdSlot variant="feed" className="my-2" />
+                    </div>
+                  )}
+                </>
+              ))}
+            </div>
+          </section>
+        )}
 
         {/* Event Banners */}
         {eventBanners.length > 0 && (
@@ -390,108 +614,6 @@ export default function MainScreen() {
             </ScrollArea>
           </section>
         )}
-
-        {/* Mid Ad */}
-        <div className="px-4 py-6">
-          <AdSlot variant="rectangle" />
-        </div>
-
-        {/* Video Section */}
-        <section className="px-4 py-4">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
-              <div className="w-6 h-6 rounded bg-[hsl(var(--video-indicator))] flex items-center justify-center">
-                <Play className="w-4 h-4 text-white fill-white" />
-              </div>
-              <h2 className="text-lg font-semibold">{t("content.videos")}</h2>
-            </div>
-            <Button variant="ghost" size="sm" data-testid="button-see-all-videos">
-              {t("content.seeAll")}
-            </Button>
-          </div>
-
-          <div className="flex gap-4 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide">
-            {sampleVideos.map((video) => (
-              <div
-                key={video.id}
-                className="flex-shrink-0 w-[280px] cursor-pointer hover-elevate active-elevate-2 rounded-xl"
-                data-testid={`card-video-${video.id}`}
-              >
-                <div className="relative aspect-video rounded-xl overflow-hidden mb-2">
-                  <img
-                    src={video.thumbnail}
-                    alt={video.title}
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
-                    <div className="w-16 h-16 rounded-full bg-white/90 flex items-center justify-center">
-                      <Play className="w-8 h-8 text-primary fill-primary ml-1" />
-                    </div>
-                  </div>
-                  <div className="absolute bottom-2 right-2 bg-black/80 text-white text-xs px-2 py-1 rounded">
-                    {video.duration}
-                  </div>
-                </div>
-                <h3 className="font-semibold text-sm mb-1 line-clamp-2">
-                  {language === "en" ? video.titleEn : video.title}
-                </h3>
-                {language !== "en" && language !== "ko" && (
-                  <p className="text-xs text-muted-foreground mb-1">
-                    {video.titleEn}
-                  </p>
-                )}
-                <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                  <span>{video.views} {t("content.views")}</span>
-                  <span>•</span>
-                  <span>2 days ago</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* Bottom Ad */}
-        <div className="px-4 py-6">
-          <AdSlot variant="banner" />
-        </div>
-
-        {/* Blog Section Preview */}
-        <section className="px-4 py-4 mb-4">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
-              <div className="w-6 h-6 rounded bg-[hsl(var(--blog-indicator))] flex items-center justify-center text-white text-xs font-bold">
-                B
-              </div>
-              <h2 className="text-lg font-semibold">{t("content.blogs")}</h2>
-            </div>
-            <Button variant="ghost" size="sm" data-testid="button-see-all-blogs">
-              {t("content.seeAll")}
-            </Button>
-          </div>
-
-          <Card className="overflow-hidden hover-elevate active-elevate-2 cursor-pointer" data-testid="card-blog-featured">
-            <img
-              src="https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=800"
-              alt="Blog post"
-              className="w-full h-48 object-cover"
-            />
-            <div className="p-4">
-              <h3 className="font-semibold text-base mb-2 line-clamp-2">
-                홍대 한식당 완벽 가이드 - 외국인 관광객을 위한 추천
-              </h3>
-              <p className="text-sm text-muted-foreground mb-3 line-clamp-3">
-                Complete guide to Korean restaurants in Hongdae area. 
-                From traditional dishes to modern fusion cuisine...
-              </p>
-              <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                <Clock className="w-3 h-3" />
-                <span>5 {t("content.readTime")}</span>
-                <span>•</span>
-                <span>1 day ago</span>
-              </div>
-            </div>
-          </Card>
-        </section>
 
         {/* Announcements Section */}
         <section className="px-4 py-4 mb-4">
