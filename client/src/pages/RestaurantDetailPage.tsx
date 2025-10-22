@@ -134,6 +134,12 @@ export default function RestaurantDetailPage() {
     enabled: !!restaurantId,
   });
 
+  // Fetch restaurant images
+  const { data: restaurantImages = [] } = useQuery<Array<{ id: string; imageUrl: string; displayOrder: number }>>({
+    queryKey: ["/api/restaurants", restaurantId, "images"],
+    enabled: !!restaurantId,
+  });
+
   const isSaved = savedStatus?.isSaved || false;
   const isOwner = ownershipStatus?.isOwner || false;
 
@@ -614,33 +620,58 @@ export default function RestaurantDetailPage() {
               </div>
               
               {/* Additional Images - 2x2 Grid */}
-              {[
-                "https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=400",
-                "https://images.unsplash.com/photo-1498654896293-37aacf113fd9?w=400",
-                "https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=400",
-                "https://images.unsplash.com/photo-1551218808-94e220e084d2?w=400",
-              ].map((imgUrl, index) => (
-                <div
-                  key={index}
-                  className="relative overflow-hidden cursor-pointer hover-elevate"
-                  onClick={() => setIsGalleryOpen(true)}
-                >
-                  {index === 3 && (
-                    <div className="absolute inset-0 bg-black/60 flex items-center justify-center z-10">
-                      <div className="text-white text-center">
-                        <Eye className="w-6 h-6 mx-auto mb-1" />
-                        <p className="text-sm font-semibold">{language === "en" ? "View All" : "전체보기"}</p>
+              {restaurantImages.length > 0 ? (
+                restaurantImages.slice(0, 4).map((img, index) => (
+                  <div
+                    key={img.id}
+                    className="relative overflow-hidden cursor-pointer hover-elevate"
+                    onClick={() => setIsGalleryOpen(true)}
+                  >
+                    {index === 3 && restaurantImages.length > 4 && (
+                      <div className="absolute inset-0 bg-black/60 flex items-center justify-center z-10">
+                        <div className="text-white text-center">
+                          <Eye className="w-6 h-6 mx-auto mb-1" />
+                          <p className="text-sm font-semibold">{language === "en" ? "View All" : "전체보기"}</p>
+                        </div>
                       </div>
-                    </div>
-                  )}
-                  <OptimizedImage
-                    src={imgUrl}
-                    alt={`${restaurantName} ${index + 2}`}
-                    className="w-full h-full"
-                    objectFit="cover"
-                  />
-                </div>
-              ))}
+                    )}
+                    <OptimizedImage
+                      src={img.imageUrl}
+                      alt={`${restaurantName} ${index + 2}`}
+                      className="w-full h-full"
+                      objectFit="cover"
+                    />
+                  </div>
+                ))
+              ) : (
+                [
+                  "https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=400",
+                  "https://images.unsplash.com/photo-1498654896293-37aacf113fd9?w=400",
+                  "https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=400",
+                  "https://images.unsplash.com/photo-1551218808-94e220e084d2?w=400",
+                ].map((imgUrl, index) => (
+                  <div
+                    key={index}
+                    className="relative overflow-hidden cursor-pointer hover-elevate"
+                    onClick={() => setIsGalleryOpen(true)}
+                  >
+                    {index === 3 && (
+                      <div className="absolute inset-0 bg-black/60 flex items-center justify-center z-10">
+                        <div className="text-white text-center">
+                          <Eye className="w-6 h-6 mx-auto mb-1" />
+                          <p className="text-sm font-semibold">{language === "en" ? "View All" : "전체보기"}</p>
+                        </div>
+                      </div>
+                    )}
+                    <OptimizedImage
+                      src={imgUrl}
+                      alt={`${restaurantName} ${index + 2}`}
+                      className="w-full h-full"
+                      objectFit="cover"
+                    />
+                  </div>
+                ))
+              )}
             </div>
 
             {/* Overlay Buttons */}
@@ -1608,18 +1639,11 @@ export default function RestaurantDetailPage() {
           </DialogHeader>
           <ScrollArea className="max-h-[calc(90vh-80px)] px-6 pb-6">
             <div className="grid grid-cols-2 gap-2">
-              {[restaurant.imageUrl, ...[ 
-                "https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=800",
-                "https://images.unsplash.com/photo-1498654896293-37aacf113fd9?w=800",
-                "https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=800",
-                "https://images.unsplash.com/photo-1551218808-94e220e084d2?w=800",
-                "https://images.unsplash.com/photo-1580820866981-b6d8e1c522e3?w=800",
-                "https://images.unsplash.com/photo-1563245372-f21724e3856d?w=800",
-                "https://images.unsplash.com/photo-1590846406792-0adc7f938f1d?w=800",
-              ]].map((imgUrl, index) => (
-                <div key={index} className="relative aspect-[4/3] overflow-hidden rounded-lg">
+              {/* Show main restaurant image first, then all DB images */}
+              {[{ id: 'main', imageUrl: restaurant.imageUrl }, ...restaurantImages].map((img, index) => (
+                <div key={img.id} className="relative aspect-[4/3] overflow-hidden rounded-lg">
                   <OptimizedImage
-                    src={imgUrl}
+                    src={img.imageUrl}
                     alt={`${restaurantName} ${index + 1}`}
                     className="w-full h-full"
                     objectFit="cover"

@@ -134,7 +134,7 @@ export default function DashboardPage() {
     mutationFn: async (imageUrl: string) => {
       await apiRequest("POST", `/api/restaurants/${selectedRestaurant?.id}/images`, {
         imageUrl,
-        displayOrder: images.length,
+        displayOrder: images?.length || 0,
       });
     },
     onSuccess: () => {
@@ -440,7 +440,7 @@ export default function DashboardPage() {
                       </p>
                     </div>
                     <p className="text-2xl font-bold" data-testid="stat-monthly-reviews">
-                      {stats.monthlyReviews[0]?.count || 0}
+                      {stats.monthlyReviews?.[0]?.count || 0}
                     </p>
                   </Card>
 
