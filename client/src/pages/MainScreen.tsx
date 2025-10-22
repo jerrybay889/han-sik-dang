@@ -193,10 +193,10 @@ export default function MainScreen() {
         url="/"
         structuredData={structuredData}
       />
-      <div className="min-h-screen bg-background pb-[72px]">
+      <div className="min-h-screen bg-background pb-[72px] lg:pb-0">
         {/* Header */}
       <header className="sticky top-0 z-50 bg-card border-b border-border">
-        <div className="max-w-md mx-auto px-4 py-3">
+        <div className="max-w-7xl mx-auto px-4 lg:px-6 py-3">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
               <img
@@ -212,7 +212,7 @@ export default function MainScreen() {
               </Button>
             </div>
           </div>
-          <div className="relative">
+          <div className="relative max-w-2xl mx-auto lg:mx-0">
             <input
               type="search"
               placeholder={t("search.placeholder")}
@@ -224,11 +224,10 @@ export default function MainScreen() {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
           </div>
 
-          {/* Filters */}
-          <div className="mt-3 flex items-center gap-2 overflow-x-auto pb-1">
+          {/* Mobile Filters */}
+          <div className="mt-3 lg:hidden flex items-center gap-2 overflow-x-auto pb-1">
             <ScrollArea className="w-full">
               <div className="flex gap-2">
-                {/* Nearby Filter */}
                 <Button
                   size="sm"
                   variant={nearbyFilter ? "default" : "outline"}
@@ -240,7 +239,6 @@ export default function MainScreen() {
                   {t("filters.nearby")}
                 </Button>
 
-                {/* Price Filter */}
                 <Select
                   value={priceFilter?.toString() || "all"}
                   onValueChange={(value) => setPriceFilter(value === "all" ? null : parseInt(value))}
@@ -257,7 +255,6 @@ export default function MainScreen() {
                   </SelectContent>
                 </Select>
 
-                {/* Cuisine Filter */}
                 <Select
                   value={cuisineFilter || "all"}
                   onValueChange={(value) => setCuisineFilter(value === "all" ? null : value)}
@@ -274,7 +271,6 @@ export default function MainScreen() {
                   </SelectContent>
                 </Select>
 
-                {/* Sort */}
                 <Select
                   value={sortBy}
                   onValueChange={(value: any) => setSortBy(value)}
@@ -296,7 +292,90 @@ export default function MainScreen() {
         </div>
       </header>
 
-      <div className="max-w-md mx-auto">
+      {/* Desktop Layout with Sidebar */}
+      <div className="max-w-7xl mx-auto">
+        <div className="lg:flex lg:gap-6 lg:px-6">
+          {/* Desktop Sidebar Filters */}
+          <aside className="hidden lg:block w-64 flex-shrink-0 sticky top-[120px] h-fit">
+            <Card className="p-4">
+              <h3 className="font-semibold mb-4">{t("filters.title")}</h3>
+              
+              <div className="space-y-4">
+                {/* Nearby Filter */}
+                <div>
+                  <Button
+                    size="sm"
+                    variant={nearbyFilter ? "default" : "outline"}
+                    onClick={handleNearbyFilter}
+                    className="w-full"
+                    data-testid="button-nearby"
+                  >
+                    <Navigation className="w-4 h-4 mr-2" />
+                    {t("filters.nearby")}
+                  </Button>
+                </div>
+
+                {/* Price Filter */}
+                <div>
+                  <label className="text-sm font-medium mb-2 block">{t("filters.priceRange")}</label>
+                  <Select
+                    value={priceFilter?.toString() || "all"}
+                    onValueChange={(value) => setPriceFilter(value === "all" ? null : parseInt(value))}
+                  >
+                    <SelectTrigger className="w-full" data-testid="select-price">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">{t("filters.allPrices")}</SelectItem>
+                      <SelectItem value="1">₩ - {t("filters.budget")}</SelectItem>
+                      <SelectItem value="2">₩₩ - {t("filters.moderate")}</SelectItem>
+                      <SelectItem value="3">₩₩₩ - {t("filters.expensive")}</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Cuisine Filter */}
+                <div>
+                  <label className="text-sm font-medium mb-2 block">{t("filters.cuisine")}</label>
+                  <Select
+                    value={cuisineFilter || "all"}
+                    onValueChange={(value) => setCuisineFilter(value === "all" ? null : value)}
+                  >
+                    <SelectTrigger className="w-full" data-testid="select-cuisine">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">{t("filters.allCuisine")}</SelectItem>
+                      {cuisines.map((cuisine) => (
+                        <SelectItem key={cuisine} value={cuisine}>{cuisine}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Sort */}
+                <div>
+                  <label className="text-sm font-medium mb-2 block">{t("filters.sortBy")}</label>
+                  <Select
+                    value={sortBy}
+                    onValueChange={(value: any) => setSortBy(value)}
+                  >
+                    <SelectTrigger className="w-full" data-testid="select-sort">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="rating">{t("filters.rating")}</SelectItem>
+                      <SelectItem value="reviews">{t("filters.reviews")}</SelectItem>
+                      {userLocation && <SelectItem value="distance">{t("filters.distance")}</SelectItem>}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </Card>
+          </aside>
+
+          {/* Main Content */}
+          <div className="flex-1 min-w-0">
         {/* Top Ad Banner */}
         <div className="px-4 pt-4">
           <AdSlot variant="banner" />
@@ -420,82 +499,73 @@ export default function MainScreen() {
             )}
           </div>
 
-          <div className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
             {(isLoading || isSearching) ? (
-              Array.from({ length: 3 }).map((_, i) => (
+              Array.from({ length: 6 }).map((_, i) => (
                 <Card key={i} className="overflow-hidden">
-                  <div className="flex gap-3 p-3">
-                    <div className="w-24 h-24 rounded-md bg-muted animate-pulse" />
-                    <div className="flex-1 min-w-0 space-y-2">
-                      <div className="h-5 bg-muted rounded animate-pulse w-3/4" />
-                      <div className="h-4 bg-muted rounded animate-pulse w-1/2" />
-                      <div className="h-4 bg-muted rounded animate-pulse w-2/3" />
-                    </div>
+                  <div className="aspect-[4/3] bg-muted animate-pulse" />
+                  <div className="p-3 space-y-2">
+                    <div className="h-5 bg-muted rounded animate-pulse w-3/4" />
+                    <div className="h-4 bg-muted rounded animate-pulse w-1/2" />
+                    <div className="h-4 bg-muted rounded animate-pulse w-2/3" />
                   </div>
                 </Card>
               ))
             ) : displayRestaurants.length === 0 && searchQuery.trim().length > 0 ? (
-              <Card className="p-8 text-center">
-                <Search className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-                <p className="text-lg font-semibold mb-2">{t("search.noResults")}</p>
-                <p className="text-sm text-muted-foreground">
-                  {t("search.tryDifferent")}
-                </p>
-              </Card>
+              <div className="col-span-full">
+                <Card className="p-8 text-center">
+                  <Search className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+                  <p className="text-lg font-semibold mb-2">{t("search.noResults")}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {t("search.tryDifferent")}
+                  </p>
+                </Card>
+              </div>
             ) : (
-              displayRestaurants.slice(0, 8).map((restaurant, index) => (
-                <>
-                  <Link key={restaurant.id} href={`/restaurant/${restaurant.id}`}>
-                    <Card
-                      className="overflow-hidden hover-elevate active-elevate-2 cursor-pointer"
-                      data-testid={`card-restaurant-${restaurant.id}`}
-                      onMouseEnter={() => prefetchRestaurant(restaurant.id)}
-                    >
-                      <div className="flex gap-3 p-3">
-                        <OptimizedImage
-                          src={restaurant.imageUrl}
-                          alt={restaurant.name}
-                          className="w-24 h-24 rounded-md"
-                          width={96}
-                          height={96}
-                          objectFit="cover"
-                          data-testid={`image-restaurant-${restaurant.id}`}
-                        />
-                        <div className="flex-1 min-w-0">
-                          <h3 className="font-semibold text-base mb-1 truncate">
-                            {language === "en" ? restaurant.nameEn : restaurant.name}
-                          </h3>
-                          <p className="text-sm text-muted-foreground mb-2 truncate">
-                            {language === "en" ? restaurant.name : restaurant.nameEn}
-                          </p>
-                          <div className="flex items-center gap-2 mb-2 flex-wrap">
-                            <Badge variant="secondary" className="text-xs">
-                              {restaurant.cuisine}
-                            </Badge>
-                            {restaurant.rating > 0 && (
-                              <div className="flex items-center gap-1 text-sm">
-                                <Star className="w-4 h-4 fill-[hsl(var(--accent-success))] text-[hsl(var(--accent-success))]" />
-                                <span className="font-medium">{restaurant.rating}</span>
-                                <span className="text-muted-foreground">
-                                  ({restaurant.reviewCount})
-                                </span>
-                              </div>
-                            )}
-                          </div>
-                          <div className="flex items-center gap-1 text-xs text-muted-foreground truncate">
-                            <MapPin className="w-3 h-3 flex-shrink-0" />
-                            <span className="truncate">{restaurant.district}</span>
-                          </div>
-                        </div>
-                      </div>
-                    </Card>
-                  </Link>
-                  {(index + 1) % 4 === 0 && index < 7 && (
-                    <div key={`ad-${index}`}>
-                      <AdSlot variant="feed" className="my-2" />
+              displayRestaurants.slice(0, 12).map((restaurant, index) => (
+                <Link key={restaurant.id} href={`/restaurant/${restaurant.id}`}>
+                  <Card
+                    className="overflow-hidden hover-elevate active-elevate-2 cursor-pointer h-full"
+                    data-testid={`card-restaurant-${restaurant.id}`}
+                    onMouseEnter={() => prefetchRestaurant(restaurant.id)}
+                  >
+                    <div className="relative aspect-[4/3]">
+                      <OptimizedImage
+                        src={restaurant.imageUrl}
+                        alt={restaurant.name}
+                        className="w-full h-full"
+                        objectFit="cover"
+                        data-testid={`image-restaurant-${restaurant.id}`}
+                      />
                     </div>
-                  )}
-                </>
+                    <div className="p-3">
+                      <h3 className="font-semibold text-base mb-1 truncate">
+                        {language === "en" ? restaurant.nameEn : restaurant.name}
+                      </h3>
+                      <p className="text-sm text-muted-foreground mb-2 truncate">
+                        {language === "en" ? restaurant.name : restaurant.nameEn}
+                      </p>
+                      <div className="flex items-center gap-2 mb-2 flex-wrap">
+                        <Badge variant="secondary" className="text-xs">
+                          {restaurant.cuisine}
+                        </Badge>
+                        {restaurant.rating > 0 && (
+                          <div className="flex items-center gap-1 text-sm">
+                            <Star className="w-4 h-4 fill-[hsl(var(--accent-success))] text-[hsl(var(--accent-success))]" />
+                            <span className="font-medium">{restaurant.rating}</span>
+                            <span className="text-muted-foreground text-xs">
+                              ({restaurant.reviewCount})
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-1 text-xs text-muted-foreground truncate">
+                        <MapPin className="w-3 h-3 flex-shrink-0" />
+                        <span className="truncate">{restaurant.district}</span>
+                      </div>
+                    </div>
+                  </Card>
+                </Link>
               ))
             )}
           </div>
@@ -812,6 +882,10 @@ export default function MainScreen() {
             </div>
           )}
         </section>
+          </div>
+          {/* End of Main Content */}
+        </div>
+        {/* End of Desktop Layout Container */}
       </div>
 
       <BottomNav />
