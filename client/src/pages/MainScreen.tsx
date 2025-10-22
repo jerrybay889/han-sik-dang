@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Search, MapPin, Star, Clock, TrendingUp, Play, Bot, ChevronRight, Bell } from "lucide-react";
+import { useState, useEffect, useMemo } from "react";
+import { Search, MapPin, Star, Clock, TrendingUp, Play, Bot, ChevronRight, Bell, Navigation, DollarSign, UtensilsCrossed, ArrowUpDown } from "lucide-react";
 import { AdSlot } from "@/components/AdSlot";
 import { BottomNav } from "@/components/BottomNav";
 import { LanguageSelector } from "@/components/LanguageSelector";
@@ -9,16 +9,29 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { createWebsiteSchema, createOrganizationSchema } from "@/lib/structuredData";
 import { useQuery } from "@tanstack/react-query";
 import { queryClient } from "@/lib/queryClient";
 import { Link } from "wouter";
+import { getUserLocation, calculateDistance, formatDistance } from "@/lib/geoUtils";
 import type { Restaurant, Announcement, EventBanner } from "@shared/schema";
 
 export default function MainScreen() {
   const { t, language } = useLanguage();
   const [searchQuery, setSearchQuery] = useState("");
+  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [nearbyFilter, setNearbyFilter] = useState(false);
+  const [priceFilter, setPriceFilter] = useState<number | null>(null);
+  const [cuisineFilter, setCuisineFilter] = useState<string | null>(null);
+  const [sortBy, setSortBy] = useState<"rating" | "reviews" | "distance">("rating");
 
   const { data: restaurants, isLoading } = useQuery<Restaurant[]>({
     queryKey: ["/api/restaurants"],
@@ -60,9 +73,78 @@ export default function MainScreen() {
     ],
   };
 
-  const displayRestaurants = searchQuery.trim().length > 0 
-    ? searchResults 
-    : (restaurants || []);
+  // Get user location for "Nearby" filter
+  const handleNearbyFilter = async () => {
+    if (nearbyFilter) {
+      setNearbyFilter(false);
+      setUserLocation(null);
+    } else {
+      const location = await getUserLocation();
+      if (location) {
+        setUserLocation(location);
+        setNearbyFilter(true);
+        setSortBy("distance");
+      }
+    }
+  };
+
+  // Filter and sort restaurants
+  const displayRestaurants = useMemo(() => {
+    let filtered = searchQuery.trim().length > 0 
+      ? searchResults 
+      : (restaurants || []);
+
+    // Apply price filter
+    if (priceFilter !== null) {
+      filtered = filtered.filter(r => r.priceRange === priceFilter);
+    }
+
+    // Apply cuisine filter
+    if (cuisineFilter) {
+      filtered = filtered.filter(r => r.cuisine === cuisineFilter);
+    }
+
+    // Apply nearby filter (within 5km)
+    if (nearbyFilter && userLocation) {
+      filtered = filtered.filter(r => {
+        if (!r.latitude || !r.longitude) return false;
+        const distance = calculateDistance(
+          userLocation.lat,
+          userLocation.lng,
+          r.latitude,
+          r.longitude
+        );
+        return distance <= 5;
+      });
+    }
+
+    // Sort restaurants
+    const sorted = [...filtered].sort((a, b) => {
+      if (sortBy === "rating") {
+        return b.rating - a.rating;
+      } else if (sortBy === "reviews") {
+        return b.reviewCount - a.reviewCount;
+      } else if (sortBy === "distance" && userLocation) {
+        const distA = (a.latitude && a.longitude) 
+          ? calculateDistance(userLocation.lat, userLocation.lng, a.latitude, a.longitude)
+          : Infinity;
+        const distB = (b.latitude && b.longitude)
+          ? calculateDistance(userLocation.lat, userLocation.lng, b.latitude, b.longitude)
+          : Infinity;
+        return distA - distB;
+      }
+      return 0;
+    });
+
+    return sorted;
+  }, [searchQuery, searchResults, restaurants, priceFilter, cuisineFilter, nearbyFilter, userLocation, sortBy]);
+
+  // Get unique cuisines for filter
+  const cuisines = useMemo(() => {
+    const allRestaurants = restaurants || [];
+    const uniqueCuisines = Array.from(new Set(allRestaurants.map(r => r.cuisine)));
+    return uniqueCuisines.sort();
+  }, [restaurants]);
 
   const prefetchRestaurant = (restaurantId: string) => {
     queryClient.prefetchQuery({
@@ -140,6 +222,76 @@ export default function MainScreen() {
               data-testid="input-search"
             />
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+          </div>
+
+          {/* Filters */}
+          <div className="mt-3 flex items-center gap-2 overflow-x-auto pb-1">
+            <ScrollArea className="w-full">
+              <div className="flex gap-2">
+                {/* Nearby Filter */}
+                <Button
+                  size="sm"
+                  variant={nearbyFilter ? "default" : "outline"}
+                  onClick={handleNearbyFilter}
+                  className="flex-shrink-0"
+                  data-testid="button-nearby"
+                >
+                  <Navigation className="w-4 h-4 mr-1" />
+                  {language === "en" ? "Nearby" : "내 주변"}
+                </Button>
+
+                {/* Price Filter */}
+                <Select
+                  value={priceFilter?.toString() || "all"}
+                  onValueChange={(value) => setPriceFilter(value === "all" ? null : parseInt(value))}
+                >
+                  <SelectTrigger className="w-[120px] h-8" data-testid="select-price">
+                    <DollarSign className="w-4 h-4 mr-1" />
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">{language === "en" ? "All Prices" : "모든 가격"}</SelectItem>
+                    <SelectItem value="1">₩</SelectItem>
+                    <SelectItem value="2">₩₩</SelectItem>
+                    <SelectItem value="3">₩₩₩</SelectItem>
+                  </SelectContent>
+                </Select>
+
+                {/* Cuisine Filter */}
+                <Select
+                  value={cuisineFilter || "all"}
+                  onValueChange={(value) => setCuisineFilter(value === "all" ? null : value)}
+                >
+                  <SelectTrigger className="w-[140px] h-8" data-testid="select-cuisine">
+                    <UtensilsCrossed className="w-4 h-4 mr-1" />
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">{language === "en" ? "All Cuisine" : "모든 요리"}</SelectItem>
+                    {cuisines.map((cuisine) => (
+                      <SelectItem key={cuisine} value={cuisine}>{cuisine}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
+                {/* Sort */}
+                <Select
+                  value={sortBy}
+                  onValueChange={(value: any) => setSortBy(value)}
+                >
+                  <SelectTrigger className="w-[120px] h-8" data-testid="select-sort">
+                    <ArrowUpDown className="w-4 h-4 mr-1" />
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="rating">{language === "en" ? "Rating" : "평점순"}</SelectItem>
+                    <SelectItem value="reviews">{language === "en" ? "Reviews" : "리뷰순"}</SelectItem>
+                    {userLocation && <SelectItem value="distance">{language === "en" ? "Distance" : "거리순"}</SelectItem>}
+                  </SelectContent>
+                </Select>
+              </div>
+              <ScrollBar orientation="horizontal" />
+            </ScrollArea>
           </div>
         </div>
       </header>

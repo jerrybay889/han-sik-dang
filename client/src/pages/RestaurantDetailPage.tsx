@@ -12,6 +12,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { OptimizedImage } from "@/components/OptimizedImage";
 import { SEO } from "@/components/SEO";
 import { AdSense } from "@/components/AdSense";
+import { NaverMap } from "@/components/NaverMap";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/hooks/useAuth";
 import { isUnauthorizedError } from "@/lib/authUtils";
@@ -826,6 +827,19 @@ export default function RestaurantDetailPage() {
                 </div>
               </div>
             </Card>
+
+            {/* Map Section */}
+            {restaurant.latitude && restaurant.longitude && (
+              <div className="mb-6">
+                <NaverMap
+                  latitude={restaurant.latitude}
+                  longitude={restaurant.longitude}
+                  restaurantName={restaurantName}
+                  address={restaurant.address}
+                  zoom={16}
+                />
+              </div>
+            )}
 
             {/* Promotions Section */}
             {promotions.length > 0 && (

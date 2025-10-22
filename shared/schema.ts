@@ -36,6 +36,8 @@ export const restaurants = pgTable("restaurants", {
   cuisine: text("cuisine").notNull(),
   district: text("district").notNull(),
   address: text("address").notNull(),
+  latitude: real("latitude"),
+  longitude: real("longitude"),
   description: text("description").notNull(),
   descriptionEn: text("description_en").notNull(),
   rating: real("rating").notNull().default(0),
