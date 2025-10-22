@@ -923,59 +923,73 @@ export default function RestaurantDetailPage() {
                     ))}
                   </div>
                 ) : (
-                  <div className="space-y-3">
-                    {videos.map((video) => (
-                      <a
-                        key={video.id}
-                        href={`https://www.youtube.com/watch?v=${video.videoId}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="block"
-                        data-testid={`video-${video.id}`}
+                  <>
+                    <div className="space-y-3">
+                      {(showAllVideos ? videos : videos.slice(0, 5)).map((video) => (
+                        <a
+                          key={video.id}
+                          href={`https://www.youtube.com/watch?v=${video.videoId}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="block"
+                          data-testid={`video-${video.id}`}
+                        >
+                          <Card className="p-3 hover-elevate active-elevate-2">
+                            <div className="flex gap-3">
+                              <div className="relative flex-shrink-0 w-32 h-20 bg-muted rounded overflow-hidden">
+                                <OptimizedImage
+                                  src={video.thumbnailUrl}
+                                  alt={video.title}
+                                  className="w-full h-full"
+                                  width={128}
+                                  height={80}
+                                  objectFit="cover"
+                                  data-testid="img-video-thumbnail"
+                                />
+                                <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+                                  <Play className="w-8 h-8 text-white fill-white" />
+                                </div>
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <h3 className="font-medium text-sm line-clamp-2 mb-1" data-testid="text-video-title">
+                                  {video.title}
+                                </h3>
+                                <p className="text-xs text-muted-foreground mb-1" data-testid="text-channel-name">
+                                  {video.channelName}
+                                </p>
+                                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                  {video.viewCount && (
+                                    <span className="flex items-center gap-1">
+                                      <Eye className="w-3 h-3" />
+                                      {video.viewCount.toLocaleString()}
+                                    </span>
+                                  )}
+                                  {video.publishedAt && (
+                                    <span className="flex items-center gap-1">
+                                      <Calendar className="w-3 h-3" />
+                                      {new Date(video.publishedAt).toLocaleDateString(language === "en" ? "en-US" : "ko-KR", { year: 'numeric', month: 'short' })}
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          </Card>
+                        </a>
+                      ))}
+                    </div>
+                    {videos.length > 5 && (
+                      <Button
+                        variant="outline"
+                        className="w-full mt-3"
+                        onClick={() => setShowAllVideos(!showAllVideos)}
+                        data-testid="button-toggle-videos"
                       >
-                        <Card className="p-3 hover-elevate active-elevate-2">
-                          <div className="flex gap-3">
-                            <div className="relative flex-shrink-0 w-32 h-20 bg-muted rounded overflow-hidden">
-                              <OptimizedImage
-                                src={video.thumbnailUrl}
-                                alt={video.title}
-                                className="w-full h-full"
-                                width={128}
-                                height={80}
-                                objectFit="cover"
-                                data-testid="img-video-thumbnail"
-                              />
-                              <div className="absolute inset-0 flex items-center justify-center bg-black/30">
-                                <Play className="w-8 h-8 text-white fill-white" />
-                              </div>
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <h3 className="font-medium text-sm line-clamp-2 mb-1" data-testid="text-video-title">
-                                {video.title}
-                              </h3>
-                              <p className="text-xs text-muted-foreground mb-1" data-testid="text-channel-name">
-                                {video.channelName}
-                              </p>
-                              <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                                {video.viewCount && (
-                                  <span className="flex items-center gap-1">
-                                    <Eye className="w-3 h-3" />
-                                    {video.viewCount.toLocaleString()}
-                                  </span>
-                                )}
-                                {video.publishedAt && (
-                                  <span className="flex items-center gap-1">
-                                    <Calendar className="w-3 h-3" />
-                                    {new Date(video.publishedAt).toLocaleDateString(language === "en" ? "en-US" : "ko-KR", { year: 'numeric', month: 'short' })}
-                                  </span>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-                        </Card>
-                      </a>
-                    ))}
-                  </div>
+                        {showAllVideos 
+                          ? (language === "en" ? "Show Less" : "접기")
+                          : (language === "en" ? `Show All (${videos.length})` : `전체보기 (${videos.length}개)`)}
+                      </Button>
+                    )}
+                  </>
                 )}
               </Card>
             )}
