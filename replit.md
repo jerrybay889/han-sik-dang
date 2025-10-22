@@ -16,7 +16,11 @@ Preferred communication style: Simple, everyday language.
 -   **Routing**: Wouter.
 -   **State Management**: TanStack React Query v5 for server state and caching.
 -   **UI Components**: shadcn/ui (New York style) built on Radix UI, styled with Tailwind CSS v4 and custom CSS variables.
--   **Design System**: Mobile-first responsive, 8px grid, dual-mode theming, multi-language typography (Noto Sans KR, SF Pro Display), accessibility-focused.
+-   **Design System**: Fully responsive design (mobile/tablet/desktop), 8px grid, dual-mode theming, multi-language typography (Noto Sans KR, SF Pro Display), accessibility-focused.
+-   **Responsive Layout**: 
+    - **Desktop (≥1280px)**: 3-column restaurant grid with left filter sidebar (264px fixed width), max-width 1280px container
+    - **Tablet (768px-1279px)**: 2-column restaurant grid with horizontal scroll filters, no sidebar
+    - **Mobile (<768px)**: 1-column vertical layout with horizontal scroll filters, optimized for touch interactions
 -   **Internationalization (i18n)**: i18next with 9-language support (English, Korean, Japanese, Chinese Simplified/Traditional, Spanish, French, German, Russian), HTTP backend for translations, automatic language detection, localStorage persistence.
 -   **SEO**: `react-helmet-async` for dynamic meta tags, structured data (Schema.org JSON-LD), sitemap, robots.txt, multilingual SEO.
 -   **PWA**: `manifest.json`, Service Worker for offline caching, installability, standalone display, app icons, shortcuts.
