@@ -138,7 +138,7 @@ export default function MyPage() {
       <div className="min-h-screen bg-background pb-[72px]">
         {/* Header */}
       <header className="bg-primary text-primary-foreground">
-        <div className="max-w-md mx-auto px-4 py-6">
+        <div className="max-w-7xl mx-auto px-4 xl:px-6 py-6">
           <div className="flex items-center justify-between mb-4">
             <img
               src="/attached_assets/배경제거 -Gemini_Generated_Image_1ac1sb1ac1sb1ac1_ALTools_AIRemoveBG_1760940109625.png"
@@ -230,7 +230,7 @@ export default function MyPage() {
         </div>
       </header>
 
-      <div className="max-w-md mx-auto">
+      <div className="max-w-7xl mx-auto">
         {/* Ad Banner */}
         <div className="px-4 pt-4">
           <AdSlot variant="banner" />
@@ -277,28 +277,28 @@ export default function MyPage() {
             </Button>
           </div>
 
-          <div className="space-y-3">
-            {!isAuthenticated ? (
-              <Card className="p-8 text-center">
-                <LogIn className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-                <p className="text-lg font-semibold mb-2">
-                  {language === "en" ? "Log in to save restaurants" : "로그인하여 레스토랑 저장"}
-                </p>
-                <p className="text-sm text-muted-foreground mb-4">
-                  {language === "en" 
-                    ? "Save your favorite Korean restaurants and access them anytime" 
-                    : "좋아하는 한식당을 저장하고 언제든지 확인하세요"}
-                </p>
-                <Button
-                  onClick={() => window.location.href = "/api/login"}
-                  data-testid="button-login-saved"
-                >
-                  <LogIn className="w-4 h-4 mr-2" />
-                  {language === "en" ? "Log In" : "로그인"}
-                </Button>
-              </Card>
-            ) : loadingSaved ? (
-              Array.from({ length: 3 }).map((_, i) => (
+          {!isAuthenticated ? (
+            <Card className="p-8 text-center">
+              <LogIn className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+              <p className="text-lg font-semibold mb-2">
+                {language === "en" ? "Log in to save restaurants" : "로그인하여 레스토랑 저장"}
+              </p>
+              <p className="text-sm text-muted-foreground mb-4">
+                {language === "en" 
+                  ? "Save your favorite Korean restaurants and access them anytime" 
+                  : "좋아하는 한식당을 저장하고 언제든지 확인하세요"}
+              </p>
+              <Button
+                onClick={() => window.location.href = "/api/login"}
+                data-testid="button-login-saved"
+              >
+                <LogIn className="w-4 h-4 mr-2" />
+                {language === "en" ? "Log In" : "로그인"}
+              </Button>
+            </Card>
+          ) : loadingSaved ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+              {Array.from({ length: 3 }).map((_, i) => (
                 <Card key={i} className="p-4">
                   <div className="flex gap-3">
                     <div className="w-24 h-24 rounded-md bg-muted animate-pulse" />
@@ -308,21 +308,23 @@ export default function MyPage() {
                     </div>
                   </div>
                 </Card>
-              ))
-            ) : savedRestaurants.length === 0 ? (
-              <Card className="p-8 text-center">
-                <Heart className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-                <p className="text-lg font-semibold mb-2">
-                  {language === "en" ? "No saved restaurants yet" : "저장된 레스토랑이 없습니다"}
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  {language === "en"
-                    ? "Start saving your favorite restaurants to see them here"
-                    : "좋아하는 레스토랑을 저장하면 여기에 표시됩니다"}
-                </p>
-              </Card>
-            ) : (
-              savedRestaurants.map((restaurant) => (
+              ))}
+            </div>
+          ) : savedRestaurants.length === 0 ? (
+            <Card className="p-8 text-center">
+              <Heart className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+              <p className="text-lg font-semibold mb-2">
+                {language === "en" ? "No saved restaurants yet" : "저장된 레스토랑이 없습니다"}
+              </p>
+              <p className="text-sm text-muted-foreground">
+                {language === "en"
+                  ? "Start saving your favorite restaurants to see them here"
+                  : "좋아하는 레스토랑을 저장하면 여기에 표시됩니다"}
+              </p>
+            </Card>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+              {savedRestaurants.map((restaurant) => (
                 <Link key={restaurant.id} href={`/restaurant/${restaurant.id}`}>
                   <Card
                     className="p-4 hover-elevate active-elevate-2 cursor-pointer"
@@ -363,9 +365,9 @@ export default function MyPage() {
                     </div>
                   </Card>
                 </Link>
-              ))
-            )}
-          </div>
+              ))}
+            </div>
+          )}
         </section>
 
         {/* Event Banners */}
