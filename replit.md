@@ -30,7 +30,7 @@ Preferred communication style: Simple, everyday language.
 -   **Authentication**: Replit Auth with OIDC via Passport.js, session-based (`connect-pg-simple`), auto-upsert on login, JWT refresh token support.
 -   **Authorization**: Role-based access control with `isAdmin` field and middleware for admin routes.
 -   **Admin Dashboard**: Master admin dashboard with 15+ API endpoints (`/api/admin/*`) for managing restaurants, users, reviews, announcements, and event banners, including platform statistics with charts.
--   **Restaurant Dashboard (Backend)**: Backend infrastructure for B2B restaurant management with 11 authenticated API endpoints for ownership verification, review responses, promotions, and analytics.
+-   **Restaurant Dashboard (Backend)**: Backend infrastructure for B2B restaurant management with 12 authenticated API endpoints for ownership verification, review responses, promotions, image management, and analytics.
 
 ### Data Storage
 

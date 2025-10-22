@@ -195,8 +195,8 @@ export default function DashboardPage() {
         response,
       });
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/restaurants", selectedRestaurant?.id, "reviews-with-responses"] });
+    onSuccess: async () => {
+      await queryClient.refetchQueries({ queryKey: ["/api/restaurants", selectedRestaurant?.id, "reviews-with-responses"] });
       setIsResponseDialogOpen(false);
       setResponseText("");
       setSelectedReview(null);
@@ -219,8 +219,8 @@ export default function DashboardPage() {
         response,
       });
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/restaurants", selectedRestaurant?.id, "reviews-with-responses"] });
+    onSuccess: async () => {
+      await queryClient.refetchQueries({ queryKey: ["/api/restaurants", selectedRestaurant?.id, "reviews-with-responses"] });
       setIsResponseDialogOpen(false);
       setResponseText("");
       setSelectedReview(null);
@@ -242,8 +242,8 @@ export default function DashboardPage() {
         restaurantId: selectedRestaurant?.id,
       });
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/restaurants", selectedRestaurant?.id, "reviews-with-responses"] });
+    onSuccess: async () => {
+      await queryClient.refetchQueries({ queryKey: ["/api/restaurants", selectedRestaurant?.id, "reviews-with-responses"] });
       toast({
         title: language === "en" ? "Response deleted" : "응답이 삭제되었습니다",
       });
