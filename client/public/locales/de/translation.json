@@ -89,18 +89,43 @@
     "nearby": "In der Nähe",
     "all": "Alle Standorte",
     "priceRange": "Preisspanne",
+    "allPrices": "Alle Preise",
     "budget": "Günstig",
     "moderate": "Moderat",
     "expensive": "Teuer",
     "luxury": "Luxus",
     "cuisine": "Küchentyp",
+    "allCuisine": "Alle Küchen",
     "sortBy": "Sortieren nach",
-    "rating": "Höchste Bewertung",
+    "rating": "Bewertung",
+    "reviews": "Bewertungen",
     "popular": "Am beliebtesten",
     "newest": "Neueste",
     "distance": "Entfernung",
     "clearAll": "Alles löschen",
     "apply": "Filter anwenden"
+  },
+  "search": {
+    "placeholder": "Restaurants, Gerichte suchen...",
+    "button": "Suchen",
+    "noResults": "Keine Restaurants gefunden",
+    "tryDifferent": "Versuchen Sie es mit anderen Suchbegriffen"
+  },
+  "discover": {
+    "title": "Koreanische Restaurants entdecken",
+    "popular": "Beliebte Restaurants",
+    "featured": "Ausgewählte Premium-Restaurants",
+    "sponsored": "Gesponsert",
+    "featuredBadge": "Ausgewählt",
+    "aiRecommend": "KI-Empfehlungen erhalten",
+    "viewAll": "Alle anzeigen"
+  },
+  "time": {
+    "daysAgo": "vor {{count}} Tagen",
+    "dayAgo": "vor {{count}} Tag",
+    "hoursAgo": "vor {{count}} Stunden",
+    "hourAgo": "vor {{count}} Stunde",
+    "justNow": "Gerade eben"
   },
   "reviews": {
     "title": "Kundenbewertungen",

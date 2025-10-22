@@ -89,18 +89,43 @@
     "nearby": "近く",
     "all": "すべての場所",
     "priceRange": "価格帯",
+    "allPrices": "すべての価格",
     "budget": "低価格",
     "moderate": "中価格",
     "expensive": "高価格",
     "luxury": "高級",
     "cuisine": "料理の種類",
+    "allCuisine": "すべての料理",
     "sortBy": "並び替え",
-    "rating": "高評価順",
+    "rating": "評価順",
+    "reviews": "レビュー順",
     "popular": "人気順",
     "newest": "新着順",
     "distance": "距離順",
     "clearAll": "すべてクリア",
     "apply": "フィルターを適用"
+  },
+  "search": {
+    "placeholder": "レストラン、料理を検索...",
+    "button": "検索",
+    "noResults": "レストランが見つかりません",
+    "tryDifferent": "別のキーワードで検索してみてください"
+  },
+  "discover": {
+    "title": "韓国料理レストランを発見",
+    "popular": "人気レストラン",
+    "featured": "おすすめプレミアムレストラン",
+    "sponsored": "広告",
+    "featuredBadge": "おすすめ",
+    "aiRecommend": "AIによるおすすめを取得",
+    "viewAll": "すべて表示"
+  },
+  "time": {
+    "daysAgo": "{{count}}日前",
+    "dayAgo": "{{count}}日前",
+    "hoursAgo": "{{count}}時間前",
+    "hourAgo": "{{count}}時間前",
+    "justNow": "たった今"
   },
   "reviews": {
     "title": "お客様レビュー",

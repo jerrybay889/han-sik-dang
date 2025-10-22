@@ -89,18 +89,43 @@
     "nearby": "附近",
     "all": "所有位置",
     "priceRange": "價格範圍",
+    "allPrices": "所有價格",
     "budget": "經濟",
     "moderate": "適中",
     "expensive": "昂貴",
     "luxury": "豪華",
     "cuisine": "菜系類型",
+    "allCuisine": "所有菜系",
     "sortBy": "排序方式",
-    "rating": "評分最高",
+    "rating": "評分",
+    "reviews": "評論",
     "popular": "最受歡迎",
     "newest": "最新",
     "distance": "距離",
     "clearAll": "清除全部",
     "apply": "應用篩選"
+  },
+  "search": {
+    "placeholder": "搜尋餐廳、菜品...",
+    "button": "搜尋",
+    "noResults": "未找到餐廳",
+    "tryDifferent": "嘗試使用不同的關鍵詞搜尋"
+  },
+  "discover": {
+    "title": "探索韓國餐廳",
+    "popular": "熱門餐廳",
+    "featured": "精選優質餐廳",
+    "sponsored": "廣告",
+    "featuredBadge": "精選",
+    "aiRecommend": "獲取AI推薦",
+    "viewAll": "查看全部"
+  },
+  "time": {
+    "daysAgo": "{{count}}天前",
+    "dayAgo": "{{count}}天前",
+    "hoursAgo": "{{count}}小時前",
+    "hourAgo": "{{count}}小時前",
+    "justNow": "剛剛"
   },
   "reviews": {
     "title": "顧客評論",

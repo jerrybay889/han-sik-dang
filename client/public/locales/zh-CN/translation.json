@@ -89,18 +89,43 @@
     "nearby": "附近",
     "all": "所有位置",
     "priceRange": "价格范围",
+    "allPrices": "所有价格",
     "budget": "经济",
     "moderate": "适中",
     "expensive": "昂贵",
     "luxury": "豪华",
     "cuisine": "菜系类型",
+    "allCuisine": "所有菜系",
     "sortBy": "排序方式",
-    "rating": "评分最高",
+    "rating": "评分",
+    "reviews": "评论",
     "popular": "最受欢迎",
     "newest": "最新",
     "distance": "距离",
     "clearAll": "清除全部",
     "apply": "应用筛选"
+  },
+  "search": {
+    "placeholder": "搜索餐厅、菜品...",
+    "button": "搜索",
+    "noResults": "未找到餐厅",
+    "tryDifferent": "尝试使用不同的关键词搜索"
+  },
+  "discover": {
+    "title": "探索韩国餐厅",
+    "popular": "热门餐厅",
+    "featured": "精选优质餐厅",
+    "sponsored": "广告",
+    "featuredBadge": "精选",
+    "aiRecommend": "获取AI推荐",
+    "viewAll": "查看全部"
+  },
+  "time": {
+    "daysAgo": "{{count}}天前",
+    "dayAgo": "{{count}}天前",
+    "hoursAgo": "{{count}}小时前",
+    "hourAgo": "{{count}}小时前",
+    "justNow": "刚刚"
   },
   "reviews": {
     "title": "顾客评论",

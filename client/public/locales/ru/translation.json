@@ -89,18 +89,43 @@
     "nearby": "Рядом",
     "all": "Все локации",
     "priceRange": "Ценовой диапазон",
+    "allPrices": "Все цены",
     "budget": "Бюджетный",
     "moderate": "Средний",
     "expensive": "Дорогой",
     "luxury": "Люкс",
     "cuisine": "Тип кухни",
+    "allCuisine": "Все кухни",
     "sortBy": "Сортировать по",
-    "rating": "Высокому рейтингу",
+    "rating": "Рейтингу",
+    "reviews": "Отзывам",
     "popular": "Популярности",
     "newest": "Новизне",
     "distance": "Расстоянию",
     "clearAll": "Очистить все",
     "apply": "Применить фильтры"
+  },
+  "search": {
+    "placeholder": "Поиск ресторанов, блюд...",
+    "button": "Поиск",
+    "noResults": "Рестораны не найдены",
+    "tryDifferent": "Попробуйте другие ключевые слова"
+  },
+  "discover": {
+    "title": "Откройте корейские рестораны",
+    "popular": "Популярные рестораны",
+    "featured": "Избранные премиум-рестораны",
+    "sponsored": "Реклама",
+    "featuredBadge": "Избранное",
+    "aiRecommend": "Получить рекомендации ИИ",
+    "viewAll": "Показать все"
+  },
+  "time": {
+    "daysAgo": "{{count}} дн. назад",
+    "dayAgo": "{{count}} день назад",
+    "hoursAgo": "{{count}} ч. назад",
+    "hourAgo": "{{count}} час назад",
+    "justNow": "Только что"
   },
   "reviews": {
     "title": "Отзывы клиентов",
