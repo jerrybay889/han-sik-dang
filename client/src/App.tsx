@@ -9,6 +9,7 @@ import { LanguageProvider } from "@/contexts/LanguageContext";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { initGA } from "@/lib/analytics";
 import { useAnalytics } from "@/hooks/use-analytics";
+import { useTranslation } from "react-i18next";
 
 const MainScreen = lazy(() => import("@/pages/MainScreen"));
 const AIPage = lazy(() => import("@/pages/AIPage"));
@@ -21,11 +22,13 @@ const AdminRoutes = lazy(() => import("@/pages/admin/AdminRoutes"));
 const NotFound = lazy(() => import("@/pages/not-found"));
 
 function LoadingFallback() {
+  const { t } = useTranslation();
+  
   return (
     <div className="flex items-center justify-center min-h-screen bg-background">
       <div className="flex flex-col items-center gap-4">
         <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-        <p className="text-sm text-muted-foreground">Loading...</p>
+        <p className="text-sm text-muted-foreground">{t('common.loading')}</p>
       </div>
     </div>
   );

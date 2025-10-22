@@ -89,18 +89,43 @@
     "nearby": "Nearby",
     "all": "All Locations",
     "priceRange": "Price Range",
+    "allPrices": "All Prices",
     "budget": "Budget",
     "moderate": "Moderate",
     "expensive": "Expensive",
     "luxury": "Luxury",
     "cuisine": "Cuisine Type",
+    "allCuisine": "All Cuisine",
     "sortBy": "Sort By",
-    "rating": "Highest Rated",
+    "rating": "Rating",
+    "reviews": "Reviews",
     "popular": "Most Popular",
     "newest": "Newest",
     "distance": "Distance",
     "clearAll": "Clear All",
     "apply": "Apply Filters"
+  },
+  "search": {
+    "placeholder": "Search restaurants, dishes...",
+    "button": "Search",
+    "noResults": "No restaurants found",
+    "tryDifferent": "Try searching with different keywords"
+  },
+  "discover": {
+    "title": "Discover Korean Restaurants",
+    "popular": "Popular Restaurants",
+    "featured": "Featured Restaurants",
+    "sponsored": "Sponsored",
+    "featuredBadge": "Featured",
+    "aiRecommend": "Get AI-Powered Recommendations",
+    "viewAll": "View All"
+  },
+  "time": {
+    "daysAgo": "{{count}} days ago",
+    "dayAgo": "{{count}} day ago",
+    "hoursAgo": "{{count}} hours ago",
+    "hourAgo": "{{count}} hour ago",
+    "justNow": "Just now"
   },
   "reviews": {
     "title": "Customer Reviews",

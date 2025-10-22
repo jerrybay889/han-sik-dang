@@ -237,7 +237,7 @@ export default function MainScreen() {
                   data-testid="button-nearby"
                 >
                   <Navigation className="w-4 h-4 mr-1" />
-                  {language === "en" ? "Nearby" : "내 주변"}
+                  {t("filters.nearby")}
                 </Button>
 
                 {/* Price Filter */}
@@ -250,7 +250,7 @@ export default function MainScreen() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">{language === "en" ? "All Prices" : "모든 가격"}</SelectItem>
+                    <SelectItem value="all">{t("filters.allPrices")}</SelectItem>
                     <SelectItem value="1">₩</SelectItem>
                     <SelectItem value="2">₩₩</SelectItem>
                     <SelectItem value="3">₩₩₩</SelectItem>
@@ -267,7 +267,7 @@ export default function MainScreen() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">{language === "en" ? "All Cuisine" : "모든 요리"}</SelectItem>
+                    <SelectItem value="all">{t("filters.allCuisine")}</SelectItem>
                     {cuisines.map((cuisine) => (
                       <SelectItem key={cuisine} value={cuisine}>{cuisine}</SelectItem>
                     ))}
@@ -284,9 +284,9 @@ export default function MainScreen() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="rating">{language === "en" ? "Rating" : "평점순"}</SelectItem>
-                    <SelectItem value="reviews">{language === "en" ? "Reviews" : "리뷰순"}</SelectItem>
-                    {userLocation && <SelectItem value="distance">{language === "en" ? "Distance" : "거리순"}</SelectItem>}
+                    <SelectItem value="rating">{t("filters.rating")}</SelectItem>
+                    <SelectItem value="reviews">{t("filters.reviews")}</SelectItem>
+                    {userLocation && <SelectItem value="distance">{t("filters.distance")}</SelectItem>}
                   </SelectContent>
                 </Select>
               </div>
@@ -340,10 +340,10 @@ export default function MainScreen() {
             <div className="px-4 mb-3">
               <div className="flex items-center justify-between">
                 <h2 className="text-lg font-semibold">
-                  {language === "en" ? "Featured Restaurants" : "추천 프리미엄 맛집"}
+                  {t("discover.featured")}
                 </h2>
                 <Badge variant="default" className="bg-[hsl(var(--accent-warning))] text-[hsl(var(--accent-warning-foreground))]">
-                  {language === "en" ? "Sponsored" : "광고"}
+                  {t("discover.sponsored")}
                 </Badge>
               </div>
             </div>
@@ -366,7 +366,7 @@ export default function MainScreen() {
                         />
                         <div className="absolute top-2 right-2">
                           <Badge className="bg-[hsl(var(--primary))] text-primary-foreground">
-                            Featured
+                            {t("discover.featuredBadge")}
                           </Badge>
                         </div>
                       </div>
@@ -437,9 +437,9 @@ export default function MainScreen() {
             ) : displayRestaurants.length === 0 && searchQuery.trim().length > 0 ? (
               <Card className="p-8 text-center">
                 <Search className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-                <p className="text-lg font-semibold mb-2">No restaurants found</p>
+                <p className="text-lg font-semibold mb-2">{t("search.noResults")}</p>
                 <p className="text-sm text-muted-foreground">
-                  Try searching with different keywords
+                  {t("search.tryDifferent")}
                 </p>
               </Card>
             ) : (

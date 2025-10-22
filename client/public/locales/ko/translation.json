@@ -86,21 +86,46 @@
   "filters": {
     "title": "필터",
     "location": "위치",
-    "nearby": "근처",
+    "nearby": "내 주변",
     "all": "모든 위치",
     "priceRange": "가격대",
+    "allPrices": "모든 가격",
     "budget": "저렴",
     "moderate": "보통",
     "expensive": "비싼",
     "luxury": "고급",
     "cuisine": "음식 종류",
+    "allCuisine": "모든 요리",
     "sortBy": "정렬 기준",
-    "rating": "높은 평점순",
+    "rating": "평점순",
+    "reviews": "리뷰순",
     "popular": "인기순",
     "newest": "최신순",
     "distance": "거리순",
     "clearAll": "전체 지우기",
     "apply": "필터 적용"
+  },
+  "search": {
+    "placeholder": "레스토랑, 음식 검색...",
+    "button": "검색",
+    "noResults": "검색 결과가 없습니다",
+    "tryDifferent": "다른 키워드로 검색해보세요"
+  },
+  "discover": {
+    "title": "한식당 찾기",
+    "popular": "인기 맛집",
+    "featured": "추천 프리미엄 맛집",
+    "sponsored": "광고",
+    "featuredBadge": "추천",
+    "aiRecommend": "AI 맞춤 추천 받기",
+    "viewAll": "전체보기"
+  },
+  "time": {
+    "daysAgo": "{{count}}일 전",
+    "dayAgo": "{{count}}일 전",
+    "hoursAgo": "{{count}}시간 전",
+    "hourAgo": "{{count}}시간 전",
+    "justNow": "방금 전"
   },
   "reviews": {
     "title": "고객 리뷰",
