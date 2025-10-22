@@ -899,6 +899,42 @@ ${insights && insights.firstTimerTips ? `첫 방문 팁: ${insights.firstTimerTi
     }
   });
 
+  // Get reviews with responses for restaurant owner
+  app.get("/api/restaurants/:id/reviews-with-responses", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+
+      const { id } = req.params;
+      
+      // Verify ownership
+      const isOwner = await storage.isRestaurantOwner(userId, id);
+      if (!isOwner) {
+        return res.status(403).json({ error: "Forbidden: You are not the owner of this restaurant" });
+      }
+
+      // Get reviews and responses
+      const reviews = await storage.getReviewsByRestaurant(id);
+      const responses = await storage.getResponsesByRestaurant(id);
+
+      // Combine reviews with their responses
+      const reviewsWithResponses = reviews.map(review => {
+        const response = responses.find(r => r.reviewId === review.id);
+        return {
+          ...review,
+          response: response || null,
+        };
+      });
+
+      res.json(reviewsWithResponses);
+    } catch (error) {
+      console.error("Get reviews with responses error:", error);
+      res.status(500).json({ error: "Failed to fetch reviews with responses" });
+    }
+  });
+
   // Promotion Routes
 
   // Get all promotions for a restaurant (public)

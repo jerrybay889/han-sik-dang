@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Link } from "wouter";
-import { Store, TrendingUp, Star, MessageSquare, Tag, Plus, Edit, Trash2, ChevronRight, Image } from "lucide-react";
+import { Store, TrendingUp, Star, MessageSquare, Tag, Plus, Edit, Trash2, ChevronRight, Image, Reply } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -14,13 +14,17 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/hooks/useAuth";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import type { Restaurant, Promotion, RestaurantImage } from "@shared/schema";
+import type { Restaurant, Promotion, RestaurantImage, Review, ReviewResponse } from "@shared/schema";
 
 interface DashboardStats {
   totalReviews: number;
   averageRating: number;
   ratingDistribution: { rating: number; count: number }[];
   monthlyReviews: { month: string; count: number }[];
+}
+
+interface ReviewWithResponse extends Review {
+  response: ReviewResponse | null;
 }
 
 export default function DashboardPage() {
@@ -33,6 +37,9 @@ export default function DashboardPage() {
   const [editingPromotion, setEditingPromotion] = useState<Promotion | null>(null);
   const [isImageDialogOpen, setIsImageDialogOpen] = useState(false);
   const [newImageUrl, setNewImageUrl] = useState("");
+  const [isResponseDialogOpen, setIsResponseDialogOpen] = useState(false);
+  const [selectedReview, setSelectedReview] = useState<ReviewWithResponse | null>(null);
+  const [responseText, setResponseText] = useState("");
 
   // Promotion form state
   const [promotionTitle, setPromotionTitle] = useState("");
@@ -65,6 +72,12 @@ export default function DashboardPage() {
   // Fetch images for selected restaurant
   const { data: images = [] } = useQuery<RestaurantImage[]>({
     queryKey: ["/api/restaurants", selectedRestaurant?.id, "images"],
+    enabled: !!selectedRestaurant,
+  });
+
+  // Fetch reviews with responses for selected restaurant
+  const { data: reviewsWithResponses = [] } = useQuery<ReviewWithResponse[]>({
+    queryKey: ["/api/restaurants", selectedRestaurant?.id, "reviews-with-responses"],
     enabled: !!selectedRestaurant,
   });
 
@@ -173,6 +186,76 @@ export default function DashboardPage() {
     },
   });
 
+  // Review response mutations
+  const createResponseMutation = useMutation({
+    mutationFn: async ({ reviewId, response }: { reviewId: string; response: string }) => {
+      await apiRequest("POST", "/api/review-responses", {
+        reviewId,
+        restaurantId: selectedRestaurant?.id,
+        response,
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/restaurants", selectedRestaurant?.id, "reviews-with-responses"] });
+      setIsResponseDialogOpen(false);
+      setResponseText("");
+      setSelectedReview(null);
+      toast({
+        title: language === "en" ? "Response posted" : "응답이 게시되었습니다",
+      });
+    },
+    onError: () => {
+      toast({
+        title: language === "en" ? "Failed to post response" : "응답 게시 실패",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const updateResponseMutation = useMutation({
+    mutationFn: async ({ id, response }: { id: string; response: string }) => {
+      await apiRequest("PATCH", `/api/review-responses/${id}`, {
+        restaurantId: selectedRestaurant?.id,
+        response,
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/restaurants", selectedRestaurant?.id, "reviews-with-responses"] });
+      setIsResponseDialogOpen(false);
+      setResponseText("");
+      setSelectedReview(null);
+      toast({
+        title: language === "en" ? "Response updated" : "응답이 수정되었습니다",
+      });
+    },
+    onError: () => {
+      toast({
+        title: language === "en" ? "Failed to update response" : "응답 수정 실패",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const deleteResponseMutation = useMutation({
+    mutationFn: async (id: string) => {
+      await apiRequest("DELETE", `/api/review-responses/${id}`, {
+        restaurantId: selectedRestaurant?.id,
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/restaurants", selectedRestaurant?.id, "reviews-with-responses"] });
+      toast({
+        title: language === "en" ? "Response deleted" : "응답이 삭제되었습니다",
+      });
+    },
+    onError: () => {
+      toast({
+        title: language === "en" ? "Failed to delete response" : "응답 삭제 실패",
+        variant: "destructive",
+      });
+    },
+  });
+
   const resetPromotionForm = () => {
     setPromotionTitle("");
     setPromotionTitleEn("");
@@ -233,6 +316,42 @@ export default function DashboardPage() {
   const handleDeletePromotion = (id: string) => {
     if (window.confirm(language === "en" ? "Are you sure you want to delete this promotion?" : "이 프로모션을 삭제하시겠습니까?")) {
       deletePromotionMutation.mutate(id);
+    }
+  };
+
+  const handleOpenResponseDialog = (review: ReviewWithResponse) => {
+    setSelectedReview(review);
+    setResponseText(review.response?.response || "");
+    setIsResponseDialogOpen(true);
+  };
+
+  const handleSubmitResponse = () => {
+    if (!selectedReview || !responseText.trim()) {
+      toast({
+        title: language === "en" ? "Please enter a response" : "응답을 입력하세요",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (selectedReview.response) {
+      // Update existing response
+      updateResponseMutation.mutate({
+        id: selectedReview.response.id,
+        response: responseText,
+      });
+    } else {
+      // Create new response
+      createResponseMutation.mutate({
+        reviewId: selectedReview.id,
+        response: responseText,
+      });
+    }
+  };
+
+  const handleDeleteResponse = (id: string) => {
+    if (window.confirm(language === "en" ? "Are you sure you want to delete this response?" : "이 응답을 삭제하시겠습니까?")) {
+      deleteResponseMutation.mutate(id);
     }
   };
 
@@ -570,7 +689,7 @@ export default function DashboardPage() {
               </Card>
 
               {/* Images Section */}
-              <Card className="p-6">
+              <Card className="p-6 mb-6">
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-2">
                     <Image className="w-5 h-5 text-primary" />
@@ -622,6 +741,111 @@ export default function DashboardPage() {
                           #{index + 1}
                         </div>
                       </div>
+                    ))}
+                  </div>
+                )}
+              </Card>
+
+              {/* Reviews & Responses Section */}
+              <Card className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2">
+                    <MessageSquare className="w-5 h-5 text-primary" />
+                    <h3 className="font-semibold">
+                      {language === "en" ? "Customer Reviews & Responses" : "고객 리뷰 및 응답"}
+                    </h3>
+                  </div>
+                  <Badge variant="secondary">
+                    {reviewsWithResponses.length} {language === "en" ? "reviews" : "리뷰"}
+                  </Badge>
+                </div>
+
+                {reviewsWithResponses.length === 0 ? (
+                  <div className="text-center py-8">
+                    <MessageSquare className="w-12 h-12 mx-auto mb-3 text-muted-foreground" />
+                    <p className="text-muted-foreground">
+                      {language === "en" ? "No reviews yet" : "아직 리뷰가 없습니다"}
+                    </p>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      {language === "en" ? "Customer reviews will appear here" : "고객 리뷰가 여기에 표시됩니다"}
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {reviewsWithResponses.map((review) => (
+                      <Card key={review.id} className="p-4" data-testid={`review-item-${review.id}`}>
+                        {/* Review */}
+                        <div className="mb-3">
+                          <div className="flex items-start justify-between mb-2">
+                            <div>
+                              <p className="font-medium">{review.userName}</p>
+                              <div className="flex items-center gap-1 mt-1">
+                                {Array.from({ length: 5 }).map((_, i) => (
+                                  <Star
+                                    key={i}
+                                    className={`w-4 h-4 ${
+                                      i < review.rating
+                                        ? "fill-[hsl(var(--accent-success))] text-[hsl(var(--accent-success))]"
+                                        : "fill-muted text-muted"
+                                    }`}
+                                  />
+                                ))}
+                              </div>
+                            </div>
+                            <p className="text-xs text-muted-foreground">
+                              {new Date(review.createdAt).toLocaleDateString(language)}
+                            </p>
+                          </div>
+                          <p className="text-sm">{review.comment}</p>
+                        </div>
+
+                        {/* Response */}
+                        {review.response ? (
+                          <div className="bg-muted/50 rounded-lg p-3 border-l-4 border-primary">
+                            <div className="flex items-start justify-between mb-2">
+                              <div className="flex items-center gap-2">
+                                <Reply className="w-4 h-4 text-primary" />
+                                <p className="text-sm font-medium text-primary">
+                                  {language === "en" ? "Your Response" : "귀하의 응답"}
+                                </p>
+                              </div>
+                              <div className="flex gap-1">
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  onClick={() => handleOpenResponseDialog(review)}
+                                  data-testid={`button-edit-response-${review.id}`}
+                                >
+                                  <Edit className="w-3 h-3" />
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  onClick={() => handleDeleteResponse(review.response!.id)}
+                                  data-testid={`button-delete-response-${review.id}`}
+                                >
+                                  <Trash2 className="w-3 h-3" />
+                                </Button>
+                              </div>
+                            </div>
+                            <p className="text-sm">{review.response.response}</p>
+                            <p className="text-xs text-muted-foreground mt-2">
+                              {new Date(review.response.createdAt).toLocaleDateString(language)}
+                            </p>
+                          </div>
+                        ) : (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleOpenResponseDialog(review)}
+                            className="w-full"
+                            data-testid={`button-respond-${review.id}`}
+                          >
+                            <Reply className="w-4 h-4 mr-2" />
+                            {language === "en" ? "Respond to Review" : "리뷰에 응답하기"}
+                          </Button>
+                        )}
+                      </Card>
                     ))}
                   </div>
                 )}
@@ -856,6 +1080,88 @@ export default function DashboardPage() {
               {createImageMutation.isPending 
                 ? "..." 
                 : (language === "en" ? "Add Image" : "이미지 추가")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Review Response Dialog */}
+      <Dialog open={isResponseDialogOpen} onOpenChange={(open) => {
+        setIsResponseDialogOpen(open);
+        if (!open) {
+          setSelectedReview(null);
+          setResponseText("");
+        }
+      }}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>
+              {selectedReview?.response 
+                ? (language === "en" ? "Edit Response" : "응답 수정") 
+                : (language === "en" ? "Respond to Review" : "리뷰에 응답하기")}
+            </DialogTitle>
+            <DialogDescription>
+              {selectedReview && (
+                <div className="mt-3 p-3 bg-muted rounded-lg">
+                  <div className="flex items-center gap-2 mb-2">
+                    <p className="font-medium text-sm">{selectedReview.userName}</p>
+                    <div className="flex items-center gap-1">
+                      {Array.from({ length: selectedReview.rating }).map((_, i) => (
+                        <Star
+                          key={i}
+                          className="w-3 h-3 fill-[hsl(var(--accent-success))] text-[hsl(var(--accent-success))]"
+                        />
+                      ))}
+                    </div>
+                  </div>
+                  <p className="text-sm text-muted-foreground">{selectedReview.comment}</p>
+                </div>
+              )}
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            <div>
+              <label className="text-sm font-medium mb-2 block">
+                {language === "en" ? "Your Response" : "귀하의 응답"}
+              </label>
+              <Textarea
+                value={responseText}
+                onChange={(e) => setResponseText(e.target.value)}
+                placeholder={language === "en" 
+                  ? "Thank you for your review! We're glad you enjoyed..." 
+                  : "리뷰 감사합니다! 즐거운 시간 보내셨다니..."}
+                rows={5}
+                data-testid="textarea-response"
+              />
+              <p className="text-xs text-muted-foreground mt-2">
+                {language === "en"
+                  ? "Be professional and courteous in your response"
+                  : "전문적이고 정중하게 응답하세요"}
+              </p>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setIsResponseDialogOpen(false);
+                setSelectedReview(null);
+                setResponseText("");
+              }}
+              data-testid="button-cancel-response"
+            >
+              {language === "en" ? "Cancel" : "취소"}
+            </Button>
+            <Button
+              onClick={handleSubmitResponse}
+              disabled={!responseText.trim() || createResponseMutation.isPending || updateResponseMutation.isPending}
+              data-testid="button-submit-response"
+            >
+              {(createResponseMutation.isPending || updateResponseMutation.isPending) 
+                ? "..." 
+                : (language === "en" ? "Submit Response" : "응답 제출")}
             </Button>
           </DialogFooter>
         </DialogContent>
