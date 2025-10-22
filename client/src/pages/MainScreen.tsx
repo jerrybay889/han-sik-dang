@@ -630,62 +630,53 @@ export default function MainScreen() {
         )}
 
         {/* Continue Trending Section - Part 2 */}
-        {!searchQuery && displayRestaurants.length > 8 && (
+        {!searchQuery && displayRestaurants.length > 12 && (
           <section className="px-4 py-4">
-            <div className="space-y-4">
-              {displayRestaurants.slice(8, 16).map((restaurant, index) => (
-                <>
-                  <Link key={restaurant.id} href={`/restaurant/${restaurant.id}`}>
-                    <Card
-                      className="overflow-hidden hover-elevate active-elevate-2 cursor-pointer"
-                      data-testid={`card-restaurant-${restaurant.id}`}
-                      onMouseEnter={() => prefetchRestaurant(restaurant.id)}
-                    >
-                      <div className="flex gap-3 p-3">
-                        <OptimizedImage
-                          src={restaurant.imageUrl}
-                          alt={restaurant.name}
-                          className="w-24 h-24 rounded-md"
-                          width={96}
-                          height={96}
-                          objectFit="cover"
-                          data-testid={`image-restaurant-${restaurant.id}`}
-                        />
-                        <div className="flex-1 min-w-0">
-                          <h3 className="font-semibold text-base mb-1 truncate">
-                            {language === "en" ? restaurant.nameEn : restaurant.name}
-                          </h3>
-                          <p className="text-sm text-muted-foreground mb-2 truncate">
-                            {language === "en" ? restaurant.name : restaurant.nameEn}
-                          </p>
-                          <div className="flex items-center gap-2 mb-2 flex-wrap">
-                            <Badge variant="secondary" className="text-xs">
-                              {restaurant.cuisine}
-                            </Badge>
-                            {restaurant.rating > 0 && (
-                              <div className="flex items-center gap-1 text-sm">
-                                <Star className="w-4 h-4 fill-[hsl(var(--accent-success))] text-[hsl(var(--accent-success))]" />
-                                <span className="font-medium">{restaurant.rating}</span>
-                                <span className="text-muted-foreground">
-                                  ({restaurant.reviewCount})
-                                </span>
-                              </div>
-                            )}
-                          </div>
-                          <div className="flex items-center gap-1 text-xs text-muted-foreground truncate">
-                            <MapPin className="w-3 h-3 flex-shrink-0" />
-                            <span className="truncate">{restaurant.district}</span>
-                          </div>
-                        </div>
-                      </div>
-                    </Card>
-                  </Link>
-                  {(index + 1) % 4 === 0 && (index + 8) < displayRestaurants.length - 1 && (
-                    <div key={`ad-${index + 8}`}>
-                      <AdSlot variant="feed" className="my-2" />
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+              {displayRestaurants.slice(12, 24).map((restaurant, index) => (
+                <Link key={restaurant.id} href={`/restaurant/${restaurant.id}`}>
+                  <Card
+                    className="overflow-hidden hover-elevate active-elevate-2 cursor-pointer h-full"
+                    data-testid={`card-restaurant-${restaurant.id}`}
+                    onMouseEnter={() => prefetchRestaurant(restaurant.id)}
+                  >
+                    <div className="relative aspect-[4/3]">
+                      <OptimizedImage
+                        src={restaurant.imageUrl}
+                        alt={restaurant.name}
+                        className="w-full h-full"
+                        objectFit="cover"
+                        data-testid={`image-restaurant-${restaurant.id}`}
+                      />
                     </div>
-                  )}
-                </>
+                    <div className="p-3">
+                      <h3 className="font-semibold text-base mb-1 truncate">
+                        {language === "en" ? restaurant.nameEn : restaurant.name}
+                      </h3>
+                      <p className="text-sm text-muted-foreground mb-2 truncate">
+                        {language === "en" ? restaurant.name : restaurant.nameEn}
+                      </p>
+                      <div className="flex items-center gap-2 mb-2 flex-wrap">
+                        <Badge variant="secondary" className="text-xs">
+                          {restaurant.cuisine}
+                        </Badge>
+                        {restaurant.rating > 0 && (
+                          <div className="flex items-center gap-1 text-sm">
+                            <Star className="w-4 h-4 fill-[hsl(var(--accent-success))] text-[hsl(var(--accent-success))]" />
+                            <span className="font-medium">{restaurant.rating}</span>
+                            <span className="text-muted-foreground text-xs">
+                              ({restaurant.reviewCount})
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-1 text-xs text-muted-foreground truncate">
+                        <MapPin className="w-3 h-3 flex-shrink-0" />
+                        <span className="truncate">{restaurant.district}</span>
+                      </div>
+                    </div>
+                  </Card>
+                </Link>
               ))}
             </div>
           </section>
@@ -734,62 +725,53 @@ export default function MainScreen() {
         )}
 
         {/* Continue Trending Section - Part 3 (remaining) */}
-        {!searchQuery && displayRestaurants.length > 16 && (
+        {!searchQuery && displayRestaurants.length > 24 && (
           <section className="px-4 py-4">
-            <div className="space-y-4">
-              {displayRestaurants.slice(16).map((restaurant, index) => (
-                <>
-                  <Link key={restaurant.id} href={`/restaurant/${restaurant.id}`}>
-                    <Card
-                      className="overflow-hidden hover-elevate active-elevate-2 cursor-pointer"
-                      data-testid={`card-restaurant-${restaurant.id}`}
-                      onMouseEnter={() => prefetchRestaurant(restaurant.id)}
-                    >
-                      <div className="flex gap-3 p-3">
-                        <OptimizedImage
-                          src={restaurant.imageUrl}
-                          alt={restaurant.name}
-                          className="w-24 h-24 rounded-md"
-                          width={96}
-                          height={96}
-                          objectFit="cover"
-                          data-testid={`image-restaurant-${restaurant.id}`}
-                        />
-                        <div className="flex-1 min-w-0">
-                          <h3 className="font-semibold text-base mb-1 truncate">
-                            {language === "en" ? restaurant.nameEn : restaurant.name}
-                          </h3>
-                          <p className="text-sm text-muted-foreground mb-2 truncate">
-                            {language === "en" ? restaurant.name : restaurant.nameEn}
-                          </p>
-                          <div className="flex items-center gap-2 mb-2 flex-wrap">
-                            <Badge variant="secondary" className="text-xs">
-                              {restaurant.cuisine}
-                            </Badge>
-                            {restaurant.rating > 0 && (
-                              <div className="flex items-center gap-1 text-sm">
-                                <Star className="w-4 h-4 fill-[hsl(var(--accent-success))] text-[hsl(var(--accent-success))]" />
-                                <span className="font-medium">{restaurant.rating}</span>
-                                <span className="text-muted-foreground">
-                                  ({restaurant.reviewCount})
-                                </span>
-                              </div>
-                            )}
-                          </div>
-                          <div className="flex items-center gap-1 text-xs text-muted-foreground truncate">
-                            <MapPin className="w-3 h-3 flex-shrink-0" />
-                            <span className="truncate">{restaurant.district}</span>
-                          </div>
-                        </div>
-                      </div>
-                    </Card>
-                  </Link>
-                  {(index + 1) % 4 === 0 && (index + 16) < displayRestaurants.length - 1 && (
-                    <div key={`ad-${index + 16}`}>
-                      <AdSlot variant="feed" className="my-2" />
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+              {displayRestaurants.slice(24).map((restaurant, index) => (
+                <Link key={restaurant.id} href={`/restaurant/${restaurant.id}`}>
+                  <Card
+                    className="overflow-hidden hover-elevate active-elevate-2 cursor-pointer h-full"
+                    data-testid={`card-restaurant-${restaurant.id}`}
+                    onMouseEnter={() => prefetchRestaurant(restaurant.id)}
+                  >
+                    <div className="relative aspect-[4/3]">
+                      <OptimizedImage
+                        src={restaurant.imageUrl}
+                        alt={restaurant.name}
+                        className="w-full h-full"
+                        objectFit="cover"
+                        data-testid={`image-restaurant-${restaurant.id}`}
+                      />
                     </div>
-                  )}
-                </>
+                    <div className="p-3">
+                      <h3 className="font-semibold text-base mb-1 truncate">
+                        {language === "en" ? restaurant.nameEn : restaurant.name}
+                      </h3>
+                      <p className="text-sm text-muted-foreground mb-2 truncate">
+                        {language === "en" ? restaurant.name : restaurant.nameEn}
+                      </p>
+                      <div className="flex items-center gap-2 mb-2 flex-wrap">
+                        <Badge variant="secondary" className="text-xs">
+                          {restaurant.cuisine}
+                        </Badge>
+                        {restaurant.rating > 0 && (
+                          <div className="flex items-center gap-1 text-sm">
+                            <Star className="w-4 h-4 fill-[hsl(var(--accent-success))] text-[hsl(var(--accent-success))]" />
+                            <span className="font-medium">{restaurant.rating}</span>
+                            <span className="text-muted-foreground text-xs">
+                              ({restaurant.reviewCount})
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-1 text-xs text-muted-foreground truncate">
+                        <MapPin className="w-3 h-3 flex-shrink-0" />
+                        <span className="truncate">{restaurant.district}</span>
+                      </div>
+                    </div>
+                  </Card>
+                </Link>
               ))}
             </div>
           </section>
