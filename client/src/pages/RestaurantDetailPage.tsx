@@ -563,7 +563,7 @@ export default function RestaurantDetailPage() {
   if (loadingRestaurant) {
     return (
       <div className="min-h-screen bg-background">
-        <div className="max-w-md mx-auto">
+        <div className="max-w-7xl mx-auto">
           <div className="h-64 bg-muted animate-pulse" />
           <div className="p-4 space-y-4">
             <div className="h-8 bg-muted rounded animate-pulse" />
@@ -602,7 +602,7 @@ export default function RestaurantDetailPage() {
         url={`/restaurant/${restaurant.id}`}
       />
       <div className="min-h-screen bg-background pb-8">
-        <div className="max-w-md mx-auto">
+        <div className="max-w-7xl mx-auto px-4 xl:px-6">
           {/* Header Image Gallery */}
           <div className="relative">
             {/* Gallery Grid */}
