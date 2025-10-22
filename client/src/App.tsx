@@ -17,12 +17,7 @@ const MyPage = lazy(() => import("@/pages/MyPage"));
 const RestaurantDetailPage = lazy(() => import("@/pages/RestaurantDetailPage"));
 const DashboardPage = lazy(() => import("@/pages/DashboardPage"));
 const AuthPage = lazy(() => import("@/pages/AuthPage"));
-const AdminLayout = lazy(() => import("@/pages/admin/AdminLayout"));
-const AdminDashboard = lazy(() => import("@/pages/admin/AdminDashboard"));
-const AdminRestaurants = lazy(() => import("@/pages/admin/AdminRestaurants"));
-const AdminUsers = lazy(() => import("@/pages/admin/AdminUsers"));
-const AdminReviews = lazy(() => import("@/pages/admin/AdminReviews"));
-const AdminContent = lazy(() => import("@/pages/admin/AdminContent"));
+const AdminRoutes = lazy(() => import("@/pages/admin/AdminRoutes"));
 const NotFound = lazy(() => import("@/pages/not-found"));
 
 function LoadingFallback() {
@@ -51,41 +46,8 @@ function Router() {
         <Route path="/login" component={AuthPage} />
         
         {/* Admin Routes */}
-        <Route path="/admin">
-          {() => (
-            <AdminLayout>
-              <AdminDashboard />
-            </AdminLayout>
-          )}
-        </Route>
-        <Route path="/admin/restaurants">
-          {() => (
-            <AdminLayout>
-              <AdminRestaurants />
-            </AdminLayout>
-          )}
-        </Route>
-        <Route path="/admin/users">
-          {() => (
-            <AdminLayout>
-              <AdminUsers />
-            </AdminLayout>
-          )}
-        </Route>
-        <Route path="/admin/reviews">
-          {() => (
-            <AdminLayout>
-              <AdminReviews />
-            </AdminLayout>
-          )}
-        </Route>
-        <Route path="/admin/content">
-          {() => (
-            <AdminLayout>
-              <AdminContent />
-            </AdminLayout>
-          )}
-        </Route>
+        <Route path="/admin" component={AdminRoutes} />
+        <Route path="/admin/:rest*" component={AdminRoutes} />
         
         <Route component={NotFound} />
       </Switch>
