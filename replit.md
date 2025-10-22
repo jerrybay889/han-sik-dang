@@ -17,9 +17,10 @@ Preferred communication style: Simple, everyday language.
 -   **State Management**: TanStack React Query v5 for server state and caching.
 -   **UI Components**: shadcn/ui (New York style) built on Radix UI, styled with Tailwind CSS v4 and custom CSS variables.
 -   **Design System**: Mobile-first responsive, 8px grid, dual-mode theming, multi-language typography (Noto Sans KR, SF Pro Display), accessibility-focused.
+-   **Internationalization (i18n)**: i18next with 9-language support (English, Korean, Japanese, Chinese Simplified/Traditional, Spanish, French, German, Russian), HTTP backend for translations, automatic language detection, localStorage persistence.
 -   **SEO**: `react-helmet-async` for dynamic meta tags, structured data (Schema.org JSON-LD), sitemap, robots.txt, multilingual SEO.
 -   **PWA**: `manifest.json`, Service Worker for offline caching, installability, standalone display, app icons, shortcuts.
--   **Features**: Naver Maps integration with 4-language support, GPS location services for "Nearby" filtering, advanced multi-criteria filtering (price, cuisine, sort), image lazy loading, code splitting.
+-   **Features**: Naver Maps integration with multi-language support, GPS location services for "Nearby" filtering, advanced multi-criteria filtering (price, cuisine, sort), image lazy loading, code splitting.
 
 ### Backend
 
@@ -129,6 +130,12 @@ The restaurant owner dashboard is a complete B2B management system accessible at
 
 -   `wouter`: Lightweight client-side routing.
 -   `@tanstack/react-query`: Server state management with caching.
+
+### Internationalization
+
+-   `i18next`: Internationalization framework.
+-   `react-i18next`: React bindings for i18next.
+-   `i18next-browser-languagedetector`: Browser language detection plugin.
 
 ### Other Integrations
 

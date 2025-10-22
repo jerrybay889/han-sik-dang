@@ -1,4 +1,4 @@
-export type Language = "ko" | "en" | "ja" | "zh-CN" | "zh-TW" | "es" | "fr" | "de" | "vi";
+export type Language = "ko" | "en" | "ja" | "zh-CN" | "zh-TW" | "es" | "fr" | "de" | "ru";
 
 export const languages: { code: Language; name: string; nativeName: string }[] = [
   { code: "ko", name: "Korean", nativeName: "한국어" },
@@ -9,7 +9,7 @@ export const languages: { code: Language; name: string; nativeName: string }[] =
   { code: "es", name: "Spanish", nativeName: "Español" },
   { code: "fr", name: "French", nativeName: "Français" },
   { code: "de", name: "German", nativeName: "Deutsch" },
-  { code: "vi", name: "Vietnamese", nativeName: "Tiếng Việt" },
+  { code: "ru", name: "Russian", nativeName: "Русский" },
 ];
 
 type TranslationKey =

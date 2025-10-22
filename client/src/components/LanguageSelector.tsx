@@ -10,9 +10,9 @@ import {
 import { Button } from "@/components/ui/button";
 
 export function LanguageSelector() {
-  const { language, setLanguage, t } = useLanguage();
+  const { language, setLanguage } = useLanguage();
 
-  const currentLanguage = languages.find((l) => l.code === language);
+  const currentLanguage = languages.find((l) => l.code === language) || languages[0];
 
   return (
     <DropdownMenu>
@@ -20,19 +20,19 @@ export function LanguageSelector() {
         <Button
           variant="ghost"
           size="sm"
-          className="gap-2"
+          className="gap-2 hover-elevate active-elevate-2"
           data-testid="button-language-selector"
         >
           <Globe className="w-4 h-4" />
-          <span className="text-xs font-medium">{currentLanguage?.nativeName}</span>
+          <span className="text-xs font-medium">{currentLanguage.nativeName}</span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-48">
+      <DropdownMenuContent align="end" className="w-56">
         {languages.map((lang) => (
           <DropdownMenuItem
             key={lang.code}
             onClick={() => setLanguage(lang.code)}
-            className={language === lang.code ? "bg-accent" : ""}
+            className={`cursor-pointer ${language === lang.code ? "bg-accent" : ""}`}
             data-testid={`language-${lang.code}`}
           >
             <div className="flex flex-col">

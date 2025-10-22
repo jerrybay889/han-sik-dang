@@ -1,4 +1,5 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { createContext, useContext, ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 import { Language, translations } from "@shared/i18n";
 
 interface LanguageContextType {
@@ -10,30 +11,12 @@ interface LanguageContextType {
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
-  const [language, setLanguageState] = useState<Language>(() => {
-    const saved = localStorage.getItem("language");
-    if (saved && (saved as Language)) {
-      return saved as Language;
-    }
-    
-    const browserLang = navigator.language.toLowerCase();
-    if (browserLang.startsWith("en")) return "en";
-    if (browserLang.startsWith("ja")) return "ja";
-    if (browserLang.startsWith("zh-cn") || browserLang === "zh") return "zh-CN";
-    if (browserLang.startsWith("zh-tw") || browserLang === "zh-hant") return "zh-TW";
-    if (browserLang.startsWith("es")) return "es";
-    if (browserLang.startsWith("fr")) return "fr";
-    if (browserLang.startsWith("de")) return "de";
-    if (browserLang.startsWith("vi")) return "vi";
-    return "ko";
-  });
-
-  useEffect(() => {
-    localStorage.setItem("language", language);
-  }, [language]);
+  const { i18n } = useTranslation();
+  
+  const language = (i18n.language as Language) || "en";
 
   const setLanguage = (lang: Language) => {
-    setLanguageState(lang);
+    i18n.changeLanguage(lang);
   };
 
   const t = (key: string): string => {
