@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Link } from "wouter";
-import { Store, TrendingUp, Star, MessageSquare, Tag, Plus, Edit, Trash2, ChevronRight } from "lucide-react";
+import { Store, TrendingUp, Star, MessageSquare, Tag, Plus, Edit, Trash2, ChevronRight, Image } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -14,7 +14,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/hooks/useAuth";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import type { Restaurant, Promotion } from "@shared/schema";
+import type { Restaurant, Promotion, RestaurantImage } from "@shared/schema";
 
 interface DashboardStats {
   totalReviews: number;
@@ -31,6 +31,8 @@ export default function DashboardPage() {
   const [selectedRestaurant, setSelectedRestaurant] = useState<Restaurant | null>(null);
   const [isPromotionDialogOpen, setIsPromotionDialogOpen] = useState(false);
   const [editingPromotion, setEditingPromotion] = useState<Promotion | null>(null);
+  const [isImageDialogOpen, setIsImageDialogOpen] = useState(false);
+  const [newImageUrl, setNewImageUrl] = useState("");
 
   // Promotion form state
   const [promotionTitle, setPromotionTitle] = useState("");
@@ -57,6 +59,12 @@ export default function DashboardPage() {
   // Fetch promotions for selected restaurant
   const { data: promotions = [] } = useQuery<Promotion[]>({
     queryKey: ["/api/restaurants", selectedRestaurant?.id, "all-promotions"],
+    enabled: !!selectedRestaurant,
+  });
+
+  // Fetch images for selected restaurant
+  const { data: images = [] } = useQuery<RestaurantImage[]>({
+    queryKey: ["/api/restaurants", selectedRestaurant?.id, "images"],
     enabled: !!selectedRestaurant,
   });
 
@@ -116,6 +124,50 @@ export default function DashboardPage() {
     onError: () => {
       toast({
         title: language === "en" ? "Failed to delete promotion" : "프로모션 삭제 실패",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Image mutations
+  const createImageMutation = useMutation({
+    mutationFn: async (imageUrl: string) => {
+      await apiRequest("POST", `/api/restaurants/${selectedRestaurant?.id}/images`, {
+        imageUrl,
+        displayOrder: images.length,
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/restaurants", selectedRestaurant?.id, "images"] });
+      setIsImageDialogOpen(false);
+      setNewImageUrl("");
+      toast({
+        title: language === "en" ? "Image added" : "이미지가 추가되었습니다",
+      });
+    },
+    onError: () => {
+      toast({
+        title: language === "en" ? "Failed to add image" : "이미지 추가 실패",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const deleteImageMutation = useMutation({
+    mutationFn: async (id: string) => {
+      await apiRequest("DELETE", `/api/restaurant-images/${id}`, {
+        restaurantId: selectedRestaurant?.id,
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/restaurants", selectedRestaurant?.id, "images"] });
+      toast({
+        title: language === "en" ? "Image deleted" : "이미지가 삭제되었습니다",
+      });
+    },
+    onError: () => {
+      toast({
+        title: language === "en" ? "Failed to delete image" : "이미지 삭제 실패",
         variant: "destructive",
       });
     },
@@ -516,6 +568,64 @@ export default function DashboardPage() {
                   </div>
                 )}
               </Card>
+
+              {/* Images Section */}
+              <Card className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2">
+                    <Image className="w-5 h-5 text-primary" />
+                    <h3 className="font-semibold">
+                      {language === "en" ? "Restaurant Images" : "레스토랑 이미지"}
+                    </h3>
+                  </div>
+                  <Button
+                    size="sm"
+                    onClick={() => setIsImageDialogOpen(true)}
+                    data-testid="button-add-image"
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    {language === "en" ? "Add" : "추가"}
+                  </Button>
+                </div>
+
+                {images.length === 0 ? (
+                  <div className="text-center py-8">
+                    <Image className="w-12 h-12 mx-auto mb-3 text-muted-foreground" />
+                    <p className="text-muted-foreground">
+                      {language === "en" ? "No images yet" : "이미지가 없습니다"}
+                    </p>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      {language === "en" ? "Add images to showcase your restaurant" : "레스토랑을 소개할 이미지를 추가하세요"}
+                    </p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-3 gap-3">
+                    {images.map((image, index) => (
+                      <div key={image.id} className="relative group">
+                        <div className="aspect-square rounded-lg overflow-hidden bg-muted">
+                          <img
+                            src={image.imageUrl}
+                            alt={`Image ${index + 1}`}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                          onClick={() => deleteImageMutation.mutate(image.id)}
+                          data-testid={`button-delete-image-${image.id}`}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                        <div className="absolute bottom-2 left-2 bg-background/80 backdrop-blur-sm px-2 py-1 rounded text-xs">
+                          #{index + 1}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </Card>
             </div>
           )}
         </div>
@@ -672,6 +782,80 @@ export default function DashboardPage() {
               {(createPromotionMutation.isPending || updatePromotionMutation.isPending) 
                 ? "..." 
                 : (language === "en" ? "Save" : "저장")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Image Dialog */}
+      <Dialog open={isImageDialogOpen} onOpenChange={setIsImageDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>
+              {language === "en" ? "Add Restaurant Image" : "레스토랑 이미지 추가"}
+            </DialogTitle>
+            <DialogDescription>
+              {restaurantName}
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            <div>
+              <label className="text-sm font-medium mb-2 block">
+                {language === "en" ? "Image URL" : "이미지 URL"}
+              </label>
+              <Input
+                value={newImageUrl}
+                onChange={(e) => setNewImageUrl(e.target.value)}
+                placeholder="https://example.com/image.jpg"
+                data-testid="input-image-url"
+              />
+              <p className="text-xs text-muted-foreground mt-2">
+                {language === "en" 
+                  ? "Enter a direct link to an image hosted on Unsplash, Imgur, or another image hosting service" 
+                  : "Unsplash, Imgur 또는 다른 이미지 호스팅 서비스에 호스팅된 이미지의 직접 링크를 입력하세요"}
+              </p>
+            </div>
+
+            {newImageUrl && (
+              <div>
+                <label className="text-sm font-medium mb-2 block">
+                  {language === "en" ? "Preview" : "미리보기"}
+                </label>
+                <div className="aspect-video rounded-lg overflow-hidden bg-muted">
+                  <img
+                    src={newImageUrl}
+                    alt="Preview"
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      e.currentTarget.src = "";
+                      e.currentTarget.alt = language === "en" ? "Invalid image URL" : "잘못된 이미지 URL";
+                    }}
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setIsImageDialogOpen(false);
+                setNewImageUrl("");
+              }}
+              data-testid="button-cancel-image"
+            >
+              {language === "en" ? "Cancel" : "취소"}
+            </Button>
+            <Button
+              onClick={() => createImageMutation.mutate(newImageUrl)}
+              disabled={!newImageUrl || createImageMutation.isPending}
+              data-testid="button-submit-image"
+            >
+              {createImageMutation.isPending 
+                ? "..." 
+                : (language === "en" ? "Add Image" : "이미지 추가")}
             </Button>
           </DialogFooter>
         </DialogContent>
