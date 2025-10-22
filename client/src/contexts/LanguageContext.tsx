@@ -1,6 +1,6 @@
 import { createContext, useContext, ReactNode } from "react";
 import { useTranslation } from "react-i18next";
-import { Language, translations } from "@shared/i18n";
+import { Language } from "@shared/i18n";
 
 interface LanguageContextType {
   language: Language;
@@ -11,7 +11,7 @@ interface LanguageContextType {
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
-  const { i18n } = useTranslation();
+  const { i18n, t: i18nT } = useTranslation();
   
   const language = (i18n.language as Language) || "en";
 
@@ -20,8 +20,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   };
 
   const t = (key: string): string => {
-    const translation = translations[language];
-    return translation?.[key as keyof typeof translation] || key;
+    return i18nT(key);
   };
 
   return (
