@@ -49,6 +49,7 @@ export default function RestaurantDetailPage() {
   const [chatInput, setChatInput] = useState("");
   const [isSendingMessage, setIsSendingMessage] = useState(false);
   const chatScrollRef = useRef<HTMLDivElement>(null);
+  const [isGalleryOpen, setIsGalleryOpen] = useState(false);
 
   const { data: restaurant, isLoading: loadingRestaurant } = useQuery<Restaurant>({
     queryKey: ["/api/restaurants", restaurantId],
@@ -593,18 +594,55 @@ export default function RestaurantDetailPage() {
       />
       <div className="min-h-screen bg-background pb-8">
         <div className="max-w-md mx-auto">
-          {/* Header Image */}
+          {/* Header Image Gallery */}
           <div className="relative">
-            <OptimizedImage
-              src={restaurant.imageUrl}
-              alt={restaurantName}
-              className="w-full h-64"
-              height={256}
-              priority={true}
-              objectFit="cover"
-              data-testid="img-restaurant-hero"
-            />
-            <div className="absolute top-4 left-4 right-4 flex justify-between items-start">
+            {/* Gallery Grid */}
+            <div className="grid grid-cols-4 gap-1 h-64">
+              {/* Main Image - Takes 2 columns */}
+              <div className="col-span-2 row-span-2 relative overflow-hidden cursor-pointer" onClick={() => setIsGalleryOpen(true)}>
+                <OptimizedImage
+                  src={restaurant.imageUrl}
+                  alt={restaurantName}
+                  className="w-full h-full"
+                  height={256}
+                  priority={true}
+                  objectFit="cover"
+                  data-testid="img-restaurant-hero"
+                />
+              </div>
+              
+              {/* Additional Images - 2x2 Grid */}
+              {[
+                "https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=400",
+                "https://images.unsplash.com/photo-1498654896293-37aacf113fd9?w=400",
+                "https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=400",
+                "https://images.unsplash.com/photo-1551218808-94e220e084d2?w=400",
+              ].map((imgUrl, index) => (
+                <div
+                  key={index}
+                  className="relative overflow-hidden cursor-pointer hover-elevate"
+                  onClick={() => setIsGalleryOpen(true)}
+                >
+                  {index === 3 && (
+                    <div className="absolute inset-0 bg-black/60 flex items-center justify-center z-10">
+                      <div className="text-white text-center">
+                        <Eye className="w-6 h-6 mx-auto mb-1" />
+                        <p className="text-sm font-semibold">{language === "en" ? "View All" : "전체보기"}</p>
+                      </div>
+                    </div>
+                  )}
+                  <OptimizedImage
+                    src={imgUrl}
+                    alt={`${restaurantName} ${index + 2}`}
+                    className="w-full h-full"
+                    objectFit="cover"
+                  />
+                </div>
+              ))}
+            </div>
+
+            {/* Overlay Buttons */}
+            <div className="absolute top-4 left-4 right-4 flex justify-between items-start z-20">
               <Link href="/">
                 <Button
                   size="icon"
@@ -1527,6 +1565,39 @@ export default function RestaurantDetailPage() {
               </Button>
             </div>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Image Gallery Dialog */}
+      <Dialog open={isGalleryOpen} onOpenChange={setIsGalleryOpen}>
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-hidden p-0">
+          <DialogHeader className="px-6 pt-6 pb-3">
+            <DialogTitle>
+              {restaurantName} - {language === "en" ? "Photos" : "사진"}
+            </DialogTitle>
+          </DialogHeader>
+          <ScrollArea className="max-h-[calc(90vh-80px)] px-6 pb-6">
+            <div className="grid grid-cols-2 gap-2">
+              {[restaurant.imageUrl, ...[ 
+                "https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=800",
+                "https://images.unsplash.com/photo-1498654896293-37aacf113fd9?w=800",
+                "https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=800",
+                "https://images.unsplash.com/photo-1551218808-94e220e084d2?w=800",
+                "https://images.unsplash.com/photo-1580820866981-b6d8e1c522e3?w=800",
+                "https://images.unsplash.com/photo-1563245372-f21724e3856d?w=800",
+                "https://images.unsplash.com/photo-1590846406792-0adc7f938f1d?w=800",
+              ]].map((imgUrl, index) => (
+                <div key={index} className="relative aspect-[4/3] overflow-hidden rounded-lg">
+                  <OptimizedImage
+                    src={imgUrl}
+                    alt={`${restaurantName} ${index + 1}`}
+                    className="w-full h-full"
+                    objectFit="cover"
+                  />
+                </div>
+              ))}
+            </div>
+          </ScrollArea>
         </DialogContent>
       </Dialog>
     </>
