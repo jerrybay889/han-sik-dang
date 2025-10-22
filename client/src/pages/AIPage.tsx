@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Bot, Send, Sparkles, Utensils, MapPin, Heart, Loader2 } from "lucide-react";
+import { Bot, Send, Sparkles, Utensils, MapPin, Beef, Soup, Fish, Leaf, TrendingUp, Loader2 } from "lucide-react";
 import { BottomNav } from "@/components/BottomNav";
 import { LanguageSelector } from "@/components/LanguageSelector";
 import { SEO } from "@/components/SEO";
@@ -28,10 +28,16 @@ export default function AIPage() {
   const [isLoading, setIsLoading] = useState(false);
 
   const suggestions = [
-    { icon: Utensils, text: t("ai.suggestions.vegan") },
-    { icon: MapPin, text: t("ai.suggestions.nearby") },
-    { icon: Heart, text: t("ai.suggestions.romantic") },
-    { icon: Sparkles, text: t("ai.suggestions.special") },
+    { icon: Utensils, text: language === "en" ? "Bibimbap" : "비빔밥" },
+    { icon: Beef, text: language === "en" ? "Bulgogi" : "불고기" },
+    { icon: Soup, text: language === "en" ? "Kimchi Stew" : "김치찌개" },
+    { icon: Beef, text: language === "en" ? "Samgyeopsal" : "삼겹살" },
+    { icon: Leaf, text: language === "en" ? "Vegan Options" : "비건 옵션" },
+    { icon: Fish, text: language === "en" ? "Seafood" : "해산물" },
+    { icon: Sparkles, text: language === "en" ? "Traditional" : "전통 한식" },
+    { icon: Utensils, text: language === "en" ? "Modern Fusion" : "현대적인" },
+    { icon: MapPin, text: language === "en" ? "Nearby" : "가까운 곳" },
+    { icon: TrendingUp, text: language === "en" ? "Popular Dishes" : "인기 메뉴" },
   ];
 
   const handleSend = async (messageText?: string) => {
@@ -159,21 +165,24 @@ export default function AIPage() {
         {/* Quick Suggestions */}
         {messages.length === 1 && !isLoading && (
           <div className="pt-4" data-testid="suggestions-container">
-            <div className="grid grid-cols-2 gap-2">
+            <p className="text-xs text-muted-foreground mb-3 px-1">
+              {language === "en" ? "Try asking about:" : "이런 것을 물어보세요:"}
+            </p>
+            <div className="grid grid-cols-3 gap-2">
               {suggestions.map((suggestion, index) => {
                 const Icon = suggestion.icon;
                 return (
                   <Card
                     key={index}
-                    className="p-4 hover-elevate active-elevate-2 cursor-pointer"
+                    className="p-2 hover-elevate active-elevate-2 cursor-pointer"
                     onClick={() => handleSend(suggestion.text)}
                     data-testid={`suggestion-${index}`}
                   >
-                    <div className="flex flex-col items-center gap-2 text-center">
-                      <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                        <Icon className="w-5 h-5 text-primary" />
+                    <div className="flex flex-col items-center gap-1 text-center">
+                      <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                        <Icon className="w-3.5 h-3.5 text-primary" />
                       </div>
-                      <p className="text-sm font-medium">{suggestion.text}</p>
+                      <p className="text-xs font-medium leading-tight">{suggestion.text}</p>
                     </div>
                   </Card>
                 );
