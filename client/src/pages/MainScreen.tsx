@@ -193,10 +193,10 @@ export default function MainScreen() {
         url="/"
         structuredData={structuredData}
       />
-      <div className="min-h-screen bg-background pb-[72px] lg:pb-0">
+      <div className="min-h-screen bg-background pb-[72px]">
         {/* Header */}
       <header className="sticky top-0 z-50 bg-card border-b border-border">
-        <div className="max-w-7xl mx-auto px-4 lg:px-6 py-3">
+        <div className="max-w-7xl mx-auto px-4 xl:px-6 py-3">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
               <img
@@ -212,7 +212,7 @@ export default function MainScreen() {
               </Button>
             </div>
           </div>
-          <div className="relative max-w-2xl mx-auto lg:mx-0">
+          <div className="relative max-w-2xl mx-auto xl:mx-0">
             <input
               type="search"
               placeholder={t("search.placeholder")}
@@ -224,8 +224,8 @@ export default function MainScreen() {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
           </div>
 
-          {/* Mobile Filters */}
-          <div className="mt-3 lg:hidden flex items-center gap-2 overflow-x-auto pb-1">
+          {/* Mobile & Tablet Filters */}
+          <div className="mt-3 xl:hidden flex items-center gap-2 overflow-x-auto pb-1">
             <ScrollArea className="w-full">
               <div className="flex gap-2">
                 <Button
@@ -294,9 +294,9 @@ export default function MainScreen() {
 
       {/* Desktop Layout with Sidebar */}
       <div className="max-w-7xl mx-auto">
-        <div className="lg:flex lg:gap-6 lg:px-6">
+        <div className="xl:flex xl:gap-6 xl:px-6">
           {/* Desktop Sidebar Filters */}
-          <aside className="hidden lg:block w-64 flex-shrink-0 sticky top-[120px] h-fit">
+          <aside className="hidden xl:block w-64 flex-shrink-0 sticky top-[120px] h-fit">
             <Card className="p-4">
               <h3 className="font-semibold mb-4">{t("filters.title")}</h3>
               
