@@ -2,7 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { GoogleGenAI } from "@google/genai";
-import { setupAuth, isAuthenticated } from "./replitAuth";
+import { setupAuth, isAuthenticated, isAdmin } from "./replitAuth";
 
 const genAI = new GoogleGenAI({ 
   apiKey: process.env.GOOGLE_API_KEY_HANSIKDANG || "" 
@@ -1109,6 +1109,227 @@ ${insights && insights.firstTimerTips ? `첫 방문 팁: ${insights.firstTimerTi
     } catch (error) {
       console.error("Delete restaurant image error:", error);
       res.status(500).json({ error: "Failed to delete restaurant image" });
+    }
+  });
+
+  // ==================== ADMIN ROUTES ====================
+  
+  // Admin Dashboard Statistics
+  app.get("/api/admin/dashboard/stats", isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const stats = await storage.getAdminDashboardStats();
+      res.json(stats);
+    } catch (error) {
+      console.error("Error fetching admin dashboard stats:", error);
+      res.status(500).json({ error: "Failed to fetch dashboard statistics" });
+    }
+  });
+
+  // Get all users
+  app.get("/api/admin/users", isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const users = await storage.getAllUsers();
+      res.json(users);
+    } catch (error) {
+      console.error("Error fetching all users:", error);
+      res.status(500).json({ error: "Failed to fetch users" });
+    }
+  });
+
+  // Update user admin status
+  app.patch("/api/admin/users/:id/admin-status", isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const { isAdmin } = req.body;
+
+      if (typeof isAdmin !== "number" || (isAdmin !== 0 && isAdmin !== 1)) {
+        return res.status(400).json({ error: "Invalid isAdmin value. Must be 0 or 1" });
+      }
+
+      const user = await storage.updateUserAdminStatus(id, isAdmin);
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      res.json(user);
+    } catch (error) {
+      console.error("Error updating user admin status:", error);
+      res.status(500).json({ error: "Failed to update user admin status" });
+    }
+  });
+
+  // Update restaurant (admin)
+  app.patch("/api/admin/restaurants/:id", isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const restaurant = await storage.updateRestaurant(id, req.body);
+      
+      if (!restaurant) {
+        return res.status(404).json({ error: "Restaurant not found" });
+      }
+
+      res.json(restaurant);
+    } catch (error) {
+      console.error("Error updating restaurant:", error);
+      res.status(500).json({ error: "Failed to update restaurant" });
+    }
+  });
+
+  // Delete restaurant (admin)
+  app.delete("/api/admin/restaurants/:id", isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const deleted = await storage.deleteRestaurant(id);
+      
+      if (!deleted) {
+        return res.status(404).json({ error: "Restaurant not found" });
+      }
+
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting restaurant:", error);
+      res.status(500).json({ error: "Failed to delete restaurant" });
+    }
+  });
+
+  // Get all reviews (admin)
+  app.get("/api/admin/reviews", isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const limit = req.query.limit ? parseInt(req.query.limit as string) : 100;
+      const reviews = await storage.getAllReviews(limit);
+      res.json(reviews);
+    } catch (error) {
+      console.error("Error fetching all reviews:", error);
+      res.status(500).json({ error: "Failed to fetch reviews" });
+    }
+  });
+
+  // Delete review (admin)
+  app.delete("/api/admin/reviews/:id", isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const deleted = await storage.deleteReviewAsAdmin(id);
+      
+      if (!deleted) {
+        return res.status(404).json({ error: "Review not found" });
+      }
+
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting review:", error);
+      res.status(500).json({ error: "Failed to delete review" });
+    }
+  });
+
+  // Get all announcements (admin)
+  app.get("/api/admin/announcements", isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const announcements = await storage.getAllAnnouncements();
+      res.json(announcements);
+    } catch (error) {
+      console.error("Error fetching all announcements:", error);
+      res.status(500).json({ error: "Failed to fetch announcements" });
+    }
+  });
+
+  // Create announcement (admin)
+  app.post("/api/admin/announcements", isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const announcement = await storage.createAnnouncement(req.body);
+      res.status(201).json(announcement);
+    } catch (error) {
+      console.error("Error creating announcement:", error);
+      res.status(500).json({ error: "Failed to create announcement" });
+    }
+  });
+
+  // Update announcement (admin)
+  app.patch("/api/admin/announcements/:id", isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const announcement = await storage.updateAnnouncement(id, req.body);
+      
+      if (!announcement) {
+        return res.status(404).json({ error: "Announcement not found" });
+      }
+
+      res.json(announcement);
+    } catch (error) {
+      console.error("Error updating announcement:", error);
+      res.status(500).json({ error: "Failed to update announcement" });
+    }
+  });
+
+  // Delete announcement (admin)
+  app.delete("/api/admin/announcements/:id", isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const deleted = await storage.deleteAnnouncement(id);
+      
+      if (!deleted) {
+        return res.status(404).json({ error: "Announcement not found" });
+      }
+
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting announcement:", error);
+      res.status(500).json({ error: "Failed to delete announcement" });
+    }
+  });
+
+  // Get all event banners (admin)
+  app.get("/api/admin/event-banners", isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const banners = await storage.getAllEventBanners();
+      res.json(banners);
+    } catch (error) {
+      console.error("Error fetching all event banners:", error);
+      res.status(500).json({ error: "Failed to fetch event banners" });
+    }
+  });
+
+  // Create event banner (admin)
+  app.post("/api/admin/event-banners", isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const banner = await storage.createEventBanner(req.body);
+      res.status(201).json(banner);
+    } catch (error) {
+      console.error("Error creating event banner:", error);
+      res.status(500).json({ error: "Failed to create event banner" });
+    }
+  });
+
+  // Update event banner (admin)
+  app.patch("/api/admin/event-banners/:id", isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const banner = await storage.updateEventBanner(id, req.body);
+      
+      if (!banner) {
+        return res.status(404).json({ error: "Event banner not found" });
+      }
+
+      res.json(banner);
+    } catch (error) {
+      console.error("Error updating event banner:", error);
+      res.status(500).json({ error: "Failed to update event banner" });
+    }
+  });
+
+  // Delete event banner (admin)
+  app.delete("/api/admin/event-banners/:id", isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const deleted = await storage.deleteEventBanner(id);
+      
+      if (!deleted) {
+        return res.status(404).json({ error: "Event banner not found" });
+      }
+
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting event banner:", error);
+      res.status(500).json({ error: "Failed to delete event banner" });
     }
   });
 

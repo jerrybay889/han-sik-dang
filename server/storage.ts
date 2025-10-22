@@ -125,6 +125,30 @@ export interface IStorage {
   createRestaurantImage(image: InsertRestaurantImage): Promise<RestaurantImage>;
   deleteRestaurantImage(id: string, userId: string, restaurantId: string): Promise<boolean>;
   updateImageOrder(id: string, displayOrder: number): Promise<void>;
+  
+  // Admin operations
+  getAllUsers(): Promise<User[]>;
+  updateUserAdminStatus(userId: string, isAdmin: number): Promise<User | undefined>;
+  getAdminDashboardStats(): Promise<{
+    totalRestaurants: number;
+    totalUsers: number;
+    totalReviews: number;
+    totalAnnouncements: number;
+    recentUsers: User[];
+    recentReviews: Review[];
+    restaurantsByCuisine: { cuisine: string; count: number }[];
+    reviewsPerDay: { date: string; count: number }[];
+  }>;
+  updateRestaurant(id: string, data: Partial<InsertRestaurant>): Promise<Restaurant | undefined>;
+  deleteRestaurant(id: string): Promise<boolean>;
+  getAllReviews(limit?: number): Promise<Review[]>;
+  deleteReviewAsAdmin(reviewId: string): Promise<boolean>;
+  getAllAnnouncements(): Promise<Announcement[]>;
+  updateAnnouncement(id: string, data: Partial<InsertAnnouncement>): Promise<Announcement | undefined>;
+  deleteAnnouncement(id: string): Promise<boolean>;
+  getAllEventBanners(): Promise<EventBanner[]>;
+  updateEventBanner(id: string, data: Partial<InsertEventBanner>): Promise<EventBanner | undefined>;
+  deleteEventBanner(id: string): Promise<boolean>;
 }
 
 export class DbStorage implements IStorage {
@@ -605,6 +629,191 @@ export class DbStorage implements IStorage {
       .update(restaurantImages)
       .set({ displayOrder })
       .where(eq(restaurantImages.id, id));
+  }
+
+  // Admin operations
+  async getAllUsers(): Promise<User[]> {
+    return await db.select().from(users).orderBy(desc(users.createdAt));
+  }
+
+  async updateUserAdminStatus(userId: string, isAdmin: number): Promise<User | undefined> {
+    const result = await db
+      .update(users)
+      .set({ isAdmin, updatedAt: new Date() })
+      .where(eq(users.id, userId))
+      .returning();
+    return result[0];
+  }
+
+  async getAdminDashboardStats(): Promise<{
+    totalRestaurants: number;
+    totalUsers: number;
+    totalReviews: number;
+    totalAnnouncements: number;
+    recentUsers: User[];
+    recentReviews: Review[];
+    restaurantsByCuisine: { cuisine: string; count: number }[];
+    reviewsPerDay: { date: string; count: number }[];
+  }> {
+    // Get total counts
+    const totalRestaurantsResult = await db
+      .select({ count: sql<number>`cast(count(*) as int)` })
+      .from(restaurants);
+    const totalUsersResult = await db
+      .select({ count: sql<number>`cast(count(*) as int)` })
+      .from(users);
+    const totalReviewsResult = await db
+      .select({ count: sql<number>`cast(count(*) as int)` })
+      .from(reviews);
+    const totalAnnouncementsResult = await db
+      .select({ count: sql<number>`cast(count(*) as int)` })
+      .from(announcements);
+
+    // Get recent users (last 10)
+    const recentUsers = await db
+      .select()
+      .from(users)
+      .orderBy(desc(users.createdAt))
+      .limit(10);
+
+    // Get recent reviews (last 10)
+    const recentReviews = await db
+      .select()
+      .from(reviews)
+      .orderBy(desc(reviews.createdAt))
+      .limit(10);
+
+    // Get restaurants by cuisine
+    const cuisineStats = await db
+      .select({
+        cuisine: restaurants.cuisine,
+        count: sql<number>`cast(count(*) as int)`,
+      })
+      .from(restaurants)
+      .groupBy(restaurants.cuisine)
+      .orderBy(desc(sql`count(*)`));
+
+    // Get reviews per day (last 30 days)
+    const reviewsPerDay = await db
+      .select({
+        date: sql<string>`to_char(${reviews.createdAt}, 'YYYY-MM-DD')`,
+        count: sql<number>`cast(count(*) as int)`,
+      })
+      .from(reviews)
+      .where(sql`${reviews.createdAt} >= NOW() - INTERVAL '30 days'`)
+      .groupBy(sql`to_char(${reviews.createdAt}, 'YYYY-MM-DD')`)
+      .orderBy(sql`to_char(${reviews.createdAt}, 'YYYY-MM-DD')`);
+
+    return {
+      totalRestaurants: totalRestaurantsResult[0]?.count || 0,
+      totalUsers: totalUsersResult[0]?.count || 0,
+      totalReviews: totalReviewsResult[0]?.count || 0,
+      totalAnnouncements: totalAnnouncementsResult[0]?.count || 0,
+      recentUsers,
+      recentReviews,
+      restaurantsByCuisine: cuisineStats,
+      reviewsPerDay,
+    };
+  }
+
+  async updateRestaurant(id: string, data: Partial<InsertRestaurant>): Promise<Restaurant | undefined> {
+    const result = await db
+      .update(restaurants)
+      .set(data)
+      .where(eq(restaurants.id, id))
+      .returning();
+    return result[0];
+  }
+
+  async deleteRestaurant(id: string): Promise<boolean> {
+    const result = await db
+      .delete(restaurants)
+      .where(eq(restaurants.id, id))
+      .returning();
+    return result.length > 0;
+  }
+
+  async getAllReviews(limit: number = 100): Promise<Review[]> {
+    return await db
+      .select()
+      .from(reviews)
+      .orderBy(desc(reviews.createdAt))
+      .limit(limit);
+  }
+
+  async deleteReviewAsAdmin(reviewId: string): Promise<boolean> {
+    // Get restaurant ID before deleting
+    const review = await db
+      .select()
+      .from(reviews)
+      .where(eq(reviews.id, reviewId));
+    
+    if (review.length === 0) {
+      return false;
+    }
+
+    const restaurantId = review[0].restaurantId;
+
+    const result = await db
+      .delete(reviews)
+      .where(eq(reviews.id, reviewId))
+      .returning();
+    
+    if (result.length > 0) {
+      // Update restaurant rating
+      await this.updateRestaurantRating(restaurantId);
+      return true;
+    }
+    
+    return false;
+  }
+
+  async getAllAnnouncements(): Promise<Announcement[]> {
+    return await db
+      .select()
+      .from(announcements)
+      .orderBy(desc(announcements.isPinned), desc(announcements.createdAt));
+  }
+
+  async updateAnnouncement(id: string, data: Partial<InsertAnnouncement>): Promise<Announcement | undefined> {
+    const result = await db
+      .update(announcements)
+      .set(data)
+      .where(eq(announcements.id, id))
+      .returning();
+    return result[0];
+  }
+
+  async deleteAnnouncement(id: string): Promise<boolean> {
+    const result = await db
+      .delete(announcements)
+      .where(eq(announcements.id, id))
+      .returning();
+    return result.length > 0;
+  }
+
+  async getAllEventBanners(): Promise<EventBanner[]> {
+    return await db
+      .select()
+      .from(eventBanners)
+      .orderBy(eventBanners.displayOrder);
+  }
+
+  async updateEventBanner(id: string, data: Partial<InsertEventBanner>): Promise<EventBanner | undefined> {
+    const result = await db
+      .update(eventBanners)
+      .set(data)
+      .where(eq(eventBanners.id, id))
+      .returning();
+    return result[0];
+  }
+
+  async deleteEventBanner(id: string): Promise<boolean> {
+    const result = await db
+      .delete(eventBanners)
+      .where(eq(eventBanners.id, id))
+      .returning();
+    return result.length > 0;
   }
 }
 
