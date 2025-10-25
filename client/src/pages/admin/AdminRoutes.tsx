@@ -1,5 +1,5 @@
 import { lazy, Suspense } from "react";
-import { Route, Switch, Router } from "wouter";
+import { useLocation } from "wouter";
 import AdminLayout from "./AdminLayout";
 
 const AdminDashboard = lazy(() => import("./AdminDashboard"));
@@ -29,40 +29,49 @@ function LoadingFallback() {
 }
 
 export default function AdminRoutes() {
+  const [location] = useLocation();
+  
+  let PageComponent = AdminDashboard;
+  
+  // Match specific routes first (more specific to less specific)
+  if (location === "/admin/restaurants/applications") {
+    PageComponent = AdminRestaurantApplications;
+  } else if (location === "/admin/restaurants/owner-inquiries") {
+    PageComponent = AdminOwnerInquiries;
+  } else if (location === "/admin/restaurants/payments") {
+    PageComponent = AdminPayments;
+  } else if (location === "/admin/restaurants/owner-notices") {
+    PageComponent = AdminOwnerNotices;
+  } else if (location === "/admin/restaurants") {
+    PageComponent = AdminRestaurants;
+  } else if (location === "/admin/users/tiers") {
+    PageComponent = AdminUsersByTier;
+  } else if (location === "/admin/users/analytics") {
+    PageComponent = AdminUsersAnalytics;
+  } else if (location === "/admin/users") {
+    PageComponent = AdminUsers;
+  } else if (location === "/admin/reviews") {
+    PageComponent = AdminReviews;
+  } else if (location === "/admin/content/youtube") {
+    PageComponent = AdminYouTube;
+  } else if (location === "/admin/content/blog") {
+    PageComponent = AdminBlog;
+  } else if (location === "/admin/content/events") {
+    PageComponent = AdminEvents;
+  } else if (location === "/admin/content/announcements") {
+    PageComponent = AdminAnnouncements;
+  } else if (location === "/admin/content") {
+    PageComponent = AdminContent;
+  } else if (location === "/admin/inquiries/customer") {
+    PageComponent = AdminCustomerInquiries;
+  } else if (location === "/admin/inquiries/partnership") {
+    PageComponent = AdminPartnershipInquiries;
+  }
+  
   return (
     <AdminLayout>
       <Suspense fallback={<LoadingFallback />}>
-        <Router base="/admin">
-          <Switch>
-            <Route path="/" component={AdminDashboard} />
-          
-          {/* Restaurants */}
-          <Route path="/restaurants/applications" component={AdminRestaurantApplications} />
-          <Route path="/restaurants/owner-inquiries" component={AdminOwnerInquiries} />
-          <Route path="/restaurants/payments" component={AdminPayments} />
-          <Route path="/restaurants/owner-notices" component={AdminOwnerNotices} />
-          <Route path="/restaurants" component={AdminRestaurants} />
-          
-          {/* Users */}
-          <Route path="/users/tiers" component={AdminUsersByTier} />
-          <Route path="/users/analytics" component={AdminUsersAnalytics} />
-          <Route path="/users" component={AdminUsers} />
-          
-          {/* Reviews */}
-          <Route path="/reviews" component={AdminReviews} />
-          
-          {/* Content */}
-          <Route path="/content/youtube" component={AdminYouTube} />
-          <Route path="/content/blog" component={AdminBlog} />
-          <Route path="/content/events" component={AdminEvents} />
-          <Route path="/content/announcements" component={AdminAnnouncements} />
-          <Route path="/content" component={AdminContent} />
-          
-          {/* Inquiries */}
-          <Route path="/inquiries/customer" component={AdminCustomerInquiries} />
-          <Route path="/inquiries/partnership" component={AdminPartnershipInquiries} />
-          </Switch>
-        </Router>
+        <PageComponent />
       </Suspense>
     </AdminLayout>
   );
