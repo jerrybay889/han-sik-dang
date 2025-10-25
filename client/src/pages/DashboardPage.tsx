@@ -306,10 +306,17 @@ export default function DashboardPage() {
   // Menu mutations
   const createMenuMutation = useMutation({
     mutationFn: async (data: any) => {
-      await apiRequest("POST", "/api/menus", data);
+      const response = await apiRequest("POST", "/api/menus", data);
+      return response;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/restaurants", selectedRestaurant?.id, "menus"] });
+    onSuccess: async (newMenu) => {
+      // Update cache directly with the new menu
+      const queryKey = ["/api/restaurants", selectedRestaurant?.id, "menus"];
+      queryClient.setQueryData(queryKey, (old: Menu[] = []) => [...old, newMenu]);
+      
+      // Also refetch to ensure consistency
+      await queryClient.refetchQueries({ queryKey });
+      
       setIsMenuDialogOpen(false);
       resetMenuForm();
       toast({
@@ -328,8 +335,8 @@ export default function DashboardPage() {
     mutationFn: async ({ id, data }: { id: string; data: any }) => {
       await apiRequest("PATCH", `/api/menus/${id}`, data);
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/restaurants", selectedRestaurant?.id, "menus"] });
+    onSuccess: async () => {
+      await queryClient.refetchQueries({ queryKey: ["/api/restaurants", selectedRestaurant?.id, "menus"] });
       setIsMenuDialogOpen(false);
       resetMenuForm();
       toast({
@@ -350,8 +357,8 @@ export default function DashboardPage() {
         restaurantId: selectedRestaurant?.id,
       });
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/restaurants", selectedRestaurant?.id, "menus"] });
+    onSuccess: async () => {
+      await queryClient.refetchQueries({ queryKey: ["/api/restaurants", selectedRestaurant?.id, "menus"] });
       toast({
         title: language === "en" ? "Menu item deleted" : "메뉴가 삭제되었습니다",
       });
@@ -938,7 +945,7 @@ export default function DashboardPage() {
                             )}
                             <div className="flex items-center justify-between mt-2">
                               <p className="font-semibold text-primary">
-                                ₩{menu.price.toLocaleString()}
+                                ₩{menu.price?.toLocaleString() || '0'}
                               </p>
                               <div className="flex gap-1">
                                 <Button
