@@ -53,6 +53,12 @@ export const restaurants = pgTable("restaurants", {
   isVegan: integer("is_vegan").notNull().default(0),
   isHalal: integer("is_halal").notNull().default(0),
   isFeatured: integer("is_featured").notNull().default(0),
+  visitors1d: integer("visitors_1d").notNull().default(0),
+  visitors7d: integer("visitors_7d").notNull().default(0),
+  visitors10d: integer("visitors_10d").notNull().default(0),
+  visitors1m: integer("visitors_1m").notNull().default(0),
+  city: text("city"),
+  districtDetail: text("district_detail"),
 }, (table) => [
   index("idx_restaurants_name").on(table.name),
   index("idx_restaurants_name_en").on(table.nameEn),
@@ -61,6 +67,7 @@ export const restaurants = pgTable("restaurants", {
   index("idx_restaurants_category").on(table.category),
   index("idx_restaurants_rating").on(table.rating),
   index("idx_restaurants_is_featured").on(table.isFeatured),
+  index("idx_restaurants_visitors_1m").on(table.visitors1m),
 ]);
 
 export const insertRestaurantSchema = createInsertSchema(restaurants).omit({
