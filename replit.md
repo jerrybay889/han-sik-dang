@@ -34,7 +34,15 @@ Preferred communication style: Simple, everyday language.
 -   **Storage**: Interface-based `IStorage` implemented by `DbStorage` using PostgreSQL via Drizzle ORM.
 -   **Authentication**: Replit Auth with OIDC via Passport.js, session-based (`connect-pg-simple`), auto-upsert on login, JWT refresh token support.
 -   **Authorization**: Role-based access control with `isAdmin` field and middleware for admin routes.
--   **Admin Dashboard**: Master admin dashboard with 15+ API endpoints (`/api/admin/*`) for managing restaurants, users, reviews, announcements, and event banners, including platform statistics with charts.
+-   **Admin Dashboard**: Comprehensive master admin dashboard with 30+ API endpoints (`/api/admin/*`) for complete platform management including:
+    - Restaurant Applications: Review and process new restaurant partnership applications
+    - Multi-Channel Inquiries: Manage owner, customer, and partnership inquiries with response system
+    - Owner Notices: Publish platform-wide notices for restaurant owners
+    - Payment Tracking: Monitor all payment transactions
+    - User Analytics: Analyze users by tier, country, and region with visualization
+    - Blog Posts: Content management system
+    - AI Priority Tasks: Intelligent task prioritization showing pending applications and inquiries
+    - Platform Statistics: Comprehensive charts and analytics dashboard
 -   **Restaurant Dashboard**: Complete B2B restaurant management system with frontend UI and backend API (15+ authenticated endpoints) for ownership verification, review response management (CRUD operations), promotions, image management, and analytics.
 
 ### Data Storage
@@ -43,6 +51,7 @@ Preferred communication style: Simple, everyday language.
 -   **ORM**: Drizzle ORM, with Zod validation for schema defined in `shared/schema.ts`.
 -   **Content**: 30 restaurant records with complete menu data, external reviews, YouTube content integration, and AI insights.
 -   **User Reviews**: CRUD operations with ownership validation, automatic restaurant rating recalculation.
+-   **Admin Tables**: 7 additional management tables (restaurantApplications, ownerInquiries, customerInquiries, partnershipInquiries, ownerNotices, payments, blogPosts) for comprehensive platform management.
 
 ### AI Integration
 
