@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Link } from "wouter";
-import { Store, TrendingUp, Star, MessageSquare, Tag, Plus, Edit, Trash2, ChevronRight, Image, Reply } from "lucide-react";
+import { Store, TrendingUp, Star, MessageSquare, Tag, Plus, Edit, Trash2, ChevronRight, Image, Reply, Utensils, Sparkles, Target, Users, Lightbulb } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -9,12 +9,13 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import { SEO } from "@/components/SEO";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/hooks/useAuth";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import type { Restaurant, Promotion, RestaurantImage, Review, ReviewResponse } from "@shared/schema";
+import type { Restaurant, Promotion, RestaurantImage, Review, ReviewResponse, Menu } from "@shared/schema";
 
 interface DashboardStats {
   totalReviews: number;
@@ -27,6 +28,17 @@ interface ReviewWithResponse extends Review {
   response: ReviewResponse | null;
 }
 
+interface AIAnalysisResponse {
+  restaurant: Restaurant;
+  analysis: {
+    businessAnalysis: { ko: string; en: string };
+    competitorAnalysis: { ko: string; en: string };
+    strategicRecommendations: { ko: string; en: string };
+  };
+  competitors: Restaurant[];
+  generatedAt: string;
+}
+
 export default function DashboardPage() {
   const { t, language } = useLanguage();
   const { toast } = useToast();
@@ -36,10 +48,23 @@ export default function DashboardPage() {
   const [isPromotionDialogOpen, setIsPromotionDialogOpen] = useState(false);
   const [editingPromotion, setEditingPromotion] = useState<Promotion | null>(null);
   const [isImageDialogOpen, setIsImageDialogOpen] = useState(false);
-  const [newImageUrl, setNewImageUrl] = useState("");
+  const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
   const [isResponseDialogOpen, setIsResponseDialogOpen] = useState(false);
   const [selectedReview, setSelectedReview] = useState<ReviewWithResponse | null>(null);
   const [responseText, setResponseText] = useState("");
+  
+  // Menu dialog state
+  const [isMenuDialogOpen, setIsMenuDialogOpen] = useState(false);
+  const [editingMenu, setEditingMenu] = useState<Menu | null>(null);
+  const [menuNameKo, setMenuNameKo] = useState("");
+  const [menuNameEn, setMenuNameEn] = useState("");
+  const [menuDescKo, setMenuDescKo] = useState("");
+  const [menuDescEn, setMenuDescEn] = useState("");
+  const [menuPrice, setMenuPrice] = useState("");
+  const [menuCategory, setMenuCategory] = useState("");
+  const [menuImageUrl, setMenuImageUrl] = useState("");
+  const [menuIsPopular, setMenuIsPopular] = useState(false);
+  const [menuIsRecommended, setMenuIsRecommended] = useState(false);
 
   // Promotion form state
   const [promotionTitle, setPromotionTitle] = useState("");
@@ -79,6 +104,18 @@ export default function DashboardPage() {
   const { data: reviewsWithResponses = [] } = useQuery<ReviewWithResponse[]>({
     queryKey: ["/api/restaurants", selectedRestaurant?.id, "reviews-with-responses"],
     enabled: !!selectedRestaurant,
+  });
+
+  // Fetch menus for selected restaurant
+  const { data: menus = [] } = useQuery<Menu[]>({
+    queryKey: ["/api/restaurants", selectedRestaurant?.id, "menus"],
+    enabled: !!selectedRestaurant,
+  });
+
+  // Fetch AI analysis for selected restaurant
+  const { data: aiAnalysis, refetch: refetchAIAnalysis, isLoading: isLoadingAIAnalysis } = useQuery<AIAnalysisResponse>({
+    queryKey: ["/api/restaurants", selectedRestaurant?.id, "ai-analysis"],
+    enabled: false, // Only fetch when user clicks "Generate Analysis"
   });
 
   // Promotion mutations
@@ -142,25 +179,35 @@ export default function DashboardPage() {
     },
   });
 
-  // Image mutations
-  const createImageMutation = useMutation({
-    mutationFn: async (imageUrl: string) => {
-      await apiRequest("POST", `/api/restaurants/${selectedRestaurant?.id}/images`, {
-        imageUrl,
-        displayOrder: images?.length || 0,
+  // Image mutations (using file upload)
+  const uploadImageMutation = useMutation({
+    mutationFn: async (file: File) => {
+      const formData = new FormData();
+      formData.append('image', file);
+      
+      const response = await fetch(`/api/restaurants/${selectedRestaurant?.id}/upload-image`, {
+        method: 'POST',
+        body: formData,
+        credentials: 'include',
       });
+      
+      if (!response.ok) {
+        throw new Error('Failed to upload image');
+      }
+      
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/restaurants", selectedRestaurant?.id, "images"] });
       setIsImageDialogOpen(false);
-      setNewImageUrl("");
+      setSelectedImageFile(null);
       toast({
-        title: language === "en" ? "Image added" : "이미지가 추가되었습니다",
+        title: language === "en" ? "Image uploaded" : "이미지가 업로드되었습니다",
       });
     },
     onError: () => {
       toast({
-        title: language === "en" ? "Failed to add image" : "이미지 추가 실패",
+        title: language === "en" ? "Failed to upload image" : "이미지 업로드 실패",
         variant: "destructive",
       });
     },
@@ -256,6 +303,67 @@ export default function DashboardPage() {
     },
   });
 
+  // Menu mutations
+  const createMenuMutation = useMutation({
+    mutationFn: async (data: any) => {
+      await apiRequest("POST", "/api/menus", data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/restaurants", selectedRestaurant?.id, "menus"] });
+      setIsMenuDialogOpen(false);
+      resetMenuForm();
+      toast({
+        title: language === "en" ? "Menu item created" : "메뉴가 생성되었습니다",
+      });
+    },
+    onError: () => {
+      toast({
+        title: language === "en" ? "Failed to create menu item" : "메뉴 생성 실패",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const updateMenuMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: string; data: any }) => {
+      await apiRequest("PATCH", `/api/menus/${id}`, data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/restaurants", selectedRestaurant?.id, "menus"] });
+      setIsMenuDialogOpen(false);
+      resetMenuForm();
+      toast({
+        title: language === "en" ? "Menu item updated" : "메뉴가 수정되었습니다",
+      });
+    },
+    onError: () => {
+      toast({
+        title: language === "en" ? "Failed to update menu item" : "메뉴 수정 실패",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const deleteMenuMutation = useMutation({
+    mutationFn: async (id: string) => {
+      await apiRequest("DELETE", `/api/menus/${id}`, {
+        restaurantId: selectedRestaurant?.id,
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/restaurants", selectedRestaurant?.id, "menus"] });
+      toast({
+        title: language === "en" ? "Menu item deleted" : "메뉴가 삭제되었습니다",
+      });
+    },
+    onError: () => {
+      toast({
+        title: language === "en" ? "Failed to delete menu item" : "메뉴 삭제 실패",
+        variant: "destructive",
+      });
+    },
+  });
+
   const resetPromotionForm = () => {
     setPromotionTitle("");
     setPromotionTitleEn("");
@@ -266,6 +374,19 @@ export default function DashboardPage() {
     setStartDate("");
     setEndDate("");
     setEditingPromotion(null);
+  };
+
+  const resetMenuForm = () => {
+    setMenuNameKo("");
+    setMenuNameEn("");
+    setMenuDescKo("");
+    setMenuDescEn("");
+    setMenuPrice("");
+    setMenuCategory("");
+    setMenuImageUrl("");
+    setMenuIsPopular(false);
+    setMenuIsRecommended(false);
+    setEditingMenu(null);
   };
 
   const handleOpenPromotionDialog = (promotion?: Promotion) => {
@@ -352,6 +473,60 @@ export default function DashboardPage() {
   const handleDeleteResponse = (id: string) => {
     if (window.confirm(language === "en" ? "Are you sure you want to delete this response?" : "이 응답을 삭제하시겠습니까?")) {
       deleteResponseMutation.mutate(id);
+    }
+  };
+
+  const handleOpenMenuDialog = (menu?: Menu) => {
+    if (menu) {
+      setEditingMenu(menu);
+      setMenuNameKo(menu.name);
+      setMenuNameEn(menu.nameEn);
+      setMenuDescKo(menu.description || "");
+      setMenuDescEn(menu.descriptionEn || "");
+      setMenuPrice(menu.price.toString());
+      setMenuCategory(menu.category || "");
+      setMenuImageUrl(menu.imageUrl || "");
+      setMenuIsPopular(menu.isPopular === 1);
+      setMenuIsRecommended(menu.isRecommended === 1);
+    } else {
+      resetMenuForm();
+    }
+    setIsMenuDialogOpen(true);
+  };
+
+  const handleSubmitMenu = () => {
+    if (!selectedRestaurant || !menuNameKo || !menuNameEn || !menuPrice) {
+      toast({
+        title: language === "en" ? "Please fill all required fields" : "모든 필수 항목을 입력하세요",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const data = {
+      restaurantId: selectedRestaurant.id,
+      name: menuNameKo,
+      nameEn: menuNameEn,
+      description: menuDescKo || null,
+      descriptionEn: menuDescEn || null,
+      price: parseInt(menuPrice),
+      category: menuCategory || null,
+      imageUrl: menuImageUrl || null,
+      isPopular: menuIsPopular ? 1 : 0,
+      isRecommended: menuIsRecommended ? 1 : 0,
+      displayOrder: menus?.length || 0,
+    };
+
+    if (editingMenu) {
+      updateMenuMutation.mutate({ id: editingMenu.id, data });
+    } else {
+      createMenuMutation.mutate(data);
+    }
+  };
+
+  const handleDeleteMenu = (id: string) => {
+    if (window.confirm(language === "en" ? "Are you sure you want to delete this menu item?" : "이 메뉴를 삭제하시겠습니까?")) {
+      deleteMenuMutation.mutate(id);
     }
   };
 
@@ -688,6 +863,110 @@ export default function DashboardPage() {
                 )}
               </Card>
 
+              {/* Menu Management Section */}
+              <Card className="p-6 mb-6">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2">
+                    <Utensils className="w-5 h-5 text-primary" />
+                    <h3 className="font-semibold">
+                      {language === "en" ? "Menu Management" : "메뉴 관리"}
+                    </h3>
+                  </div>
+                  <Button
+                    size="sm"
+                    onClick={() => handleOpenMenuDialog()}
+                    data-testid="button-add-menu"
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    {language === "en" ? "Add" : "추가"}
+                  </Button>
+                </div>
+
+                {menus.length === 0 ? (
+                  <div className="text-center py-8">
+                    <Utensils className="w-12 h-12 mx-auto mb-3 text-muted-foreground" />
+                    <p className="text-muted-foreground">
+                      {language === "en" ? "No menu items yet" : "메뉴가 없습니다"}
+                    </p>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      {language === "en" ? "Add menu items to showcase your dishes" : "요리를 소개할 메뉴를 추가하세요"}
+                    </p>
+                  </div>
+                ) : (
+                  <div className="grid gap-3 md:grid-cols-2">
+                    {menus.map((menu) => (
+                      <Card key={menu.id} className="p-3" data-testid={`menu-item-${menu.id}`}>
+                        <div className="flex gap-3">
+                          {menu.imageUrl && (
+                            <div className="w-20 h-20 rounded-lg overflow-hidden bg-muted flex-shrink-0">
+                              <img
+                                src={menu.imageUrl}
+                                alt={language === "en" ? menu.nameEn : menu.name}
+                                className="w-full h-full object-cover"
+                              />
+                            </div>
+                          )}
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-start justify-between gap-2 mb-1">
+                              <div className="flex-1 min-w-0">
+                                <h4 className="font-semibold truncate">
+                                  {language === "en" ? menu.nameEn : menu.name}
+                                </h4>
+                                {menu.category && (
+                                  <Badge variant="secondary" className="text-xs mt-1">
+                                    {menu.category}
+                                  </Badge>
+                                )}
+                              </div>
+                              <div className="flex gap-1 flex-shrink-0">
+                                {menu.isPopular === 1 && (
+                                  <Badge variant="default" className="text-xs">
+                                    {language === "en" ? "Popular" : "인기"}
+                                  </Badge>
+                                )}
+                                {menu.isRecommended === 1 && (
+                                  <Badge variant="default" className="text-xs">
+                                    {language === "en" ? "Recommended" : "추천"}
+                                  </Badge>
+                                )}
+                              </div>
+                            </div>
+                            {menu.description && (
+                              <p className="text-sm text-muted-foreground line-clamp-2 mb-1">
+                                {language === "en" ? menu.descriptionEn : menu.description}
+                              </p>
+                            )}
+                            <div className="flex items-center justify-between mt-2">
+                              <p className="font-semibold text-primary">
+                                ₩{menu.price.toLocaleString()}
+                              </p>
+                              <div className="flex gap-1">
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  onClick={() => handleOpenMenuDialog(menu)}
+                                  data-testid={`button-edit-menu-${menu.id}`}
+                                >
+                                  <Edit className="w-4 h-4" />
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  onClick={() => handleDeleteMenu(menu.id)}
+                                  data-testid={`button-delete-menu-${menu.id}`}
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </Button>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </Card>
+                    ))}
+                  </div>
+                )}
+              </Card>
+
               {/* Images Section */}
               <Card className="p-6 mb-6">
                 <div className="flex items-center justify-between mb-4">
@@ -747,7 +1026,7 @@ export default function DashboardPage() {
               </Card>
 
               {/* Reviews & Responses Section */}
-              <Card className="p-6">
+              <Card className="p-6 mb-6">
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-2">
                     <MessageSquare className="w-5 h-5 text-primary" />
@@ -847,6 +1126,138 @@ export default function DashboardPage() {
                         )}
                       </Card>
                     ))}
+                  </div>
+                )}
+              </Card>
+
+              {/* AI Business Analysis Section */}
+              <Card className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2">
+                    <Sparkles className="w-5 h-5 text-primary" />
+                    <h3 className="font-semibold">
+                      {language === "en" ? "AI Business Insights" : "AI 비즈니스 분석"}
+                    </h3>
+                  </div>
+                  <Button
+                    size="sm"
+                    onClick={() => refetchAIAnalysis()}
+                    disabled={isLoadingAIAnalysis}
+                    data-testid="button-generate-ai-analysis"
+                  >
+                    {isLoadingAIAnalysis ? "..." : (language === "en" ? "Generate Analysis" : "분석 생성")}
+                  </Button>
+                </div>
+
+                {!aiAnalysis && !isLoadingAIAnalysis && (
+                  <div className="text-center py-8">
+                    <Sparkles className="w-12 h-12 mx-auto mb-3 text-muted-foreground" />
+                    <p className="text-muted-foreground">
+                      {language === "en" ? "No AI analysis generated yet" : "아직 AI 분석이 생성되지 않았습니다"}
+                    </p>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      {language === "en" 
+                        ? "Click 'Generate Analysis' to get AI-powered business insights" 
+                        : "'분석 생성'을 클릭하여 AI 기반 비즈니스 인사이트를 받으세요"}
+                    </p>
+                  </div>
+                )}
+
+                {isLoadingAIAnalysis && (
+                  <div className="text-center py-12">
+                    <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4" />
+                    <p className="text-muted-foreground">
+                      {language === "en" ? "Generating AI analysis..." : "AI 분석 생성 중..."}
+                    </p>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      {language === "en" ? "This may take a few moments" : "잠시만 기다려 주세요"}
+                    </p>
+                  </div>
+                )}
+
+                {aiAnalysis && (
+                  <div className="space-y-4">
+                    {/* Business Analysis Card */}
+                    <Card className="p-4" data-testid="card-business-analysis">
+                      <div className="flex items-start gap-3 mb-3">
+                        <Target className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
+                        <div>
+                          <h4 className="font-semibold mb-2">
+                            {language === "en" ? "Business Analysis" : "AI 업체 분석"}
+                          </h4>
+                          <p className="text-sm text-muted-foreground whitespace-pre-line">
+                            {language === "en" 
+                              ? aiAnalysis.analysis.businessAnalysis.en 
+                              : aiAnalysis.analysis.businessAnalysis.ko}
+                          </p>
+                        </div>
+                      </div>
+                    </Card>
+
+                    {/* Competitor Analysis Card */}
+                    <Card className="p-4" data-testid="card-competitor-analysis">
+                      <div className="flex items-start gap-3 mb-3">
+                        <Users className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
+                        <div className="flex-1">
+                          <h4 className="font-semibold mb-2">
+                            {language === "en" ? "Competitor Analysis" : "경쟁업체 분석"}
+                          </h4>
+                          <p className="text-sm text-muted-foreground whitespace-pre-line mb-3">
+                            {language === "en" 
+                              ? aiAnalysis.analysis.competitorAnalysis.en 
+                              : aiAnalysis.analysis.competitorAnalysis.ko}
+                          </p>
+                          {aiAnalysis.competitors && aiAnalysis.competitors.length > 0 && (
+                            <div>
+                              <p className="text-xs font-medium text-muted-foreground mb-2">
+                                {language === "en" ? "Nearby Competitors:" : "인근 경쟁업체:"}
+                              </p>
+                              <div className="space-y-2">
+                                {aiAnalysis.competitors.slice(0, 3).map((competitor) => (
+                                  <div 
+                                    key={competitor.id} 
+                                    className="flex items-center justify-between text-xs"
+                                    data-testid={`competitor-${competitor.id}`}
+                                  >
+                                    <span>{language === "en" ? competitor.nameEn : competitor.name}</span>
+                                    <div className="flex items-center gap-2">
+                                      <Badge variant="secondary" className="text-xs">
+                                        {competitor.district}
+                                      </Badge>
+                                      <div className="flex items-center gap-1">
+                                        <Star className="w-3 h-3 fill-[hsl(var(--accent-success))] text-[hsl(var(--accent-success))]" />
+                                        <span>{competitor.rating.toFixed(1)}</span>
+                                      </div>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </Card>
+
+                    {/* Strategic Recommendations Card */}
+                    <Card className="p-4" data-testid="card-strategic-recommendations">
+                      <div className="flex items-start gap-3 mb-3">
+                        <Lightbulb className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
+                        <div>
+                          <h4 className="font-semibold mb-2">
+                            {language === "en" ? "Strategic Recommendations" : "AI 전략 제안"}
+                          </h4>
+                          <p className="text-sm text-muted-foreground whitespace-pre-line">
+                            {language === "en" 
+                              ? aiAnalysis.analysis.strategicRecommendations.en 
+                              : aiAnalysis.analysis.strategicRecommendations.ko}
+                          </p>
+                        </div>
+                      </div>
+                    </Card>
+
+                    <p className="text-xs text-muted-foreground text-center">
+                      {language === "en" ? "Analysis generated on" : "분석 생성 일시:"} {new Date(aiAnalysis.generatedAt).toLocaleString(language)}
+                    </p>
                   </div>
                 )}
               </Card>
@@ -1011,8 +1422,11 @@ export default function DashboardPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Image Dialog */}
-      <Dialog open={isImageDialogOpen} onOpenChange={setIsImageDialogOpen}>
+      {/* Image Upload Dialog */}
+      <Dialog open={isImageDialogOpen} onOpenChange={(open) => {
+        setIsImageDialogOpen(open);
+        if (!open) setSelectedImageFile(null);
+      }}>
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle>
@@ -1026,37 +1440,49 @@ export default function DashboardPage() {
           <div className="space-y-4 py-4">
             <div>
               <label className="text-sm font-medium mb-2 block">
-                {language === "en" ? "Image URL" : "이미지 URL"}
+                {language === "en" ? "Select Image File" : "이미지 파일 선택"}
               </label>
               <Input
-                value={newImageUrl}
-                onChange={(e) => setNewImageUrl(e.target.value)}
-                placeholder="https://example.com/image.jpg"
-                data-testid="input-image-url"
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    if (file.size > 5 * 1024 * 1024) {
+                      toast({
+                        title: language === "en" ? "File too large" : "파일이 너무 큽니다",
+                        description: language === "en" ? "Maximum file size is 5MB" : "최대 파일 크기는 5MB입니다",
+                        variant: "destructive",
+                      });
+                      return;
+                    }
+                    setSelectedImageFile(file);
+                  }
+                }}
+                data-testid="input-image-file"
               />
               <p className="text-xs text-muted-foreground mt-2">
                 {language === "en" 
-                  ? "Enter a direct link to an image hosted on Unsplash, Imgur, or another image hosting service" 
-                  : "Unsplash, Imgur 또는 다른 이미지 호스팅 서비스에 호스팅된 이미지의 직접 링크를 입력하세요"}
+                  ? "Upload an image file (JPG, PNG, GIF, WebP). Max 5MB" 
+                  : "이미지 파일을 업로드하세요 (JPG, PNG, GIF, WebP). 최대 5MB"}
               </p>
             </div>
 
-            {newImageUrl && (
+            {selectedImageFile && (
               <div>
                 <label className="text-sm font-medium mb-2 block">
                   {language === "en" ? "Preview" : "미리보기"}
                 </label>
                 <div className="aspect-video rounded-lg overflow-hidden bg-muted">
                   <img
-                    src={newImageUrl}
+                    src={URL.createObjectURL(selectedImageFile)}
                     alt="Preview"
                     className="w-full h-full object-cover"
-                    onError={(e) => {
-                      e.currentTarget.src = "";
-                      e.currentTarget.alt = language === "en" ? "Invalid image URL" : "잘못된 이미지 URL";
-                    }}
                   />
                 </div>
+                <p className="text-xs text-muted-foreground mt-2">
+                  {selectedImageFile.name} ({(selectedImageFile.size / 1024 / 1024).toFixed(2)} MB)
+                </p>
               </div>
             )}
           </div>
@@ -1066,20 +1492,20 @@ export default function DashboardPage() {
               variant="outline"
               onClick={() => {
                 setIsImageDialogOpen(false);
-                setNewImageUrl("");
+                setSelectedImageFile(null);
               }}
               data-testid="button-cancel-image"
             >
               {language === "en" ? "Cancel" : "취소"}
             </Button>
             <Button
-              onClick={() => createImageMutation.mutate(newImageUrl)}
-              disabled={!newImageUrl || createImageMutation.isPending}
+              onClick={() => selectedImageFile && uploadImageMutation.mutate(selectedImageFile)}
+              disabled={!selectedImageFile || uploadImageMutation.isPending}
               data-testid="button-submit-image"
             >
-              {createImageMutation.isPending 
+              {uploadImageMutation.isPending 
                 ? "..." 
-                : (language === "en" ? "Add Image" : "이미지 추가")}
+                : (language === "en" ? "Upload Image" : "이미지 업로드")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -1162,6 +1588,166 @@ export default function DashboardPage() {
               {(createResponseMutation.isPending || updateResponseMutation.isPending) 
                 ? "..." 
                 : (language === "en" ? "Submit Response" : "응답 제출")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Menu Dialog */}
+      <Dialog open={isMenuDialogOpen} onOpenChange={(open) => {
+        setIsMenuDialogOpen(open);
+        if (!open) resetMenuForm();
+      }}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>
+              {editingMenu 
+                ? (language === "en" ? "Edit Menu Item" : "메뉴 수정") 
+                : (language === "en" ? "Add Menu Item" : "메뉴 추가")}
+            </DialogTitle>
+            <DialogDescription>
+              {restaurantName}
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="text-sm font-medium mb-2 block">
+                  {language === "en" ? "Name (Korean)" : "이름 (한국어)"} <span className="text-destructive">*</span>
+                </label>
+                <Input
+                  value={menuNameKo}
+                  onChange={(e) => setMenuNameKo(e.target.value)}
+                  placeholder={language === "en" ? "e.g., 김치찌개" : "예: 김치찌개"}
+                  data-testid="input-menu-name-ko"
+                />
+              </div>
+
+              <div>
+                <label className="text-sm font-medium mb-2 block">
+                  {language === "en" ? "Name (English)" : "이름 (영어)"} <span className="text-destructive">*</span>
+                </label>
+                <Input
+                  value={menuNameEn}
+                  onChange={(e) => setMenuNameEn(e.target.value)}
+                  placeholder="e.g., Kimchi Stew"
+                  data-testid="input-menu-name-en"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="text-sm font-medium mb-2 block">
+                  {language === "en" ? "Description (Korean)" : "설명 (한국어)"}
+                </label>
+                <Textarea
+                  value={menuDescKo}
+                  onChange={(e) => setMenuDescKo(e.target.value)}
+                  placeholder={language === "en" ? "Menu description..." : "메뉴 설명..."}
+                  rows={3}
+                  data-testid="textarea-menu-desc-ko"
+                />
+              </div>
+
+              <div>
+                <label className="text-sm font-medium mb-2 block">
+                  {language === "en" ? "Description (English)" : "설명 (영어)"}
+                </label>
+                <Textarea
+                  value={menuDescEn}
+                  onChange={(e) => setMenuDescEn(e.target.value)}
+                  placeholder="Menu description..."
+                  rows={3}
+                  data-testid="textarea-menu-desc-en"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="text-sm font-medium mb-2 block">
+                  {language === "en" ? "Price (₩)" : "가격 (₩)"} <span className="text-destructive">*</span>
+                </label>
+                <Input
+                  type="number"
+                  value={menuPrice}
+                  onChange={(e) => setMenuPrice(e.target.value)}
+                  placeholder="15000"
+                  data-testid="input-menu-price"
+                />
+              </div>
+
+              <div>
+                <label className="text-sm font-medium mb-2 block">
+                  {language === "en" ? "Category" : "카테고리"}
+                </label>
+                <Input
+                  value={menuCategory}
+                  onChange={(e) => setMenuCategory(e.target.value)}
+                  placeholder={language === "en" ? "e.g., Main Dish" : "예: 메인 요리"}
+                  data-testid="input-menu-category"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="text-sm font-medium mb-2 block">
+                {language === "en" ? "Image URL" : "이미지 URL"}
+              </label>
+              <Input
+                value={menuImageUrl}
+                onChange={(e) => setMenuImageUrl(e.target.value)}
+                placeholder="https://example.com/menu-image.jpg"
+                data-testid="input-menu-image-url"
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="flex items-center justify-between p-3 border rounded-lg">
+                <label className="text-sm font-medium">
+                  {language === "en" ? "Popular Item" : "인기 메뉴"}
+                </label>
+                <Switch
+                  checked={menuIsPopular}
+                  onCheckedChange={setMenuIsPopular}
+                  data-testid="switch-menu-is-popular"
+                />
+              </div>
+
+              <div className="flex items-center justify-between p-3 border rounded-lg">
+                <label className="text-sm font-medium">
+                  {language === "en" ? "Recommended" : "추천 메뉴"}
+                </label>
+                <Switch
+                  checked={menuIsRecommended}
+                  onCheckedChange={setMenuIsRecommended}
+                  data-testid="switch-menu-is-recommended"
+                />
+              </div>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setIsMenuDialogOpen(false);
+                resetMenuForm();
+              }}
+              data-testid="button-cancel-menu"
+            >
+              {language === "en" ? "Cancel" : "취소"}
+            </Button>
+            <Button
+              onClick={handleSubmitMenu}
+              disabled={createMenuMutation.isPending || updateMenuMutation.isPending}
+              data-testid="button-submit-menu"
+            >
+              {(createMenuMutation.isPending || updateMenuMutation.isPending) 
+                ? "..." 
+                : (language === "en" ? "Save" : "저장")}
             </Button>
           </DialogFooter>
         </DialogContent>
