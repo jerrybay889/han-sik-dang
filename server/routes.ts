@@ -3,9 +3,44 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { GoogleGenAI } from "@google/genai";
 import { setupAuth, isAuthenticated, isAdmin } from "./replitAuth";
+import multer from "multer";
+import path from "path";
+import fs from "fs";
 
 const genAI = new GoogleGenAI({ 
   apiKey: process.env.GOOGLE_API_KEY_HANSIKDANG || "" 
+});
+
+// Configure multer for file uploads
+const uploadDir = path.join(process.cwd(), "uploaded_files");
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
+
+const uploadStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, uploadDir);
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
+  }
+});
+
+const upload = multer({
+  storage: uploadStorage,
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
+  fileFilter: (req, file, cb) => {
+    const allowedTypes = /jpeg|jpg|png|gif|webp/;
+    const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
+    const mimetype = allowedTypes.test(file.mimetype);
+    
+    if (mimetype && extname) {
+      return cb(null, true);
+    } else {
+      cb(new Error('Only image files are allowed!'));
+    }
+  }
 });
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -1245,6 +1280,248 @@ ${insights && insights.firstTimerTips ? `첫 방문 팁: ${insights.firstTimerTi
     } catch (error) {
       console.error("Delete restaurant image error:", error);
       res.status(500).json({ error: "Failed to delete restaurant image" });
+    }
+  });
+
+  // Upload image file (owner only)
+  app.post("/api/restaurants/:id/upload-image", isAuthenticated, upload.single('image'), async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+
+      const { id } = req.params;
+      
+      // Verify ownership
+      const isOwner = await storage.isRestaurantOwner(userId, id);
+      if (!isOwner) {
+        return res.status(403).json({ error: "You don't have permission to manage this restaurant" });
+      }
+
+      if (!req.file) {
+        return res.status(400).json({ error: "No file uploaded" });
+      }
+
+      // Create image URL - use relative path for uploaded file
+      const imageUrl = `/uploaded_files/${req.file.filename}`;
+      const displayOrder = parseInt(req.body.displayOrder) || 0;
+
+      const image = await storage.createRestaurantImage({
+        restaurantId: id,
+        imageUrl,
+        displayOrder,
+      });
+
+      res.status(201).json(image);
+    } catch (error) {
+      console.error("Upload image error:", error);
+      res.status(500).json({ error: "Failed to upload image" });
+    }
+  });
+
+  // ===== Menu Routes =====
+  
+  // Create menu item (owner only)
+  app.post("/api/menus", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+
+      const { restaurantId, name, nameEn, description, descriptionEn, price, category, imageUrl, isPopular, isRecommended, displayOrder } = req.body;
+
+      if (!restaurantId || !name || !nameEn || !price) {
+        return res.status(400).json({ error: "Missing required fields" });
+      }
+
+      // Verify ownership
+      const isOwner = await storage.isRestaurantOwner(userId, restaurantId);
+      if (!isOwner) {
+        return res.status(403).json({ error: "Forbidden: You are not the owner of this restaurant" });
+      }
+
+      const menu = await storage.createMenu({
+        restaurantId,
+        name,
+        nameEn,
+        description: description || null,
+        descriptionEn: descriptionEn || null,
+        price: parseInt(price),
+        category: category || null,
+        imageUrl: imageUrl || null,
+        isPopular: isPopular || 0,
+        isRecommended: isRecommended || 0,
+        displayOrder: displayOrder || 0,
+      });
+
+      res.status(201).json(menu);
+    } catch (error) {
+      console.error("Create menu error:", error);
+      res.status(500).json({ error: "Failed to create menu" });
+    }
+  });
+
+  // Update menu item (owner only)
+  app.patch("/api/menus/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+
+      const { id } = req.params;
+      const { restaurantId, ...updateData } = req.body;
+
+      if (!restaurantId) {
+        return res.status(400).json({ error: "Missing restaurantId" });
+      }
+
+      // Convert price to integer if present
+      if (updateData.price) {
+        updateData.price = parseInt(updateData.price);
+      }
+
+      const updatedMenu = await storage.updateMenu(id, userId, restaurantId, updateData);
+      if (!updatedMenu) {
+        return res.status(404).json({ error: "Menu not found or unauthorized" });
+      }
+
+      res.json(updatedMenu);
+    } catch (error) {
+      console.error("Update menu error:", error);
+      res.status(500).json({ error: "Failed to update menu" });
+    }
+  });
+
+  // Delete menu item (owner only)
+  app.delete("/api/menus/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+
+      const { id } = req.params;
+      const { restaurantId } = req.body;
+
+      if (!restaurantId) {
+        return res.status(400).json({ error: "Missing restaurantId" });
+      }
+
+      const deleted = await storage.deleteMenu(id, userId, restaurantId);
+      if (!deleted) {
+        return res.status(404).json({ error: "Menu not found or unauthorized" });
+      }
+
+      res.status(204).send();
+    } catch (error) {
+      console.error("Delete menu error:", error);
+      res.status(500).json({ error: "Failed to delete menu" });
+    }
+  });
+
+  // ===== AI Business Analysis Routes =====
+  
+  // Get AI business insights for restaurant (owner only)
+  app.get("/api/restaurants/:id/ai-analysis", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+
+      const { id } = req.params;
+      
+      // Verify ownership
+      const isOwner = await storage.isRestaurantOwner(userId, id);
+      if (!isOwner) {
+        return res.status(403).json({ error: "Forbidden: You are not the owner of this restaurant" });
+      }
+
+      // Get restaurant data
+      const restaurant = await storage.getRestaurant(id);
+      if (!restaurant) {
+        return res.status(404).json({ error: "Restaurant not found" });
+      }
+
+      // Get reviews
+      const reviews = await storage.getReviewsByRestaurant(id);
+      
+      // Get nearby restaurants in same district for competitor analysis
+      const competitors = await storage.getRestaurantsByDistrict(restaurant.district);
+      const topCompetitors = competitors
+        .filter(c => c.id !== id && c.cuisine === restaurant.cuisine)
+        .sort((a, b) => b.rating - a.rating)
+        .slice(0, 3);
+
+      // Generate AI analysis using Gemini
+      const analysisPrompt = `You are a restaurant business consultant AI. Analyze this Korean restaurant and provide detailed insights in both Korean and English.
+
+Restaurant: ${restaurant.name} (${restaurant.nameEn})
+Category: ${restaurant.category}
+Cuisine: ${restaurant.cuisine}
+District: ${restaurant.district}
+Current Rating: ${restaurant.rating}/5 (${restaurant.reviewCount} reviews)
+Price Range: ${restaurant.priceRange}
+
+Customer Reviews (${reviews.length} total):
+${reviews.slice(0, 10).map(r => `- Rating: ${r.rating}/5, Comment: ${r.comment}`).join('\n')}
+
+Top Competitors in ${restaurant.district}:
+${topCompetitors.map(c => `- ${c.name}: ${c.rating}/5 (${c.reviewCount} reviews, ${c.cuisine})`).join('\n')}
+
+Provide a comprehensive analysis in the following JSON format:
+{
+  "businessAnalysis": {
+    "ko": "현재 비즈니스 상태를 자세히 분석 (강점, 약점, 기회 요인 포함)",
+    "en": "Detailed analysis of current business status (including strengths, weaknesses, opportunities)"
+  },
+  "competitorAnalysis": {
+    "ko": "경쟁업체 분석 및 시장 포지셔닝",
+    "en": "Competitor analysis and market positioning"
+  },
+  "strategicRecommendations": {
+    "ko": "구체적인 전략 제안 (프로모션 아이디어, 메뉴 개선, 마케팅 전략 등)",
+    "en": "Specific strategic recommendations (promotion ideas, menu improvements, marketing strategies)"
+  }
+}`;
+
+      const result = await genAI.models.generateContent({
+        model: "gemini-2.0-flash-exp",
+        contents: analysisPrompt,
+      });
+      const response = result.text || "";
+      
+      // Extract JSON from response
+      const jsonMatch = response.match(/\{[\s\S]*\}/);
+      if (!jsonMatch) {
+        throw new Error("Failed to parse AI response");
+      }
+
+      const analysis = JSON.parse(jsonMatch[0]);
+      
+      res.json({
+        restaurant: {
+          id: restaurant.id,
+          name: restaurant.name,
+          nameEn: restaurant.nameEn,
+          rating: restaurant.rating,
+          reviewCount: restaurant.reviewCount,
+        },
+        analysis,
+        competitors: topCompetitors.map(c => ({
+          name: c.name,
+          nameEn: c.nameEn,
+          rating: c.rating,
+          reviewCount: c.reviewCount,
+        })),
+        generatedAt: new Date().toISOString(),
+      });
+    } catch (error) {
+      console.error("AI analysis error:", error);
+      res.status(500).json({ error: "Failed to generate AI analysis" });
     }
   });
 
