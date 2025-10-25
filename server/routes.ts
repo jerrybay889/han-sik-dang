@@ -1746,6 +1746,195 @@ Provide a comprehensive analysis in the following JSON format:
     }
   });
 
+  // ========== New Admin Management Endpoints ==========
+  
+  // Priority Tasks
+  app.get("/api/admin/dashboard/priority-tasks", isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const tasks = await storage.getAdminPriorityTasks();
+      res.json(tasks);
+    } catch (error) {
+      console.error("Error fetching priority tasks:", error);
+      res.status(500).json({ error: "Failed to fetch priority tasks" });
+    }
+  });
+
+  // Restaurant Applications
+  app.get("/api/admin/restaurant-applications", isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const applications = await storage.getAllRestaurantApplications();
+      res.json(applications);
+    } catch (error) {
+      console.error("Error fetching restaurant applications:", error);
+      res.status(500).json({ error: "Failed to fetch restaurant applications" });
+    }
+  });
+
+  app.post("/api/admin/restaurant-applications/:id/process", isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const { status, adminNote } = req.body;
+      const application = await storage.processRestaurantApplication(id, status, adminNote);
+      
+      if (!application) {
+        return res.status(404).json({ error: "Application not found" });
+      }
+
+      res.json(application);
+    } catch (error) {
+      console.error("Error processing restaurant application:", error);
+      res.status(500).json({ error: "Failed to process application" });
+    }
+  });
+
+  // Owner Inquiries
+  app.get("/api/admin/owner-inquiries", isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const inquiries = await storage.getAllOwnerInquiries();
+      res.json(inquiries);
+    } catch (error) {
+      console.error("Error fetching owner inquiries:", error);
+      res.status(500).json({ error: "Failed to fetch owner inquiries" });
+    }
+  });
+
+  app.post("/api/admin/owner-inquiries/:id/respond", isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const { adminResponse, status } = req.body;
+      const inquiry = await storage.respondToOwnerInquiry(id, adminResponse, status);
+      
+      if (!inquiry) {
+        return res.status(404).json({ error: "Inquiry not found" });
+      }
+
+      res.json(inquiry);
+    } catch (error) {
+      console.error("Error responding to owner inquiry:", error);
+      res.status(500).json({ error: "Failed to respond to inquiry" });
+    }
+  });
+
+  // Customer Inquiries
+  app.get("/api/admin/customer-inquiries", isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const inquiries = await storage.getAllCustomerInquiries();
+      res.json(inquiries);
+    } catch (error) {
+      console.error("Error fetching customer inquiries:", error);
+      res.status(500).json({ error: "Failed to fetch customer inquiries" });
+    }
+  });
+
+  app.post("/api/admin/customer-inquiries/:id/respond", isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const { adminResponse, status } = req.body;
+      const inquiry = await storage.respondToCustomerInquiry(id, adminResponse, status);
+      
+      if (!inquiry) {
+        return res.status(404).json({ error: "Inquiry not found" });
+      }
+
+      res.json(inquiry);
+    } catch (error) {
+      console.error("Error responding to customer inquiry:", error);
+      res.status(500).json({ error: "Failed to respond to inquiry" });
+    }
+  });
+
+  // Partnership Inquiries
+  app.get("/api/admin/partnership-inquiries", isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const inquiries = await storage.getAllPartnershipInquiries();
+      res.json(inquiries);
+    } catch (error) {
+      console.error("Error fetching partnership inquiries:", error);
+      res.status(500).json({ error: "Failed to fetch partnership inquiries" });
+    }
+  });
+
+  app.post("/api/admin/partnership-inquiries/:id/process", isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const { status, adminNote } = req.body;
+      const inquiry = await storage.processPartnershipInquiry(id, status, adminNote);
+      
+      if (!inquiry) {
+        return res.status(404).json({ error: "Inquiry not found" });
+      }
+
+      res.json(inquiry);
+    } catch (error) {
+      console.error("Error processing partnership inquiry:", error);
+      res.status(500).json({ error: "Failed to process inquiry" });
+    }
+  });
+
+  // Owner Notices
+  app.get("/api/admin/owner-notices", isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const notices = await storage.getAllOwnerNotices();
+      res.json(notices);
+    } catch (error) {
+      console.error("Error fetching owner notices:", error);
+      res.status(500).json({ error: "Failed to fetch owner notices" });
+    }
+  });
+
+  app.post("/api/admin/owner-notices", isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const notice = await storage.createOwnerNotice(req.body);
+      res.status(201).json(notice);
+    } catch (error) {
+      console.error("Error creating owner notice:", error);
+      res.status(500).json({ error: "Failed to create owner notice" });
+    }
+  });
+
+  // Payments
+  app.get("/api/admin/payments", isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const payments = await storage.getAllPayments();
+      res.json(payments);
+    } catch (error) {
+      console.error("Error fetching payments:", error);
+      res.status(500).json({ error: "Failed to fetch payments" });
+    }
+  });
+
+  // User Analytics
+  app.get("/api/admin/users/by-tier", isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const tierData = await storage.getUsersByTier();
+      res.json(tierData);
+    } catch (error) {
+      console.error("Error fetching users by tier:", error);
+      res.status(500).json({ error: "Failed to fetch users by tier" });
+    }
+  });
+
+  app.get("/api/admin/users/analytics", isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const analytics = await storage.getUserAnalytics();
+      res.json(analytics);
+    } catch (error) {
+      console.error("Error fetching user analytics:", error);
+      res.status(500).json({ error: "Failed to fetch user analytics" });
+    }
+  });
+
+  // Blog Posts
+  app.get("/api/admin/blog-posts", isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const posts = await storage.getAllBlogPosts();
+      res.json(posts);
+    } catch (error) {
+      console.error("Error fetching blog posts:", error);
+      res.status(500).json({ error: "Failed to fetch blog posts" });
+    }
+  });
+
   const httpServer = createServer(app);
 
   return httpServer;

@@ -30,6 +30,20 @@ import {
   type InsertPromotion,
   type RestaurantImage,
   type InsertRestaurantImage,
+  type RestaurantApplication,
+  type InsertRestaurantApplication,
+  type OwnerInquiry,
+  type InsertOwnerInquiry,
+  type CustomerInquiry,
+  type InsertCustomerInquiry,
+  type PartnershipInquiry,
+  type InsertPartnershipInquiry,
+  type OwnerNotice,
+  type InsertOwnerNotice,
+  type Payment,
+  type InsertPayment,
+  type BlogPost,
+  type InsertBlogPost,
   users,
   restaurants,
   reviews,
@@ -44,6 +58,13 @@ import {
   reviewResponses,
   promotions,
   restaurantImages,
+  restaurantApplications,
+  ownerInquiries,
+  customerInquiries,
+  partnershipInquiries,
+  ownerNotices,
+  payments,
+  blogPosts,
 } from "@shared/schema";
 
 const client = neon(process.env.DATABASE_URL!);
@@ -151,6 +172,48 @@ export interface IStorage {
   getAllEventBanners(): Promise<EventBanner[]>;
   updateEventBanner(id: string, data: Partial<InsertEventBanner>): Promise<EventBanner | undefined>;
   deleteEventBanner(id: string): Promise<boolean>;
+  
+  // Restaurant Applications
+  getAllRestaurantApplications(): Promise<RestaurantApplication[]>;
+  processRestaurantApplication(id: string, status: string, adminNote: string): Promise<RestaurantApplication | undefined>;
+  
+  // Owner Inquiries
+  getAllOwnerInquiries(): Promise<OwnerInquiry[]>;
+  respondToOwnerInquiry(id: string, adminResponse: string, status: string): Promise<OwnerInquiry | undefined>;
+  
+  // Customer Inquiries
+  getAllCustomerInquiries(): Promise<CustomerInquiry[]>;
+  respondToCustomerInquiry(id: string, adminResponse: string, status: string): Promise<CustomerInquiry | undefined>;
+  
+  // Partnership Inquiries
+  getAllPartnershipInquiries(): Promise<PartnershipInquiry[]>;
+  processPartnershipInquiry(id: string, status: string, adminNote: string): Promise<PartnershipInquiry | undefined>;
+  
+  // Owner Notices
+  getAllOwnerNotices(): Promise<OwnerNotice[]>;
+  createOwnerNotice(notice: InsertOwnerNotice): Promise<OwnerNotice>;
+  
+  // Payments
+  getAllPayments(): Promise<Payment[]>;
+  
+  // User Analytics
+  getUsersByTier(): Promise<{ tier: string; count: number; users: User[] }[]>;
+  getUserAnalytics(): Promise<{
+    usersByCountry: { country: string; count: number }[];
+    usersByRegion: { region: string; count: number }[];
+    usersByTier: { tier: string; count: number }[];
+  }>;
+  
+  // Blog Posts
+  getAllBlogPosts(): Promise<BlogPost[]>;
+  
+  // Priority Tasks
+  getAdminPriorityTasks(): Promise<{
+    pendingApplications: RestaurantApplication[];
+    pendingOwnerInquiries: OwnerInquiry[];
+    pendingCustomerInquiries: CustomerInquiry[];
+    pendingPartnershipInquiries: PartnershipInquiry[];
+  }>;
 }
 
 export class DbStorage implements IStorage {
@@ -841,6 +904,229 @@ export class DbStorage implements IStorage {
       .where(eq(eventBanners.id, id))
       .returning();
     return result.length > 0;
+  }
+
+  // Restaurant Applications
+  async getAllRestaurantApplications(): Promise<RestaurantApplication[]> {
+    return await db
+      .select()
+      .from(restaurantApplications)
+      .orderBy(desc(restaurantApplications.createdAt));
+  }
+
+  async processRestaurantApplication(id: string, status: string, adminNote: string): Promise<RestaurantApplication | undefined> {
+    const result = await db
+      .update(restaurantApplications)
+      .set({
+        status,
+        adminNote,
+        processedAt: new Date(),
+      })
+      .where(eq(restaurantApplications.id, id))
+      .returning();
+    return result[0];
+  }
+
+  // Owner Inquiries
+  async getAllOwnerInquiries(): Promise<OwnerInquiry[]> {
+    return await db
+      .select()
+      .from(ownerInquiries)
+      .orderBy(desc(ownerInquiries.createdAt));
+  }
+
+  async respondToOwnerInquiry(id: string, adminResponse: string, status: string): Promise<OwnerInquiry | undefined> {
+    const result = await db
+      .update(ownerInquiries)
+      .set({
+        adminResponse,
+        status,
+        answeredAt: new Date(),
+      })
+      .where(eq(ownerInquiries.id, id))
+      .returning();
+    return result[0];
+  }
+
+  // Customer Inquiries
+  async getAllCustomerInquiries(): Promise<CustomerInquiry[]> {
+    return await db
+      .select()
+      .from(customerInquiries)
+      .orderBy(desc(customerInquiries.createdAt));
+  }
+
+  async respondToCustomerInquiry(id: string, adminResponse: string, status: string): Promise<CustomerInquiry | undefined> {
+    const result = await db
+      .update(customerInquiries)
+      .set({
+        adminResponse,
+        status,
+        answeredAt: new Date(),
+      })
+      .where(eq(customerInquiries.id, id))
+      .returning();
+    return result[0];
+  }
+
+  // Partnership Inquiries
+  async getAllPartnershipInquiries(): Promise<PartnershipInquiry[]> {
+    return await db
+      .select()
+      .from(partnershipInquiries)
+      .orderBy(desc(partnershipInquiries.createdAt));
+  }
+
+  async processPartnershipInquiry(id: string, status: string, adminNote: string): Promise<PartnershipInquiry | undefined> {
+    const result = await db
+      .update(partnershipInquiries)
+      .set({
+        status,
+        adminNote,
+        processedAt: new Date(),
+      })
+      .where(eq(partnershipInquiries.id, id))
+      .returning();
+    return result[0];
+  }
+
+  // Owner Notices
+  async getAllOwnerNotices(): Promise<OwnerNotice[]> {
+    return await db
+      .select()
+      .from(ownerNotices)
+      .orderBy(desc(ownerNotices.isPinned), desc(ownerNotices.createdAt));
+  }
+
+  async createOwnerNotice(notice: InsertOwnerNotice): Promise<OwnerNotice> {
+    const result = await db
+      .insert(ownerNotices)
+      .values(notice)
+      .returning();
+    return result[0];
+  }
+
+  // Payments
+  async getAllPayments(): Promise<Payment[]> {
+    return await db
+      .select()
+      .from(payments)
+      .orderBy(desc(payments.createdAt));
+  }
+
+  // User Analytics
+  async getUsersByTier(): Promise<{ tier: string; count: number; users: User[] }[]> {
+    const tiers = ['bronze', 'silver', 'gold', 'platinum'];
+    const result = [];
+
+    for (const tier of tiers) {
+      const tierUsers = await db
+        .select()
+        .from(users)
+        .where(eq(users.tier, tier))
+        .orderBy(desc(users.createdAt));
+
+      result.push({
+        tier,
+        count: tierUsers.length,
+        users: tierUsers,
+      });
+    }
+
+    return result;
+  }
+
+  async getUserAnalytics(): Promise<{
+    usersByCountry: { country: string; count: number }[];
+    usersByRegion: { region: string; count: number }[];
+    usersByTier: { tier: string; count: number }[];
+  }> {
+    const usersByCountry = await db
+      .select({
+        country: users.country,
+        count: sql<number>`cast(count(*) as int)`,
+      })
+      .from(users)
+      .where(sql`${users.country} IS NOT NULL`)
+      .groupBy(users.country)
+      .orderBy(desc(sql`count(*)`));
+
+    const usersByRegion = await db
+      .select({
+        region: users.region,
+        count: sql<number>`cast(count(*) as int)`,
+      })
+      .from(users)
+      .where(sql`${users.region} IS NOT NULL`)
+      .groupBy(users.region)
+      .orderBy(desc(sql`count(*)`));
+
+    const usersByTier = await db
+      .select({
+        tier: users.tier,
+        count: sql<number>`cast(count(*) as int)`,
+      })
+      .from(users)
+      .where(sql`${users.tier} IS NOT NULL`)
+      .groupBy(users.tier)
+      .orderBy(desc(sql`count(*)`));
+
+    return {
+      usersByCountry,
+      usersByRegion,
+      usersByTier,
+    };
+  }
+
+  // Blog Posts
+  async getAllBlogPosts(): Promise<BlogPost[]> {
+    return await db
+      .select()
+      .from(blogPosts)
+      .orderBy(desc(blogPosts.createdAt));
+  }
+
+  // Priority Tasks
+  async getAdminPriorityTasks(): Promise<{
+    pendingApplications: RestaurantApplication[];
+    pendingOwnerInquiries: OwnerInquiry[];
+    pendingCustomerInquiries: CustomerInquiry[];
+    pendingPartnershipInquiries: PartnershipInquiry[];
+  }> {
+    const pendingApplications = await db
+      .select()
+      .from(restaurantApplications)
+      .where(eq(restaurantApplications.status, 'pending'))
+      .orderBy(desc(restaurantApplications.createdAt))
+      .limit(5);
+
+    const pendingOwnerInquiries = await db
+      .select()
+      .from(ownerInquiries)
+      .where(eq(ownerInquiries.status, 'pending'))
+      .orderBy(desc(ownerInquiries.createdAt))
+      .limit(5);
+
+    const pendingCustomerInquiries = await db
+      .select()
+      .from(customerInquiries)
+      .where(eq(customerInquiries.status, 'pending'))
+      .orderBy(desc(customerInquiries.createdAt))
+      .limit(5);
+
+    const pendingPartnershipInquiries = await db
+      .select()
+      .from(partnershipInquiries)
+      .where(eq(partnershipInquiries.status, 'pending'))
+      .orderBy(desc(partnershipInquiries.createdAt))
+      .limit(5);
+
+    return {
+      pendingApplications,
+      pendingOwnerInquiries,
+      pendingCustomerInquiries,
+      pendingPartnershipInquiries,
+    };
   }
 }
 
