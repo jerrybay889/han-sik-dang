@@ -21,6 +21,10 @@
   },
   "nav": {
     "home": "Home",
+    "discover": "Discover",
+    "ai": "AI Chat",
+    "content": "Content",
+    "my": "My",
     "restaurants": "Restaurants",
     "about": "About",
     "contact": "Contact",
@@ -29,6 +33,9 @@
     "dashboard": "Dashboard",
     "adminDashboard": "Admin Dashboard",
     "profile": "Profile"
+  },
+  "app": {
+    "tagline": "Your perfect Korean restaurant is just a chat away"
   },
   "home": {
     "hero": {
@@ -176,6 +183,24 @@
     "responseDeleted": "Response deleted",
     "noPromotions": "No promotions yet",
     "createFirst": "Create your first promotion"
+  },
+  "announcements": {
+    "title": "Announcements",
+    "viewAll": "View All",
+    "noItems": "No announcements at this time"
+  },
+  "events": {
+    "title": "Special Events"
+  },
+  "content": {
+    "videos": "Videos",
+    "blogs": "Blogs",
+    "seeAll": "See All",
+    "views": "views",
+    "readTime": "min read"
+  },
+  "ai": {
+    "title": "AI Assistant"
   },
   "admin": {
     "title": "Admin Dashboard",

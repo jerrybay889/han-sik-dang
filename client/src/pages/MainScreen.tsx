@@ -724,11 +724,11 @@ export default function MainScreen() {
           </section>
         )}
 
-        {/* Continue Trending Section - Part 3 (remaining) */}
+        {/* Continue Trending Section - Part 3 (last batch) */}
         {!searchQuery && displayRestaurants.length > 24 && (
           <section className="px-4 py-4">
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-              {displayRestaurants.slice(24).map((restaurant, index) => (
+              {displayRestaurants.slice(24, 30).map((restaurant, index) => (
                 <Link key={restaurant.id} href={`/restaurant/${restaurant.id}`}>
                   <Card
                     className="overflow-hidden hover-elevate active-elevate-2 cursor-pointer h-full"

@@ -21,6 +21,10 @@
   },
   "nav": {
     "home": "홈",
+    "discover": "맛집찾기",
+    "ai": "AI 챗봇",
+    "content": "콘텐츠",
+    "my": "MY",
     "restaurants": "레스토랑",
     "about": "소개",
     "contact": "연락처",
@@ -29,6 +33,9 @@
     "dashboard": "대시보드",
     "adminDashboard": "관리자 대시보드",
     "profile": "프로필"
+  },
+  "app": {
+    "tagline": "AI와 함께하는 완벽한 한식당 찾기"
   },
   "home": {
     "hero": {
@@ -176,6 +183,24 @@
     "responseDeleted": "응답이 삭제되었습니다",
     "noPromotions": "아직 프로모션이 없습니다",
     "createFirst": "첫 프로모션을 만들어보세요"
+  },
+  "announcements": {
+    "title": "공지사항",
+    "viewAll": "전체보기",
+    "noItems": "현재 공지사항이 없습니다"
+  },
+  "events": {
+    "title": "특별 이벤트"
+  },
+  "content": {
+    "videos": "영상",
+    "blogs": "블로그",
+    "seeAll": "전체보기",
+    "views": "조회수",
+    "readTime": "분 소요"
+  },
+  "ai": {
+    "title": "AI 어시스턴트"
   },
   "admin": {
     "title": "관리자 대시보드",
