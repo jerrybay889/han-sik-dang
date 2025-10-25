@@ -54,35 +54,35 @@ const menuItems: MenuItem[] = [
     icon: LayoutDashboard,
   },
   {
-    title: "Restaurants",
+    title: "레스토랑",
     icon: UtensilsCrossed,
     items: [
       {
-        title: "Restaurant List",
+        title: "레스토랑 관리",
         url: "/admin/restaurants",
         icon: UtensilsCrossed,
       },
       {
-        title: "Owner Management",
+        title: "광고업체관리",
         icon: UserCog,
         items: [
           {
-            title: "Applications",
+            title: "입점신청",
             url: "/admin/restaurants/applications",
             icon: FileText,
           },
           {
-            title: "Owner Inquiries",
+            title: "업주 문의",
             url: "/admin/restaurants/owner-inquiries",
             icon: HelpCircle,
           },
           {
-            title: "Payments",
+            title: "결제 내역",
             url: "/admin/restaurants/payments",
             icon: CreditCard,
           },
           {
-            title: "Owner Notices",
+            title: "업주 공지",
             url: "/admin/restaurants/owner-notices",
             icon: Bell,
           },
