@@ -126,7 +126,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/ai/chat", async (req, res) => {
     try {
-      const { message, language = "ko" } = req.body;
+      const { message, language = "ko", location = null, area = null } = req.body;
 
       if (!message || typeof message !== "string") {
         return res.status(400).json({ error: "Message is required" });
@@ -157,9 +157,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const restaurantData = await Promise.all(restaurantDataPromises);
 
+      // Build context based on selected location and area
+      let locationContext = "";
+      if (location === "nearby") {
+        locationContext = language === "en" 
+          ? "\n\nIMPORTANT: The user is looking for restaurants NEARBY their current location. Focus on proximity and accessibility."
+          : "\n\n중요: 사용자는 현재 위치 근처의 레스토랑을 찾고 있습니다. 접근성과 근접성에 초점을 맞춰주세요.";
+      } else if (location === "other" && area) {
+        locationContext = language === "en"
+          ? `\n\nIMPORTANT: The user wants to explore restaurants specifically in the ${area} area. Only recommend restaurants in ${area}. Filter by district matching "${area}".`
+          : `\n\n중요: 사용자는 ${area} 지역의 레스토랑을 탐색하고 싶어합니다. ${area}에 있는 레스토랑만 추천해주세요. "${area}"에 해당하는 구역의 레스토랑으로 필터링하세요.`;
+      }
+
       const systemPrompt = getSystemPrompt(language);
       const restaurantContext = `\n\nAvailable restaurants in our database:\n${JSON.stringify(restaurantData, null, 2)}`;
-      const fullPrompt = `${systemPrompt}${restaurantContext}\n\nUser question: ${message}`;
+      const fullPrompt = `${systemPrompt}${restaurantContext}${locationContext}\n\nUser question: ${message}`;
 
       const result = await genAI.models.generateContent({
         model: "gemini-2.0-flash-exp",
