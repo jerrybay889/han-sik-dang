@@ -343,7 +343,8 @@ export default function DashboardPage() {
       await apiRequest("PATCH", `/api/menus/${id}`, data);
     },
     onSuccess: async () => {
-      await queryClient.refetchQueries({ queryKey: ["/api/restaurants", selectedRestaurant?.id, "menus"] });
+      const queryKey = ["/api/restaurants", selectedRestaurant?.id, "menus"];
+      await queryClient.invalidateQueries({ queryKey });
       setIsMenuDialogOpen(false);
       resetMenuForm();
       toast({
@@ -365,7 +366,8 @@ export default function DashboardPage() {
       });
     },
     onSuccess: async () => {
-      await queryClient.refetchQueries({ queryKey: ["/api/restaurants", selectedRestaurant?.id, "menus"] });
+      const queryKey = ["/api/restaurants", selectedRestaurant?.id, "menus"];
+      await queryClient.invalidateQueries({ queryKey });
       toast({
         title: language === "en" ? "Menu item deleted" : "메뉴가 삭제되었습니다",
       });
