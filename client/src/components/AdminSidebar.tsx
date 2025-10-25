@@ -62,31 +62,31 @@ const menuItems: MenuItem[] = [
         url: "/admin/restaurants",
         icon: UtensilsCrossed,
       },
+    ],
+  },
+  {
+    title: "광고업체관리",
+    icon: UserCog,
+    items: [
       {
-        title: "광고업체관리",
-        icon: UserCog,
-        items: [
-          {
-            title: "입점신청",
-            url: "/admin/restaurants/applications",
-            icon: FileText,
-          },
-          {
-            title: "업주 문의",
-            url: "/admin/restaurants/owner-inquiries",
-            icon: HelpCircle,
-          },
-          {
-            title: "결제 내역",
-            url: "/admin/restaurants/payments",
-            icon: CreditCard,
-          },
-          {
-            title: "업주 공지",
-            url: "/admin/restaurants/owner-notices",
-            icon: Bell,
-          },
-        ],
+        title: "입점신청",
+        url: "/admin/restaurants/applications",
+        icon: FileText,
+      },
+      {
+        title: "업주 문의",
+        url: "/admin/restaurants/owner-inquiries",
+        icon: HelpCircle,
+      },
+      {
+        title: "결제 내역",
+        url: "/admin/restaurants/payments",
+        icon: CreditCard,
+      },
+      {
+        title: "업주 공지",
+        url: "/admin/restaurants/owner-notices",
+        icon: Bell,
       },
     ],
   },
