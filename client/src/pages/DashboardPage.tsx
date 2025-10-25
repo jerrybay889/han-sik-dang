@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Link } from "wouter";
 import { Store, TrendingUp, Star, MessageSquare, Tag, Plus, Edit, Trash2, ChevronRight, Image, Reply, Utensils, Sparkles, Target, Users, Lightbulb } from "lucide-react";
@@ -107,10 +107,15 @@ export default function DashboardPage() {
   });
 
   // Fetch menus for selected restaurant
-  const { data: menus = [] } = useQuery<Menu[]>({
+  const { data: menus = [], isLoading: menusLoading } = useQuery<Menu[]>({
     queryKey: ["/api/restaurants", selectedRestaurant?.id, "menus"],
     enabled: !!selectedRestaurant,
   });
+
+  // Debug logging
+  useEffect(() => {
+    console.log("[Dashboard] Menus state changed:", menus, "length:", menus?.length, "selected restaurant:", selectedRestaurant?.id);
+  }, [menus, selectedRestaurant?.id]);
 
   // Fetch AI analysis for selected restaurant
   const { data: aiAnalysis, refetch: refetchAIAnalysis, isLoading: isLoadingAIAnalysis } = useQuery<AIAnalysisResponse>({
@@ -307,15 +312,17 @@ export default function DashboardPage() {
   const createMenuMutation = useMutation({
     mutationFn: async (data: any) => {
       const response = await apiRequest("POST", "/api/menus", data);
-      return response;
+      return await response.json();
     },
     onSuccess: async (newMenu) => {
-      // Update cache directly with the new menu
-      const queryKey = ["/api/restaurants", selectedRestaurant?.id, "menus"];
-      queryClient.setQueryData(queryKey, (old: Menu[] = []) => [...old, newMenu]);
+      console.log("[Dashboard] Menu created, response:", newMenu);
       
-      // Also refetch to ensure consistency
-      await queryClient.refetchQueries({ queryKey });
+      // Invalidate and refetch menus
+      const queryKey = ["/api/restaurants", selectedRestaurant?.id, "menus"];
+      console.log("[Dashboard] Invalidating and refetching with key:", queryKey);
+      
+      await queryClient.invalidateQueries({ queryKey });
+      console.log("[Dashboard] Invalidate and refetch complete");
       
       setIsMenuDialogOpen(false);
       resetMenuForm();
