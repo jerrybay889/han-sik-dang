@@ -1,16 +1,8 @@
+import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import {
   Dialog,
   DialogContent,
@@ -19,195 +11,328 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { useState } from "react";
-import { MessageSquare } from "lucide-react";
-import { queryClient, apiRequest } from "@/lib/queryClient";
-import { useToast } from "@/hooks/use-toast";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Textarea } from "@/components/ui/textarea";
+import { MessageSquare, Eye } from "lucide-react";
 import type { OwnerInquiry } from "@shared/schema";
+import { useToast } from "@/hooks/use-toast";
+import { queryClient, apiRequest } from "@/lib/queryClient";
+import { format } from "date-fns";
+
+const STATUS_LABELS: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
+  pending: { label: "대기중", variant: "secondary" },
+  answered: { label: "답변완료", variant: "default" },
+  closed: { label: "종료", variant: "outline" },
+};
+
+const CATEGORY_LABELS: Record<string, string> = {
+  general: "일반문의",
+  technical: "기술지원",
+  billing: "결제문의",
+  other: "기타",
+};
+
+interface InquiryWithDetails extends OwnerInquiry {
+  user?: {
+    firstName: string;
+    lastName: string;
+    email: string;
+  };
+  restaurant?: {
+    name: string;
+  };
+}
 
 export default function AdminOwnerInquiries() {
   const { toast } = useToast();
-  const [selectedInquiry, setSelectedInquiry] = useState<OwnerInquiry | null>(null);
-  const [response, setResponse] = useState("");
+  
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [selectedInquiry, setSelectedInquiry] = useState<InquiryWithDetails | null>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [adminResponse, setAdminResponse] = useState("");
 
-  const { data: inquiries, isLoading } = useQuery<OwnerInquiry[]>({
+  // Fetch inquiries
+  const { data: inquiries = [], isLoading } = useQuery<InquiryWithDetails[]>({
     queryKey: ["/api/admin/owner-inquiries"],
   });
 
+  // Filter inquiries
+  const filteredInquiries = inquiries.filter(inq => 
+    statusFilter === "all" || inq.status === statusFilter
+  );
+
+  // Respond mutation
   const respondMutation = useMutation({
-    mutationFn: async ({ id, response }: { id: string; response: string }) => {
-      return await apiRequest("POST", `/api/admin/owner-inquiries/${id}/respond`, { adminResponse: response, status: "answered" });
+    mutationFn: async (data: { id: string; adminResponse: string; status: string }) => {
+      return await apiRequest("POST", `/api/admin/owner-inquiries/${data.id}/respond`, data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/owner-inquiries"] });
       queryClient.invalidateQueries({ queryKey: ["/api/admin/dashboard/priority-tasks"] });
+      setIsDialogOpen(false);
+      setAdminResponse("");
       toast({
-        title: "Success",
-        description: "Response sent successfully",
+        title: "답변 완료",
+        description: "문의에 답변이 등록되었습니다.",
       });
-      setSelectedInquiry(null);
-      setResponse("");
     },
     onError: () => {
       toast({
-        title: "Error",
-        description: "Failed to send response",
+        title: "오류",
+        description: "답변 등록 중 오류가 발생했습니다.",
         variant: "destructive",
       });
     },
   });
 
-  const handleRespond = () => {
-    if (!selectedInquiry || !response.trim()) return;
-    respondMutation.mutate({ id: selectedInquiry.id, response });
+  const handleView = (inquiry: InquiryWithDetails) => {
+    setSelectedInquiry(inquiry);
+    setAdminResponse(inquiry.adminResponse || "");
+    setIsDialogOpen(true);
   };
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-full">
-        <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
-  }
+  const handleRespond = () => {
+    if (selectedInquiry && adminResponse.trim()) {
+      respondMutation.mutate({
+        id: selectedInquiry.id,
+        adminResponse,
+        status: "answered",
+      });
+    }
+  };
 
-  const pendingInquiries = inquiries?.filter(inq => inq.status === "pending") || [];
-  const answeredInquiries = inquiries?.filter(inq => inq.status !== "pending") || [];
+  const pendingCount = inquiries.filter(i => i.status === "pending").length;
+  const answeredCount = inquiries.filter(i => i.status === "answered").length;
+  const closedCount = inquiries.filter(i => i.status === "closed").length;
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold">Owner Inquiries</h1>
-        <p className="text-muted-foreground">Manage restaurant owner questions and support requests</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold">업주 문의 관리</h1>
+          <p className="text-muted-foreground">레스토랑 업주의 문의 사항을 관리합니다</p>
+        </div>
       </div>
 
-      {/* Pending Inquiries */}
-      <Card className="p-6">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-semibold">Pending Inquiries</h2>
-          <Badge variant="secondary">{pendingInquiries.length}</Badge>
+      {/* Stats */}
+      <div className="grid grid-cols-4 gap-4">
+        <Card className="p-4">
+          <div className="text-sm text-muted-foreground">전체</div>
+          <div className="text-2xl font-bold">{inquiries.length}</div>
+        </Card>
+        <Card className="p-4">
+          <div className="text-sm text-muted-foreground">대기중</div>
+          <div className="text-2xl font-bold text-yellow-600">{pendingCount}</div>
+        </Card>
+        <Card className="p-4">
+          <div className="text-sm text-muted-foreground">답변완료</div>
+          <div className="text-2xl font-bold text-green-600">{answeredCount}</div>
+        </Card>
+        <Card className="p-4">
+          <div className="text-sm text-muted-foreground">종료</div>
+          <div className="text-2xl font-bold text-gray-600">{closedCount}</div>
+        </Card>
+      </div>
+
+      {/* Filter */}
+      <Card className="p-4">
+        <div className="flex gap-2">
+          <Button
+            variant={statusFilter === "all" ? "default" : "outline"}
+            size="sm"
+            onClick={() => setStatusFilter("all")}
+            data-testid="filter-all"
+          >
+            전체 ({inquiries.length})
+          </Button>
+          <Button
+            variant={statusFilter === "pending" ? "default" : "outline"}
+            size="sm"
+            onClick={() => setStatusFilter("pending")}
+            data-testid="filter-pending"
+          >
+            대기중 ({pendingCount})
+          </Button>
+          <Button
+            variant={statusFilter === "answered" ? "default" : "outline"}
+            size="sm"
+            onClick={() => setStatusFilter("answered")}
+            data-testid="filter-answered"
+          >
+            답변완료 ({answeredCount})
+          </Button>
+          <Button
+            variant={statusFilter === "closed" ? "default" : "outline"}
+            size="sm"
+            onClick={() => setStatusFilter("closed")}
+            data-testid="filter-closed"
+          >
+            종료 ({closedCount})
+          </Button>
         </div>
-        
-        {pendingInquiries.length === 0 ? (
-          <p className="text-center text-muted-foreground py-8">No pending inquiries</p>
+      </Card>
+
+      {/* Inquiries List */}
+      <Card>
+        {isLoading ? (
+          <div className="flex items-center justify-center h-64">
+            <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+          </div>
         ) : (
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Category</TableHead>
-                <TableHead>Title</TableHead>
-                <TableHead>Restaurant</TableHead>
-                <TableHead>Date</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
+                <TableHead>날짜</TableHead>
+                <TableHead>카테고리</TableHead>
+                <TableHead>제목</TableHead>
+                <TableHead>업주</TableHead>
+                <TableHead>레스토랑</TableHead>
+                <TableHead>상태</TableHead>
+                <TableHead>작업</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {pendingInquiries.map((inquiry) => (
-                <TableRow key={inquiry.id}>
-                  <TableCell>
-                    <Badge variant="outline">{inquiry.category}</Badge>
-                  </TableCell>
-                  <TableCell className="font-medium">{inquiry.title}</TableCell>
-                  <TableCell className="text-sm text-muted-foreground">
-                    {inquiry.restaurantId || "General"}
-                  </TableCell>
-                  <TableCell>{new Date(inquiry.createdAt).toLocaleDateString()}</TableCell>
-                  <TableCell className="text-right">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => {
-                        setSelectedInquiry(inquiry);
-                        setResponse(inquiry.adminResponse || "");
-                      }}
-                      data-testid={`button-respond-${inquiry.id}`}
-                    >
-                      <MessageSquare className="w-4 h-4 mr-1" />
-                      Respond
-                    </Button>
+              {filteredInquiries.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={7} className="text-center text-muted-foreground h-32">
+                    문의 내역이 없습니다.
                   </TableCell>
                 </TableRow>
-              ))}
+              ) : (
+                filteredInquiries.map((inquiry) => (
+                  <TableRow key={inquiry.id}>
+                    <TableCell className="whitespace-nowrap">
+                      {format(new Date(inquiry.createdAt), "yyyy-MM-dd")}
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant="outline">
+                        {CATEGORY_LABELS[inquiry.category] || inquiry.category}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="font-medium max-w-xs truncate">
+                      {inquiry.title}
+                    </TableCell>
+                    <TableCell className="text-sm">
+                      {inquiry.user ? `${inquiry.user.firstName} ${inquiry.user.lastName}` : "-"}
+                    </TableCell>
+                    <TableCell className="text-sm text-muted-foreground">
+                      {inquiry.restaurant?.name || "일반문의"}
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant={STATUS_LABELS[inquiry.status].variant}>
+                        {STATUS_LABELS[inquiry.status].label}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleView(inquiry)}
+                        data-testid={`button-view-${inquiry.id}`}
+                      >
+                        {inquiry.status === "pending" ? (
+                          <MessageSquare className="w-4 h-4" />
+                        ) : (
+                          <Eye className="w-4 h-4" />
+                        )}
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
             </TableBody>
           </Table>
         )}
       </Card>
 
-      {/* Answered Inquiries */}
-      {answeredInquiries.length > 0 && (
-        <Card className="p-6">
-          <h2 className="text-xl font-semibold mb-4">Answered Inquiries</h2>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Title</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Answered Date</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {answeredInquiries.map((inquiry) => (
-                <TableRow key={inquiry.id}>
-                  <TableCell className="font-medium">{inquiry.title}</TableCell>
-                  <TableCell>
-                    <Badge>{inquiry.status}</Badge>
-                  </TableCell>
-                  <TableCell>
-                    {inquiry.answeredAt ? new Date(inquiry.answeredAt).toLocaleDateString() : "-"}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </Card>
-      )}
-
-      {/* Response Dialog */}
-      <Dialog open={!!selectedInquiry} onOpenChange={() => {
-        setSelectedInquiry(null);
-        setResponse("");
-      }}>
+      {/* Detail & Response Dialog */}
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>{selectedInquiry?.title}</DialogTitle>
             <DialogDescription>
-              Category: {selectedInquiry?.category} | Submitted: {selectedInquiry && new Date(selectedInquiry.createdAt).toLocaleDateString()}
+              {CATEGORY_LABELS[selectedInquiry?.category || ""] || selectedInquiry?.category} | 
+              {selectedInquiry && ` ${format(new Date(selectedInquiry.createdAt), "yyyy-MM-dd HH:mm")}`}
             </DialogDescription>
           </DialogHeader>
-          
-          <div className="space-y-4">
-            <div>
-              <p className="text-sm font-medium mb-2">Inquiry Content</p>
-              <div className="p-3 rounded-lg bg-muted text-sm">
-                {selectedInquiry?.content}
-              </div>
-            </div>
 
-            <div>
-              <label className="text-sm font-medium mb-2 block">Admin Response</label>
-              <Textarea
-                value={response}
-                onChange={(e) => setResponse(e.target.value)}
-                placeholder="Type your response here..."
-                rows={5}
-                data-testid="textarea-response"
-              />
+          {selectedInquiry && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <div className="text-sm text-muted-foreground">업주</div>
+                  <div className="font-medium">
+                    {selectedInquiry.user ? `${selectedInquiry.user.firstName} ${selectedInquiry.user.lastName}` : "-"}
+                  </div>
+                </div>
+                <div>
+                  <div className="text-sm text-muted-foreground">레스토랑</div>
+                  <div className="font-medium">
+                    {selectedInquiry.restaurant?.name || "일반문의"}
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <div className="text-sm text-muted-foreground mb-2">문의 내용</div>
+                <div className="p-3 rounded-lg bg-muted text-sm whitespace-pre-wrap">
+                  {selectedInquiry.content}
+                </div>
+              </div>
+
+              {selectedInquiry.status === "pending" ? (
+                <div>
+                  <label className="text-sm font-medium mb-2 block">관리자 답변</label>
+                  <Textarea
+                    value={adminResponse}
+                    onChange={(e) => setAdminResponse(e.target.value)}
+                    placeholder="답변을 입력하세요..."
+                    rows={5}
+                    data-testid="textarea-response"
+                  />
+                </div>
+              ) : (
+                selectedInquiry.adminResponse && (
+                  <div>
+                    <div className="text-sm text-muted-foreground mb-2">관리자 답변</div>
+                    <div className="p-3 rounded-lg bg-primary/5 text-sm whitespace-pre-wrap">
+                      {selectedInquiry.adminResponse}
+                    </div>
+                    {selectedInquiry.answeredAt && (
+                      <div className="text-xs text-muted-foreground mt-2">
+                        답변일: {format(new Date(selectedInquiry.answeredAt), "yyyy-MM-dd HH:mm")}
+                      </div>
+                    )}
+                  </div>
+                )
+              )}
             </div>
-          </div>
+          )}
 
           <DialogFooter>
-            <Button variant="outline" onClick={() => {
-              setSelectedInquiry(null);
-              setResponse("");
-            }}>
-              Cancel
-            </Button>
             <Button
-              onClick={handleRespond}
-              disabled={respondMutation.isPending || !response.trim()}
-              data-testid="button-send-response"
+              variant="outline"
+              onClick={() => setIsDialogOpen(false)}
+              data-testid="button-close"
             >
-              {respondMutation.isPending ? "Sending..." : "Send Response"}
+              닫기
             </Button>
+            {selectedInquiry?.status === "pending" && (
+              <Button
+                onClick={handleRespond}
+                disabled={respondMutation.isPending || !adminResponse.trim()}
+                data-testid="button-send-response"
+              >
+                {respondMutation.isPending ? "전송 중..." : "답변 전송"}
+              </Button>
+            )}
           </DialogFooter>
         </DialogContent>
       </Dialog>
