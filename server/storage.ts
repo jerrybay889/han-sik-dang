@@ -85,6 +85,8 @@ export interface IStorage {
   
   getMenusByRestaurant(restaurantId: string): Promise<Menu[]>;
   createMenu(menu: InsertMenu): Promise<Menu>;
+  updateMenu(id: string, userId: string, restaurantId: string, data: Partial<InsertMenu>): Promise<Menu | undefined>;
+  deleteMenu(id: string, userId: string, restaurantId: string): Promise<boolean>;
   
   getYoutubeVideosByRestaurant(restaurantId: string): Promise<YoutubeVideo[]>;
   createYoutubeVideo(video: InsertYoutubeVideo): Promise<YoutubeVideo>;
@@ -353,6 +355,31 @@ export class DbStorage implements IStorage {
   async createMenu(insertMenu: InsertMenu): Promise<Menu> {
     const result = await db.insert(menus).values(insertMenu).returning();
     return result[0];
+  }
+
+  async updateMenu(id: string, userId: string, restaurantId: string, data: Partial<InsertMenu>): Promise<Menu | undefined> {
+    const isOwner = await this.isRestaurantOwner(userId, restaurantId);
+    if (!isOwner) {
+      return undefined;
+    }
+
+    const result = await db.update(menus)
+      .set(data)
+      .where(and(eq(menus.id, id), eq(menus.restaurantId, restaurantId)))
+      .returning();
+    return result[0];
+  }
+
+  async deleteMenu(id: string, userId: string, restaurantId: string): Promise<boolean> {
+    const isOwner = await this.isRestaurantOwner(userId, restaurantId);
+    if (!isOwner) {
+      return false;
+    }
+
+    const result = await db.delete(menus)
+      .where(and(eq(menus.id, id), eq(menus.restaurantId, restaurantId)))
+      .returning();
+    return result.length > 0;
   }
 
   async getYoutubeVideosByRestaurant(restaurantId: string): Promise<YoutubeVideo[]> {
