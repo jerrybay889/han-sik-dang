@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useRoute, Link } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { ArrowLeft, MapPin, Phone, Clock, Star, DollarSign, Users, Heart, Sparkles, Lightbulb, UtensilsCrossed, Play, Eye, Calendar, MessageSquare, MessageCircle, Send, X, Navigation, Store } from "lucide-react";
+import { ArrowLeft, MapPin, Phone, Clock, Star, DollarSign, Users, Heart, Sparkles, Lightbulb, UtensilsCrossed, Play, Eye, Calendar, MessageSquare, MessageCircle, Send, X, Navigation, Store, Image as ImageIcon, Video, Upload, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -37,6 +37,8 @@ export default function RestaurantDetailPage() {
   const [isReviewDialogOpen, setIsReviewDialogOpen] = useState(false);
   const [reviewRating, setReviewRating] = useState(0);
   const [reviewComment, setReviewComment] = useState("");
+  const [reviewImageUrls, setReviewImageUrls] = useState<string[]>([]);
+  const [reviewVideoUrls, setReviewVideoUrls] = useState<string[]>([]);
   const [editingReviewId, setEditingReviewId] = useState<string | null>(null);
   
   const [isResponseDialogOpen, setIsResponseDialogOpen] = useState(false);
@@ -360,12 +362,16 @@ export default function RestaurantDetailPage() {
         await apiRequest("PATCH", `/api/reviews/${editingReviewId}`, {
           rating: reviewRating,
           comment: reviewComment,
+          imageUrls: reviewImageUrls.length > 0 ? reviewImageUrls : undefined,
+          videoUrls: reviewVideoUrls.length > 0 ? reviewVideoUrls : undefined,
         });
       } else {
         await apiRequest("POST", "/api/reviews", {
           restaurantId,
           rating: reviewRating,
           comment: reviewComment,
+          imageUrls: reviewImageUrls.length > 0 ? reviewImageUrls : undefined,
+          videoUrls: reviewVideoUrls.length > 0 ? reviewVideoUrls : undefined,
         });
       }
     },
@@ -375,6 +381,8 @@ export default function RestaurantDetailPage() {
       setIsReviewDialogOpen(false);
       setReviewRating(0);
       setReviewComment("");
+      setReviewImageUrls([]);
+      setReviewVideoUrls([]);
       setEditingReviewId(null);
       toast({
         title: editingReviewId ? (language === "en" ? "Review updated" : "리뷰 수정됨") : t("review.success"),
@@ -1271,6 +1279,8 @@ export default function RestaurantDetailPage() {
                                     setEditingReviewId(review.id);
                                     setReviewRating(review.rating);
                                     setReviewComment(review.comment);
+                                    setReviewImageUrls(review.imageUrls || []);
+                                    setReviewVideoUrls(review.videoUrls || []);
                                     setIsReviewDialogOpen(true);
                                   }}
                                   data-testid={`button-edit-review-${review.id}`}
@@ -1290,6 +1300,40 @@ export default function RestaurantDetailPage() {
                           </div>
                         </div>
                         <p className="text-sm text-muted-foreground mb-2">{review.comment}</p>
+                        
+                        {/* Review Images */}
+                        {review.imageUrls && review.imageUrls.length > 0 && (
+                          <div className="grid grid-cols-3 gap-2 mb-2">
+                            {review.imageUrls.map((url, idx) => (
+                              <div key={idx} className="relative aspect-square rounded-md overflow-hidden bg-muted">
+                                <img
+                                  src={url}
+                                  alt={`Review image ${idx + 1}`}
+                                  className="w-full h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                                  onClick={() => window.open(url, '_blank')}
+                                  data-testid={`review-image-${review.id}-${idx}`}
+                                />
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                        
+                        {/* Review Videos */}
+                        {review.videoUrls && review.videoUrls.length > 0 && (
+                          <div className="grid grid-cols-2 gap-2 mb-2">
+                            {review.videoUrls.map((url, idx) => (
+                              <div key={idx} className="relative aspect-video rounded-md overflow-hidden bg-muted">
+                                <video
+                                  src={url}
+                                  controls
+                                  className="w-full h-full object-cover"
+                                  data-testid={`review-video-${review.id}-${idx}`}
+                                />
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                        
                         <p className="text-xs text-muted-foreground">
                           {new Date(review.createdAt).toLocaleDateString(language)}
                         </p>
@@ -1363,6 +1407,8 @@ export default function RestaurantDetailPage() {
           setEditingReviewId(null);
           setReviewRating(0);
           setReviewComment("");
+          setReviewImageUrls([]);
+          setReviewVideoUrls([]);
         }
       }}>
         <DialogContent className="max-w-md">
@@ -1407,6 +1453,97 @@ export default function RestaurantDetailPage() {
                 data-testid="textarea-review-comment"
               />
             </div>
+
+            {/* Photos */}
+            <div>
+              <label className="text-sm font-medium mb-2 block">
+                <ImageIcon className="w-4 h-4 inline mr-1" />
+                {language === "en" ? "Photos (optional)" : "사진 (선택)"}
+              </label>
+              <div className="space-y-2">
+                {reviewImageUrls.length > 0 && (
+                  <div className="grid grid-cols-3 gap-2">
+                    {reviewImageUrls.map((url, idx) => (
+                      <div key={idx} className="relative aspect-square rounded-md overflow-hidden bg-muted group">
+                        <img
+                          src={url}
+                          alt={`Preview ${idx + 1}`}
+                          className="w-full h-full object-cover"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setReviewImageUrls(prev => prev.filter((_, i) => i !== idx))}
+                          className="absolute top-1 right-1 p-1 bg-destructive text-destructive-foreground rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                          data-testid={`button-remove-image-${idx}`}
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                <Input
+                  type="text"
+                  placeholder={language === "en" ? "Enter image URL" : "이미지 URL 입력"}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && e.currentTarget.value.trim()) {
+                      e.preventDefault();
+                      setReviewImageUrls(prev => [...prev, e.currentTarget.value.trim()]);
+                      e.currentTarget.value = '';
+                    }
+                  }}
+                  data-testid="input-image-url"
+                />
+                <p className="text-xs text-muted-foreground">
+                  {language === "en" ? "Press Enter to add image URL" : "Enter 키를 눌러 이미지 URL 추가"}
+                </p>
+              </div>
+            </div>
+
+            {/* Videos */}
+            <div>
+              <label className="text-sm font-medium mb-2 block">
+                <Video className="w-4 h-4 inline mr-1" />
+                {language === "en" ? "Videos (optional)" : "영상 (선택)"}
+              </label>
+              <div className="space-y-2">
+                {reviewVideoUrls.length > 0 && (
+                  <div className="grid grid-cols-2 gap-2">
+                    {reviewVideoUrls.map((url, idx) => (
+                      <div key={idx} className="relative aspect-video rounded-md overflow-hidden bg-muted group">
+                        <video
+                          src={url}
+                          className="w-full h-full object-cover"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setReviewVideoUrls(prev => prev.filter((_, i) => i !== idx))}
+                          className="absolute top-1 right-1 p-1 bg-destructive text-destructive-foreground rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                          data-testid={`button-remove-video-${idx}`}
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                <Input
+                  type="text"
+                  placeholder={language === "en" ? "Enter video URL" : "영상 URL 입력"}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && e.currentTarget.value.trim()) {
+                      e.preventDefault();
+                      setReviewVideoUrls(prev => [...prev, e.currentTarget.value.trim()]);
+                      e.currentTarget.value = '';
+                    }
+                  }}
+                  data-testid="input-video-url"
+                />
+                <p className="text-xs text-muted-foreground">
+                  {language === "en" ? "Press Enter to add video URL" : "Enter 키를 눌러 영상 URL 추가"}
+                </p>
+              </div>
+            </div>
           </div>
 
           <DialogFooter>
@@ -1416,6 +1553,9 @@ export default function RestaurantDetailPage() {
                 setIsReviewDialogOpen(false);
                 setReviewRating(0);
                 setReviewComment("");
+                setReviewImageUrls([]);
+                setReviewVideoUrls([]);
+                setEditingReviewId(null);
               }}
               data-testid="button-cancel-review"
             >
