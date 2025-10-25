@@ -287,10 +287,10 @@ export default function AdminPayments() {
                     </div>
                   </div>
                 )}
-                {selectedPayment.notes && (
+                {selectedPayment.description && (
                   <div className="col-span-2">
-                    <div className="text-sm text-muted-foreground">메모</div>
-                    <div className="text-sm whitespace-pre-wrap">{selectedPayment.notes}</div>
+                    <div className="text-sm text-muted-foreground">설명</div>
+                    <div className="text-sm whitespace-pre-wrap">{selectedPayment.description}</div>
                   </div>
                 )}
               </div>
