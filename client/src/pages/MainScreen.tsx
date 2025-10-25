@@ -481,7 +481,7 @@ export default function MainScreen() {
           </section>
         )}
 
-        {/* Trending Section / Search Results - Split with Video & Blog in between */}
+        {/* Trending Section / Search Results - Part 1 (6 items) */}
         <section className="px-4 py-4">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
@@ -522,7 +522,7 @@ export default function MainScreen() {
                 </Card>
               </div>
             ) : (
-              displayRestaurants.slice(0, 12).map((restaurant, index) => (
+              displayRestaurants.slice(0, 6).map((restaurant, index) => (
                 <Link key={restaurant.id} href={`/restaurant/${restaurant.id}`}>
                   <Card
                     className="overflow-hidden hover-elevate active-elevate-2 cursor-pointer h-full"
@@ -571,7 +571,56 @@ export default function MainScreen() {
           </div>
         </section>
 
-        {/* Video Section - Moved up */}
+        {/* Event Banners */}
+        {!searchQuery && eventBanners.length > 0 && (
+          <section className="py-4">
+            <div className="px-4 mb-3">
+              <h2 className="text-lg font-semibold">{t("events.title")}</h2>
+            </div>
+            <ScrollArea className="w-full whitespace-nowrap">
+              <div className="flex gap-4 px-4 pb-2">
+                {eventBanners.map((banner) => (
+                  <a
+                    key={banner.id}
+                    href={banner.linkUrl || "#"}
+                    target={banner.linkUrl ? "_blank" : undefined}
+                    rel={banner.linkUrl ? "noopener noreferrer" : undefined}
+                    className="flex-shrink-0"
+                    data-testid={`banner-event-${banner.id}`}
+                  >
+                    <Card className="w-[320px] overflow-hidden hover-elevate active-elevate-2 cursor-pointer">
+                      <div className="relative aspect-[2/1]">
+                        <img
+                          src={banner.imageUrl}
+                          alt={language === "en" ? banner.titleEn : banner.title}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <div className="p-4">
+                        <h3 className="font-semibold text-base mb-1">
+                          {language === "en" ? banner.titleEn : banner.title}
+                        </h3>
+                        <p className="text-sm text-muted-foreground line-clamp-2">
+                          {language === "en" ? banner.descriptionEn : banner.description}
+                        </p>
+                      </div>
+                    </Card>
+                  </a>
+                ))}
+              </div>
+              <ScrollBar orientation="horizontal" />
+            </ScrollArea>
+          </section>
+        )}
+
+        {/* Mid Ad Banner */}
+        {!searchQuery && (
+          <div className="px-4 py-4">
+            <AdSlot variant="banner" />
+          </div>
+        )}
+
+        {/* Video Section */}
         {!searchQuery && (
           <section className="px-4 py-6">
             <div className="flex items-center justify-between mb-4">
@@ -629,11 +678,11 @@ export default function MainScreen() {
           </section>
         )}
 
-        {/* Continue Trending Section - Part 2 */}
-        {!searchQuery && displayRestaurants.length > 12 && (
+        {/* Continue Trending Section - Part 2 (6 items) */}
+        {!searchQuery && displayRestaurants.length > 6 && (
           <section className="px-4 py-4">
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-              {displayRestaurants.slice(12, 24).map((restaurant, index) => (
+              {displayRestaurants.slice(6, 12).map((restaurant, index) => (
                 <Link key={restaurant.id} href={`/restaurant/${restaurant.id}`}>
                   <Card
                     className="overflow-hidden hover-elevate active-elevate-2 cursor-pointer h-full"
@@ -724,11 +773,11 @@ export default function MainScreen() {
           </section>
         )}
 
-        {/* Continue Trending Section - Part 3 (last batch) */}
-        {!searchQuery && displayRestaurants.length > 24 && (
+        {/* Continue Trending Section - Part 3 (remaining items) */}
+        {!searchQuery && displayRestaurants.length > 12 && (
           <section className="px-4 py-4">
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-              {displayRestaurants.slice(24, 30).map((restaurant, index) => (
+              {displayRestaurants.slice(12, 30).map((restaurant, index) => (
                 <Link key={restaurant.id} href={`/restaurant/${restaurant.id}`}>
                   <Card
                     className="overflow-hidden hover-elevate active-elevate-2 cursor-pointer h-full"
@@ -774,48 +823,6 @@ export default function MainScreen() {
                 </Link>
               ))}
             </div>
-          </section>
-        )}
-
-        {/* Event Banners */}
-        {eventBanners.length > 0 && (
-          <section className="py-4">
-            <div className="px-4 mb-3">
-              <h2 className="text-lg font-semibold">{t("events.title")}</h2>
-            </div>
-            <ScrollArea className="w-full whitespace-nowrap">
-              <div className="flex gap-4 px-4 pb-2">
-                {eventBanners.map((banner) => (
-                  <a
-                    key={banner.id}
-                    href={banner.linkUrl || "#"}
-                    target={banner.linkUrl ? "_blank" : undefined}
-                    rel={banner.linkUrl ? "noopener noreferrer" : undefined}
-                    className="flex-shrink-0"
-                    data-testid={`banner-event-${banner.id}`}
-                  >
-                    <Card className="w-[320px] overflow-hidden hover-elevate active-elevate-2 cursor-pointer">
-                      <div className="relative aspect-[2/1]">
-                        <img
-                          src={banner.imageUrl}
-                          alt={language === "en" ? banner.titleEn : banner.title}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                      <div className="p-4">
-                        <h3 className="font-semibold text-base mb-1">
-                          {language === "en" ? banner.titleEn : banner.title}
-                        </h3>
-                        <p className="text-sm text-muted-foreground line-clamp-2">
-                          {language === "en" ? banner.descriptionEn : banner.description}
-                        </p>
-                      </div>
-                    </Card>
-                  </a>
-                ))}
-              </div>
-              <ScrollBar orientation="horizontal" />
-            </ScrollArea>
           </section>
         )}
 
