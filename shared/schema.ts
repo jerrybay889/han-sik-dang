@@ -22,6 +22,9 @@ export const users = pgTable("users", {
   lastName: varchar("last_name"),
   profileImageUrl: varchar("profile_image_url"),
   isAdmin: integer("is_admin").notNull().default(0),
+  tier: varchar("tier").notNull().default("bronze"), // bronze, silver, gold, platinum
+  country: varchar("country"),
+  region: varchar("region"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -78,11 +81,13 @@ export const reviews = pgTable("reviews", {
   comment: text("comment").notNull(),
   imageUrls: text("image_urls").array(),
   videoUrls: text("video_urls").array(),
+  isPinned: integer("is_pinned").notNull().default(0),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 }, (table) => [
   index("idx_reviews_restaurant_id").on(table.restaurantId),
   index("idx_reviews_user_id").on(table.userId),
   index("idx_reviews_created_at").on(table.createdAt),
+  index("idx_reviews_is_pinned").on(table.isPinned),
 ]);
 
 export const insertReviewSchema = createInsertSchema(reviews).omit({
@@ -352,3 +357,204 @@ export const insertRestaurantImageSchema = createInsertSchema(restaurantImages).
 
 export type InsertRestaurantImage = z.infer<typeof insertRestaurantImageSchema>;
 export type RestaurantImage = typeof restaurantImages.$inferSelect;
+
+// Restaurant Applications - 점주 신규 신청
+export const restaurantApplications = pgTable("restaurant_applications", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  restaurantName: text("restaurant_name").notNull(),
+  restaurantNameEn: text("restaurant_name_en").notNull(),
+  businessNumber: text("business_number").notNull(),
+  address: text("address").notNull(),
+  phone: text("phone").notNull(),
+  email: text("email").notNull(),
+  description: text("description"),
+  status: varchar("status").notNull().default("pending"), // pending, approved, rejected
+  adminNote: text("admin_note"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  processedAt: timestamp("processed_at"),
+}, (table) => [
+  index("idx_applications_user_id").on(table.userId),
+  index("idx_applications_status").on(table.status),
+  index("idx_applications_created_at").on(table.createdAt),
+]);
+
+export const insertRestaurantApplicationSchema = createInsertSchema(restaurantApplications).omit({
+  id: true,
+  createdAt: true,
+  processedAt: true,
+});
+
+export type InsertRestaurantApplication = z.infer<typeof insertRestaurantApplicationSchema>;
+export type RestaurantApplication = typeof restaurantApplications.$inferSelect;
+
+// Owner Inquiries - 점주가 본사에 하는 Q&A
+export const ownerInquiries = pgTable("owner_inquiries", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  restaurantId: varchar("restaurant_id").references(() => restaurants.id),
+  category: varchar("category").notNull(), // general, technical, billing, other
+  title: text("title").notNull(),
+  content: text("content").notNull(),
+  status: varchar("status").notNull().default("pending"), // pending, answered, closed
+  adminResponse: text("admin_response"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  answeredAt: timestamp("answered_at"),
+}, (table) => [
+  index("idx_owner_inquiries_user_id").on(table.userId),
+  index("idx_owner_inquiries_restaurant_id").on(table.restaurantId),
+  index("idx_owner_inquiries_status").on(table.status),
+  index("idx_owner_inquiries_created_at").on(table.createdAt),
+]);
+
+export const insertOwnerInquirySchema = createInsertSchema(ownerInquiries).omit({
+  id: true,
+  createdAt: true,
+  answeredAt: true,
+});
+
+export type InsertOwnerInquiry = z.infer<typeof insertOwnerInquirySchema>;
+export type OwnerInquiry = typeof ownerInquiries.$inferSelect;
+
+// Owner Notices - 본사가 점주들에게 보내는 공지사항
+export const ownerNotices = pgTable("owner_notices", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  title: text("title").notNull(),
+  content: text("content").notNull(),
+  category: varchar("category").notNull(), // announcement, update, maintenance, promotion
+  isPinned: integer("is_pinned").notNull().default(0),
+  targetRestaurants: text("target_restaurants").array(), // null means all
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  publishedAt: timestamp("published_at"),
+}, (table) => [
+  index("idx_owner_notices_is_pinned").on(table.isPinned),
+  index("idx_owner_notices_created_at").on(table.createdAt),
+]);
+
+export const insertOwnerNoticeSchema = createInsertSchema(ownerNotices).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertOwnerNotice = z.infer<typeof insertOwnerNoticeSchema>;
+export type OwnerNotice = typeof ownerNotices.$inferSelect;
+
+// Payments - 점주 결제 관리
+export const payments = pgTable("payments", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  restaurantId: varchar("restaurant_id").notNull().references(() => restaurants.id),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  amount: integer("amount").notNull(),
+  currency: varchar("currency").notNull().default("KRW"),
+  paymentType: varchar("payment_type").notNull(), // subscription, promotion, ad
+  status: varchar("status").notNull().default("pending"), // pending, completed, failed, refunded
+  paymentMethod: varchar("payment_method"),
+  transactionId: text("transaction_id"),
+  description: text("description"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  paidAt: timestamp("paid_at"),
+}, (table) => [
+  index("idx_payments_restaurant_id").on(table.restaurantId),
+  index("idx_payments_user_id").on(table.userId),
+  index("idx_payments_status").on(table.status),
+  index("idx_payments_created_at").on(table.createdAt),
+]);
+
+export const insertPaymentSchema = createInsertSchema(payments).omit({
+  id: true,
+  createdAt: true,
+  paidAt: true,
+});
+
+export type InsertPayment = z.infer<typeof insertPaymentSchema>;
+export type Payment = typeof payments.$inferSelect;
+
+// Customer Inquiries - 고객 문의
+export const customerInquiries = pgTable("customer_inquiries", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id),
+  email: text("email").notNull(),
+  name: text("name").notNull(),
+  category: varchar("category").notNull(), // general, complaint, suggestion, other
+  title: text("title").notNull(),
+  content: text("content").notNull(),
+  status: varchar("status").notNull().default("pending"), // pending, answered, closed
+  adminResponse: text("admin_response"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  answeredAt: timestamp("answered_at"),
+}, (table) => [
+  index("idx_customer_inquiries_user_id").on(table.userId),
+  index("idx_customer_inquiries_status").on(table.status),
+  index("idx_customer_inquiries_created_at").on(table.createdAt),
+]);
+
+export const insertCustomerInquirySchema = createInsertSchema(customerInquiries).omit({
+  id: true,
+  createdAt: true,
+  answeredAt: true,
+});
+
+export type InsertCustomerInquiry = z.infer<typeof insertCustomerInquirySchema>;
+export type CustomerInquiry = typeof customerInquiries.$inferSelect;
+
+// Partnership Inquiries - 제휴 문의
+export const partnershipInquiries = pgTable("partnership_inquiries", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  companyName: text("company_name").notNull(),
+  contactName: text("contact_name").notNull(),
+  email: text("email").notNull(),
+  phone: text("phone").notNull(),
+  partnershipType: varchar("partnership_type").notNull(), // advertisement, collaboration, sponsorship, other
+  description: text("description").notNull(),
+  status: varchar("status").notNull().default("pending"), // pending, reviewing, accepted, rejected
+  adminNote: text("admin_note"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  processedAt: timestamp("processed_at"),
+}, (table) => [
+  index("idx_partnership_inquiries_status").on(table.status),
+  index("idx_partnership_inquiries_created_at").on(table.createdAt),
+]);
+
+export const insertPartnershipInquirySchema = createInsertSchema(partnershipInquiries).omit({
+  id: true,
+  createdAt: true,
+  processedAt: true,
+});
+
+export type InsertPartnershipInquiry = z.infer<typeof insertPartnershipInquirySchema>;
+export type PartnershipInquiry = typeof partnershipInquiries.$inferSelect;
+
+// Blog Posts - 블로그 포스트
+export const blogPosts = pgTable("blog_posts", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  title: text("title").notNull(),
+  titleEn: text("title_en").notNull(),
+  content: text("content").notNull(),
+  contentEn: text("content_en").notNull(),
+  excerpt: text("excerpt"),
+  excerptEn: text("excerpt_en"),
+  imageUrl: text("image_url"),
+  author: text("author").notNull(),
+  category: varchar("category").notNull(), // food, culture, travel, tips
+  tags: text("tags").array(),
+  isExternal: integer("is_external").notNull().default(0),
+  externalUrl: text("external_url"),
+  viewCount: integer("view_count").notNull().default(0),
+  isPublished: integer("is_published").notNull().default(1),
+  publishedAt: timestamp("published_at"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+}, (table) => [
+  index("idx_blog_posts_category").on(table.category),
+  index("idx_blog_posts_is_published").on(table.isPublished),
+  index("idx_blog_posts_published_at").on(table.publishedAt),
+  index("idx_blog_posts_created_at").on(table.createdAt),
+]);
+
+export const insertBlogPostSchema = createInsertSchema(blogPosts).omit({
+  id: true,
+  viewCount: true,
+  createdAt: true,
+});
+
+export type InsertBlogPost = z.infer<typeof insertBlogPostSchema>;
+export type BlogPost = typeof blogPosts.$inferSelect;
