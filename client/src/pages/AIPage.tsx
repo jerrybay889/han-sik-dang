@@ -27,6 +27,9 @@ export default function AIPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [locationSelected, setLocationSelected] = useState(false);
   const [selectedLocation, setSelectedLocation] = useState<"nearby" | "other" | null>(null);
+  const [areaSelected, setAreaSelected] = useState(false);
+  const [selectedArea, setSelectedArea] = useState<string | null>(null);
+  const [customAreaInput, setCustomAreaInput] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
 
@@ -36,6 +39,19 @@ export default function AIPage() {
       messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [messages, isLoading]);
+
+  const destinations = [
+    { key: "hongdae", label: t("ai.destinations.hongdae") },
+    { key: "gangnam", label: t("ai.destinations.gangnam") },
+    { key: "myeongdong", label: t("ai.destinations.myeongdong") },
+    { key: "itaewon", label: t("ai.destinations.itaewon") },
+    { key: "insadong", label: t("ai.destinations.insadong") },
+    { key: "jongno", label: t("ai.destinations.jongno") },
+    { key: "yeonnamdong", label: t("ai.destinations.yeonnamdong") },
+    { key: "seongsu", label: t("ai.destinations.seongsu") },
+    { key: "mapo", label: t("ai.destinations.mapo") },
+    { key: "sinchon", label: t("ai.destinations.sinchon") },
+  ];
 
   const keywords = [
     { key: "nearby", label: t("ai.keywords.nearby"), icon: MapPin },
@@ -66,14 +82,42 @@ export default function AIPage() {
     };
     setMessages(prev => [...prev, newUserMessage]);
 
-    // Add AI response about location
-    const aiResponse = location === "nearby"
-      ? (language === "en" 
-          ? "Great! I'll help you find nearby restaurants. What type of cuisine or dish are you interested in?" 
-          : "좋아요! 근처 맛집을 찾아드리겠습니다. 어떤 음식이나 요리에 관심이 있으신가요?")
-      : (language === "en"
-          ? "Perfect! Which area would you like to explore? Feel free to tell me the district or neighborhood you're interested in."
-          : "좋아요! 어떤 지역을 탐색하고 싶으신가요? 관심 있는 구역이나 동네를 알려주세요.");
+    if (location === "nearby") {
+      // For nearby, skip area selection and go straight to keywords
+      setAreaSelected(true);
+      setSelectedArea("nearby");
+      
+      const aiResponse = language === "en" 
+        ? "Great! I'll help you find nearby restaurants. What type of cuisine or dish are you interested in?" 
+        : "좋아요! 근처 맛집을 찾아드리겠습니다. 어떤 음식이나 요리에 관심이 있으신가요?";
+
+      setTimeout(() => {
+        setMessages(prev => [...prev, {
+          id: prev.length + 1,
+          type: "ai",
+          content: aiResponse,
+        }]);
+      }, 500);
+    }
+    // For "other", don't add AI response yet - wait for area selection
+  };
+
+  const handleAreaSelect = (area: string) => {
+    setAreaSelected(true);
+    setSelectedArea(area);
+    
+    // Add area selection as user message
+    const newUserMessage = { 
+      id: messages.length + 1, 
+      type: "user" as const, 
+      content: area 
+    };
+    setMessages(prev => [...prev, newUserMessage]);
+
+    // Add AI response
+    const aiResponse = language === "en"
+      ? `Perfect! Let's find great restaurants in ${area}. What type of cuisine are you looking for?`
+      : `좋아요! ${area}의 맛집을 찾아드리겠습니다. 어떤 종류의 음식을 찾으시나요?`;
 
     setTimeout(() => {
       setMessages(prev => [...prev, {
@@ -82,6 +126,12 @@ export default function AIPage() {
         content: aiResponse,
       }]);
     }, 500);
+  };
+
+  const handleCustomAreaSubmit = () => {
+    if (!customAreaInput.trim()) return;
+    handleAreaSelect(customAreaInput.trim());
+    setCustomAreaInput("");
   };
 
   const handleKeywordClick = (keyword: string) => {
@@ -103,7 +153,8 @@ export default function AIPage() {
         body: JSON.stringify({ 
           message: userMessage, 
           language,
-          location: selectedLocation 
+          location: selectedLocation,
+          area: selectedArea
         }),
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -221,7 +272,7 @@ export default function AIPage() {
             </div>
           )}
 
-          {/* Location Selection - Shows first */}
+          {/* Step 1: Location Selection - Shows first */}
           {messages.length === 1 && !locationSelected && !isLoading && (
             <div className="pt-4" data-testid="location-selection">
               <div className="flex justify-start mb-4">
@@ -259,18 +310,75 @@ export default function AIPage() {
             </div>
           )}
 
-          {/* Keyword Suggestions - Shows after location is selected */}
-          {locationSelected && messages.length <= 4 && !isLoading && (
+          {/* Step 2: Area Selection - Shows when "Other Area" is selected */}
+          {locationSelected && selectedLocation === "other" && !areaSelected && !isLoading && (
+            <div className="pt-4" data-testid="area-selection">
+              <div className="flex justify-start mb-4">
+                <div className="max-w-[80%] rounded-2xl px-4 py-3 bg-card text-foreground border border-border rounded-bl-sm">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Bot className="w-4 h-4 text-primary" />
+                    <span className="text-xs font-medium text-primary">AI Assistant</span>
+                  </div>
+                  <p className="text-sm whitespace-pre-line leading-relaxed">
+                    {t("ai.areaSelectionQuestion")}
+                  </p>
+                </div>
+              </div>
+
+              <p className="text-xs text-muted-foreground mb-3 px-1">
+                {t("ai.popularDestinations")}
+              </p>
+              
+              <div className="grid grid-cols-2 gap-2 mb-4">
+                {destinations.map((destination) => (
+                  <Button
+                    key={destination.key}
+                    variant="outline"
+                    className="h-auto py-3 hover-elevate active-elevate-2"
+                    onClick={() => handleAreaSelect(destination.label)}
+                    data-testid={`destination-${destination.key}`}
+                  >
+                    <span className="font-medium">{destination.label}</span>
+                  </Button>
+                ))}
+              </div>
+
+              {/* Custom area input */}
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={customAreaInput}
+                  onChange={(e) => setCustomAreaInput(e.target.value)}
+                  onKeyPress={(e) => e.key === "Enter" && handleCustomAreaSubmit()}
+                  placeholder={t("ai.customAreaPlaceholder")}
+                  className="flex-1 px-4 py-3 rounded-full bg-muted text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary text-sm"
+                  data-testid="input-custom-area"
+                />
+                <Button
+                  size="icon"
+                  className="rounded-full w-12 h-12 flex-shrink-0"
+                  onClick={handleCustomAreaSubmit}
+                  disabled={!customAreaInput.trim()}
+                  data-testid="button-submit-custom-area"
+                >
+                  <Send className="w-5 h-5" />
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {/* Step 3: Keyword Suggestions - Shows after area is selected */}
+          {areaSelected && messages.length <= 6 && !isLoading && (
             <div className="pt-4" data-testid="keyword-suggestions">
               <p className="text-xs text-muted-foreground mb-3 px-1">
                 {t("ai.quickSuggestions")}
               </p>
               <div className="grid grid-cols-2 gap-2">
-                {keywords.map((keyword, index) => {
+                {keywords.map((keyword) => {
                   const Icon = keyword.icon;
                   return (
                     <Card
-                      key={index}
+                      key={keyword.key}
                       className="p-3 hover-elevate active-elevate-2 cursor-pointer"
                       onClick={() => handleKeywordClick(keyword.label)}
                       data-testid={`keyword-${keyword.key}`}

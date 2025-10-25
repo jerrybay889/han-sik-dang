@@ -206,8 +206,23 @@
     "locationQuestion": "인근 맛집을 찾으시나요, 아니면 다른 지역을 탐색하시겠어요?",
     "nearbyButton": "인근 맛집",
     "otherAreaButton": "다른 지역",
+    "areaSelectionQuestion": "어느 지역을 탐색하시겠어요? 인기 여행지를 선택하거나 직접 입력해주세요.",
+    "popularDestinations": "인기 여행지:",
+    "customAreaPlaceholder": "또는 지역명 입력...",
     "quickSuggestions": "빠른 추천:",
     "tryAsking": "이런 것을 물어보세요:",
+    "destinations": {
+      "hongdae": "홍대",
+      "gangnam": "강남",
+      "myeongdong": "명동",
+      "itaewon": "이태원",
+      "insadong": "인사동",
+      "jongno": "종로",
+      "yeonnamdong": "연남동",
+      "seongsu": "성수동",
+      "mapo": "마포",
+      "sinchon": "신촌"
+    },
     "keywords": {
       "nearby": "인근맛집",
       "vegan": "비건맛집",

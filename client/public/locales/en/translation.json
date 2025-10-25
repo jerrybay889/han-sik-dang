@@ -206,8 +206,23 @@
     "locationQuestion": "Would you like to search nearby restaurants or explore a different area?",
     "nearbyButton": "Nearby Restaurants",
     "otherAreaButton": "Other Area",
+    "areaSelectionQuestion": "Which area would you like to explore? Choose from popular destinations or enter your own location.",
+    "popularDestinations": "Popular Destinations:",
+    "customAreaPlaceholder": "Or type your area...",
     "quickSuggestions": "Quick suggestions:",
     "tryAsking": "Try asking about:",
+    "destinations": {
+      "hongdae": "Hongdae",
+      "gangnam": "Gangnam",
+      "myeongdong": "Myeong-dong",
+      "itaewon": "Itaewon",
+      "insadong": "Insadong",
+      "jongno": "Jongno",
+      "yeonnamdong": "Yeonnam-dong",
+      "seongsu": "Seongsu-dong",
+      "mapo": "Mapo",
+      "sinchon": "Sinchon"
+    },
     "keywords": {
       "nearby": "Nearby Restaurants",
       "vegan": "Vegan Restaurants",
