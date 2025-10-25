@@ -27,14 +27,61 @@ interface PriorityTask {
   icon: React.ComponentType<{ className?: string }>;
 }
 
+interface PriorityTasksData {
+  pendingApplications: any[];
+  pendingOwnerInquiries: any[];
+  pendingCustomerInquiries: any[];
+  pendingPartnershipInquiries: any[];
+}
+
 export default function AdminDashboard() {
   const { data: stats, isLoading } = useQuery<DashboardStats>({
     queryKey: ["/api/admin/dashboard/stats"],
   });
 
-  const { data: priorityTasks, isLoading: tasksLoading } = useQuery<PriorityTask[]>({
+  const { data: priorityTasksData, isLoading: tasksLoading } = useQuery<PriorityTasksData>({
     queryKey: ["/api/admin/dashboard/priority-tasks"],
   });
+
+  // Transform priority tasks data into display format
+  const priorityTasks: PriorityTask[] = priorityTasksData ? [
+    {
+      id: "restaurant-applications",
+      title: "Restaurant Applications",
+      description: "New partnership applications pending review",
+      count: priorityTasksData.pendingApplications?.length || 0,
+      priority: "high" as const,
+      link: "/admin/restaurant-applications",
+      icon: FileText,
+    },
+    {
+      id: "owner-inquiries",
+      title: "Owner Inquiries",
+      description: "Restaurant owner support requests",
+      count: priorityTasksData.pendingOwnerInquiries?.length || 0,
+      priority: "medium" as const,
+      link: "/admin/owner-inquiries",
+      icon: HelpCircle,
+    },
+    {
+      id: "customer-inquiries",
+      title: "Customer Inquiries",
+      description: "Customer support requests",
+      count: priorityTasksData.pendingCustomerInquiries?.length || 0,
+      priority: "medium" as const,
+      link: "/admin/customer-inquiries",
+      icon: MessageSquare,
+    },
+    {
+      id: "partnership-inquiries",
+      title: "Partnership Inquiries",
+      description: "Business partnership requests",
+      count: priorityTasksData.pendingPartnershipInquiries?.length || 0,
+      priority: "low" as const,
+      link: "/admin/partnership-inquiries",
+      icon: Handshake,
+    },
+  ].filter(task => task.count > 0) : [];
 
   if (isLoading) {
     return (
