@@ -1571,6 +1571,63 @@ Provide a comprehensive analysis in the following JSON format:
     }
   });
 
+  // Get user details (admin)
+  app.get("/api/admin/users/:id/details", isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const details = await storage.getUserDetails(id);
+      
+      if (!details) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      res.json(details);
+    } catch (error) {
+      console.error("Error fetching user details:", error);
+      res.status(500).json({ error: "Failed to fetch user details" });
+    }
+  });
+
+  // Update user tier (admin)
+  app.patch("/api/admin/users/:id/tier", isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const { tier } = req.body;
+
+      const validTiers = ['bronze', 'silver', 'gold', 'platinum'];
+      if (!tier || !validTiers.includes(tier.toLowerCase())) {
+        return res.status(400).json({ error: "Invalid tier. Must be one of: bronze, silver, gold, platinum" });
+      }
+
+      const user = await storage.updateUserTier(id, tier.toLowerCase());
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      res.json(user);
+    } catch (error) {
+      console.error("Error updating user tier:", error);
+      res.status(500).json({ error: "Failed to update user tier" });
+    }
+  });
+
+  // Delete user (admin)
+  app.delete("/api/admin/users/:id", isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const deleted = await storage.deleteUser(id);
+      
+      if (!deleted) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting user:", error);
+      res.status(500).json({ error: "Failed to delete user" });
+    }
+  });
+
   // Update restaurant (admin)
   app.patch("/api/admin/restaurants/:id", isAuthenticated, isAdmin, async (req: any, res) => {
     try {

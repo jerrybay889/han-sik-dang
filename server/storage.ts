@@ -152,6 +152,18 @@ export interface IStorage {
   // Admin operations
   getAllUsers(): Promise<User[]>;
   updateUserAdminStatus(userId: string, isAdmin: number): Promise<User | undefined>;
+  getUserDetails(userId: string): Promise<{
+    user: User;
+    reviews: Review[];
+    savedRestaurants: Restaurant[];
+    stats: {
+      totalReviews: number;
+      averageRating: number;
+      totalSaved: number;
+    };
+  } | undefined>;
+  updateUserTier(userId: string, tier: string): Promise<User | undefined>;
+  deleteUser(userId: string): Promise<boolean>;
   getAdminDashboardStats(): Promise<{
     totalRestaurants: number;
     totalUsers: number;
@@ -733,6 +745,85 @@ export class DbStorage implements IStorage {
       .where(eq(users.id, userId))
       .returning();
     return result[0];
+  }
+
+  async getUserDetails(userId: string): Promise<{
+    user: User;
+    reviews: Review[];
+    savedRestaurants: Restaurant[];
+    stats: {
+      totalReviews: number;
+      averageRating: number;
+      totalSaved: number;
+    };
+  } | undefined> {
+    const user = await this.getUser(userId);
+    if (!user) {
+      return undefined;
+    }
+
+    // Get user's reviews
+    const userReviews = await db
+      .select()
+      .from(reviews)
+      .where(eq(reviews.userId, userId))
+      .orderBy(desc(reviews.createdAt));
+
+    // Get saved restaurants
+    const savedRestaurantIds = await db
+      .select()
+      .from(savedRestaurants)
+      .where(eq(savedRestaurants.userId, userId));
+
+    const savedRestaurantsList = savedRestaurantIds.length > 0
+      ? await db
+          .select()
+          .from(restaurants)
+          .where(sql`${restaurants.id} IN ${sql.raw(`(${savedRestaurantIds.map(s => `'${s.restaurantId}'`).join(',')})`)}`)
+      : [];
+
+    // Calculate stats
+    const totalReviews = userReviews.length;
+    const averageRating = totalReviews > 0
+      ? userReviews.reduce((sum, r) => sum + r.rating, 0) / totalReviews
+      : 0;
+    const totalSaved = savedRestaurantIds.length;
+
+    return {
+      user,
+      reviews: userReviews,
+      savedRestaurants: savedRestaurantsList,
+      stats: {
+        totalReviews,
+        averageRating,
+        totalSaved,
+      },
+    };
+  }
+
+  async updateUserTier(userId: string, tier: string): Promise<User | undefined> {
+    const result = await db
+      .update(users)
+      .set({ tier, updatedAt: new Date() })
+      .where(eq(users.id, userId))
+      .returning();
+    return result[0];
+  }
+
+  async deleteUser(userId: string): Promise<boolean> {
+    // Delete user's reviews first
+    await db.delete(reviews).where(eq(reviews.userId, userId));
+    
+    // Delete saved restaurants
+    await db.delete(savedRestaurants).where(eq(savedRestaurants.userId, userId));
+    
+    // Delete the user
+    const result = await db
+      .delete(users)
+      .where(eq(users.id, userId))
+      .returning();
+    
+    return result.length > 0;
   }
 
   async getAdminDashboardStats(): Promise<{
