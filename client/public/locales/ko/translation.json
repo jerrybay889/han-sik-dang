@@ -200,7 +200,26 @@
     "readTime": "분 소요"
   },
   "ai": {
-    "title": "AI 어시스턴트"
+    "title": "AI 어시스턴트",
+    "welcome": "안녕하세요! 저는 한식당 찾기를 도와드리는 AI 컨시어지입니다. 취향에 맞는 완벽한 레스토랑을 찾아드릴게요. 😊",
+    "placeholder": "무엇이든 물어보세요...",
+    "locationQuestion": "인근 맛집을 찾으시나요, 아니면 다른 지역을 탐색하시겠어요?",
+    "nearbyButton": "인근 맛집",
+    "otherAreaButton": "다른 지역",
+    "quickSuggestions": "빠른 추천:",
+    "tryAsking": "이런 것을 물어보세요:",
+    "keywords": {
+      "nearby": "인근맛집",
+      "vegan": "비건맛집",
+      "popular": "인기메뉴",
+      "bbq": "BBQ",
+      "bibimbap": "비빔밥",
+      "traditional": "전통한식",
+      "modern": "현대적인",
+      "streetFood": "스트릿푸드",
+      "chinese": "중식",
+      "trending": "떠오르는맛집"
+    }
   },
   "admin": {
     "title": "관리자 대시보드",

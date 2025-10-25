@@ -200,7 +200,26 @@
     "readTime": "min read"
   },
   "ai": {
-    "title": "AI Assistant"
+    "title": "AI Assistant",
+    "welcome": "Hello! I'm your Korean restaurant concierge. I can help you find the perfect restaurant based on your preferences. 😊",
+    "placeholder": "Ask me anything...",
+    "locationQuestion": "Would you like to search nearby restaurants or explore a different area?",
+    "nearbyButton": "Nearby Restaurants",
+    "otherAreaButton": "Other Area",
+    "quickSuggestions": "Quick suggestions:",
+    "tryAsking": "Try asking about:",
+    "keywords": {
+      "nearby": "Nearby Restaurants",
+      "vegan": "Vegan Restaurants",
+      "popular": "Popular Dishes",
+      "bbq": "Korean BBQ",
+      "bibimbap": "Bibimbap",
+      "traditional": "Traditional Korean",
+      "modern": "Modern & Fusion",
+      "streetFood": "Street Food",
+      "chinese": "Chinese Cuisine",
+      "trending": "Trending Restaurants"
+    }
   },
   "admin": {
     "title": "Admin Dashboard",
