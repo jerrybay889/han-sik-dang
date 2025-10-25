@@ -1,7 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
-import { Users, UtensilsCrossed, MessageSquare, Megaphone } from "lucide-react";
+import { Users, UtensilsCrossed, MessageSquare, Megaphone, AlertCircle, FileText, HelpCircle, Handshake, Star, ChevronRight } from "lucide-react";
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis, ResponsiveContainer, Tooltip, Legend, Line, LineChart } from "recharts";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Link } from "wouter";
 
 interface DashboardStats {
   totalRestaurants: number;
@@ -14,9 +17,23 @@ interface DashboardStats {
   reviewsPerDay: { date: string; count: number }[];
 }
 
+interface PriorityTask {
+  id: string;
+  title: string;
+  description: string;
+  count: number;
+  priority: "high" | "medium" | "low";
+  link: string;
+  icon: React.ComponentType<{ className?: string }>;
+}
+
 export default function AdminDashboard() {
   const { data: stats, isLoading } = useQuery<DashboardStats>({
     queryKey: ["/api/admin/dashboard/stats"],
+  });
+
+  const { data: priorityTasks, isLoading: tasksLoading } = useQuery<PriorityTask[]>({
+    queryKey: ["/api/admin/dashboard/priority-tasks"],
   });
 
   if (isLoading) {
@@ -26,6 +43,17 @@ export default function AdminDashboard() {
       </div>
     );
   }
+
+  const getPriorityColor = (priority: string) => {
+    switch (priority) {
+      case "high":
+        return "bg-red-500/10 text-red-600 dark:text-red-400";
+      case "medium":
+        return "bg-yellow-500/10 text-yellow-600 dark:text-yellow-400";
+      default:
+        return "bg-blue-500/10 text-blue-600 dark:text-blue-400";
+    }
+  };
 
   const statCards = [
     {
@@ -60,6 +88,53 @@ export default function AdminDashboard() {
         <h1 className="text-3xl font-bold">Admin Dashboard</h1>
         <p className="text-muted-foreground">Overview of platform statistics</p>
       </div>
+
+      {/* AI Priority Tasks Section */}
+      <Card className="p-6 border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="p-2 rounded-lg bg-primary/10">
+            <AlertCircle className="w-6 h-6 text-primary" />
+          </div>
+          <div>
+            <h2 className="text-xl font-semibold">AI Priority Tasks</h2>
+            <p className="text-sm text-muted-foreground">
+              Items requiring immediate attention
+            </p>
+          </div>
+        </div>
+
+        {tasksLoading ? (
+          <div className="flex items-center justify-center h-40">
+            <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+          </div>
+        ) : !priorityTasks || priorityTasks.length === 0 ? (
+          <div className="text-center py-8">
+            <p className="text-muted-foreground">No urgent tasks at the moment. Great job!</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {priorityTasks.map((task) => (
+              <Link key={task.id} href={task.link}>
+                <Card className="p-4 hover-elevate active-elevate-2 cursor-pointer h-full">
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      <div className={`p-2 rounded-lg ${getPriorityColor(task.priority)}`}>
+                        <task.icon className="w-4 h-4" />
+                      </div>
+                      <Badge variant={task.priority === "high" ? "destructive" : "secondary"}>
+                        {task.count}
+                      </Badge>
+                    </div>
+                    <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                  </div>
+                  <h3 className="font-semibold mb-1">{task.title}</h3>
+                  <p className="text-sm text-muted-foreground">{task.description}</p>
+                </Card>
+              </Link>
+            ))}
+          </div>
+        )}
+      </Card>
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
