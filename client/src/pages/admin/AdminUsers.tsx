@@ -255,10 +255,9 @@ export default function AdminUsers() {
     return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, '0')}.${String(d.getDate()).padStart(2, '0')}`;
   };
 
-  // Get unique values for filters
-  const uniqueTiers = Array.from(new Set(users.map(u => u.tier)));
-  const uniqueLanguages = Array.from(new Set(users.map(u => u.language).filter(Boolean)));
-  const uniqueSsoProviders = Array.from(new Set(users.map(u => u.ssoProvider).filter(Boolean)));
+  // All possible filter values
+  const allTiers = ["bronze", "silver", "gold", "platinum"];
+  const allSsoProviders = ["Google", "Apple", "GitHub", "Replit"];
 
   return (
     <div className="space-y-6">
@@ -294,7 +293,7 @@ export default function AdminUsers() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">전체</SelectItem>
-                  {uniqueTiers.map((tier) => (
+                  {allTiers.map((tier) => (
                     <SelectItem key={tier} value={tier}>
                       {tier.charAt(0).toUpperCase() + tier.slice(1)}
                     </SelectItem>
@@ -311,9 +310,9 @@ export default function AdminUsers() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">전체</SelectItem>
-                  {uniqueLanguages.map((lang) => (
-                    <SelectItem key={lang} value={lang!}>
-                      {getLanguageName(lang!)}
+                  {LANGUAGES.map((lang) => (
+                    <SelectItem key={lang.value} value={lang.value}>
+                      {lang.label}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -328,8 +327,8 @@ export default function AdminUsers() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">전체</SelectItem>
-                  {uniqueSsoProviders.map((provider) => (
-                    <SelectItem key={provider} value={provider!}>
+                  {allSsoProviders.map((provider) => (
+                    <SelectItem key={provider} value={provider}>
                       {provider}
                     </SelectItem>
                   ))}
