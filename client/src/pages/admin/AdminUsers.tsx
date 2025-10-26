@@ -8,19 +8,32 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Search, Trash2, ChevronUp, ChevronDown, ChevronsUpDown } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Search, Trash2, ChevronUp, ChevronDown, ChevronsUpDown, Star, MessageSquare, Bookmark, HelpCircle } from "lucide-react";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import type { User } from "@shared/schema";
+import type { User, Review, SavedRestaurant, Restaurant, CustomerInquiry } from "@shared/schema";
 
 type SortField = "id" | "tier" | "language" | "ssoProvider" | "savedCount" | "visitors" | "createdAt";
 type SortDirection = "asc" | "desc";
 
 interface UserWithStats extends User {
   savedCount: number;
+}
+
+interface UserDetails {
+  user: User;
+  reviews: Review[];
+  savedRestaurants: Array<SavedRestaurant & { restaurant: Restaurant }>;
+  customerInquiries: CustomerInquiry[];
+  stats: {
+    totalReviews: number;
+    averageRating: number;
+    totalSaved: number;
+  };
 }
 
 const updateUserSchema = z.object({
@@ -59,11 +72,18 @@ export default function AdminUsers() {
   const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
   
   // Dialog State
-  const [editingUser, setEditingUser] = useState<UserWithStats | null>(null);
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+  const [isDetailsDialogOpen, setIsDetailsDialogOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState("overview");
 
   const { data: users = [], isLoading } = useQuery<UserWithStats[]>({
     queryKey: ["/api/admin/users"],
+  });
+
+  // Fetch user details when dialog is opened
+  const { data: userDetails, isLoading: isLoadingDetails } = useQuery<UserDetails>({
+    queryKey: ["/api/admin/users", selectedUserId, "details"],
+    enabled: !!selectedUserId && isDetailsDialogOpen,
   });
 
   // Filter & Sort
@@ -158,7 +178,7 @@ export default function AdminUsers() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
-      setIsEditDialogOpen(false);
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/users", selectedUserId, "details"] });
       toast({
         title: "수정 완료",
         description: "사용자 정보가 수정되었습니다.",
@@ -202,20 +222,21 @@ export default function AdminUsers() {
       <ChevronDown className="w-4 h-4 ml-1" />;
   };
 
-  const handleEdit = (user: UserWithStats) => {
-    setEditingUser(user);
+  const handleViewDetails = (user: UserWithStats) => {
+    setSelectedUserId(user.id);
+    setActiveTab("overview");
     form.reset({
       tier: user.tier,
       language: user.language || "ko",
       ssoProvider: user.ssoProvider || "",
       region: user.region || "",
     });
-    setIsEditDialogOpen(true);
+    setIsDetailsDialogOpen(true);
   };
 
   const handleSubmit = (data: UpdateUserForm) => {
-    if (editingUser) {
-      updateMutation.mutate({ id: editingUser.id, updates: data });
+    if (selectedUserId) {
+      updateMutation.mutate({ id: selectedUserId, updates: data });
     }
   };
 
@@ -464,9 +485,9 @@ export default function AdminUsers() {
                   <TableRow key={user.id}>
                     <TableCell>
                       <button
-                        onClick={() => handleEdit(user)}
+                        onClick={() => handleViewDetails(user)}
                         className="text-left hover:underline font-medium text-sm"
-                        data-testid={`link-edit-${user.id}`}
+                        data-testid={`link-view-details-${user.id}`}
                       >
                         {user.id.substring(0, 8)}...
                       </button>
@@ -509,137 +530,342 @@ export default function AdminUsers() {
         )}
       </Card>
 
-      {/* Edit Dialog */}
-      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="max-w-2xl">
+      {/* User Details Dialog */}
+      <Dialog open={isDetailsDialogOpen} onOpenChange={setIsDetailsDialogOpen}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>사용자 수정</DialogTitle>
+            <DialogTitle>사용자 상세 정보</DialogTitle>
             <DialogDescription>
-              사용자 정보를 수정합니다.
+              사용자의 활동 내역 및 정보를 확인하고 수정할 수 있습니다.
             </DialogDescription>
           </DialogHeader>
 
-          {editingUser && (
-            <div className="mb-4 p-4 bg-muted rounded-lg">
-              <div className="grid grid-cols-2 gap-3 text-sm">
-                <div>
-                  <span className="text-muted-foreground">이메일:</span>
-                  <span className="ml-2 font-medium">{editingUser.email}</span>
-                </div>
-                <div>
-                  <span className="text-muted-foreground">이름:</span>
-                  <span className="ml-2 font-medium">{editingUser.firstName} {editingUser.lastName}</span>
-                </div>
-                <div>
-                  <span className="text-muted-foreground">저장수:</span>
-                  <span className="ml-2 font-medium">{editingUser.savedCount}</span>
-                </div>
-                <div>
-                  <span className="text-muted-foreground">가입일:</span>
-                  <span className="ml-2 font-medium">{formatDate(editingUser.createdAt)}</span>
-                </div>
-              </div>
+          {isLoadingDetails ? (
+            <div className="flex items-center justify-center h-64">
+              <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
             </div>
-          )}
-
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-              <FormField
-                control={form.control}
-                name="tier"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>등급</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger data-testid="input-tier">
-                          <SelectValue />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="bronze">Bronze</SelectItem>
-                        <SelectItem value="silver">Silver</SelectItem>
-                        <SelectItem value="gold">Gold</SelectItem>
-                        <SelectItem value="platinum">Platinum</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="language"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>언어</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger data-testid="input-language">
-                          <SelectValue />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {LANGUAGES.map((lang) => (
-                          <SelectItem key={lang.value} value={lang.value}>
-                            {lang.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="ssoProvider"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>SSO 제공자</FormLabel>
-                    <FormControl>
-                      <Input {...field} placeholder="예: Google, Apple, GitHub" data-testid="input-sso-provider" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="region"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>지역</FormLabel>
-                    <FormControl>
-                      <Input {...field} placeholder="예: Seoul" data-testid="input-region" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <div className="flex justify-end gap-2 pt-4">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setIsEditDialogOpen(false)}
-                  data-testid="button-cancel"
-                >
-                  취소
-                </Button>
-                <Button
-                  type="submit"
-                  disabled={updateMutation.isPending}
-                  data-testid="button-save"
-                >
-                  {updateMutation.isPending ? "저장 중..." : "저장"}
-                </Button>
+          ) : userDetails ? (
+            <div className="space-y-6">
+              {/* User Header */}
+              <div className="p-4 bg-muted rounded-lg">
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
+                  <div>
+                    <span className="text-muted-foreground">이메일:</span>
+                    <span className="ml-2 font-medium" data-testid="text-user-email">
+                      {userDetails.user.email}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">이름:</span>
+                    <span className="ml-2 font-medium" data-testid="text-user-name">
+                      {userDetails.user.firstName} {userDetails.user.lastName}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">등급:</span>
+                    <Badge className={`ml-2 ${getTierColor(userDetails.user.tier)}`} data-testid="badge-user-tier">
+                      {userDetails.user.tier.charAt(0).toUpperCase() + userDetails.user.tier.slice(1)}
+                    </Badge>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">언어:</span>
+                    <span className="ml-2 font-medium" data-testid="text-user-language">
+                      {getLanguageName(userDetails.user.language || "ko")}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">SSO:</span>
+                    <span className="ml-2 font-medium" data-testid="text-user-sso">
+                      {userDetails.user.ssoProvider || "-"}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">가입일:</span>
+                    <span className="ml-2 font-medium" data-testid="text-user-created">
+                      {formatDate(userDetails.user.createdAt)}
+                    </span>
+                  </div>
+                </div>
               </div>
-            </form>
-          </Form>
+
+              {/* Tabs */}
+              <Tabs value={activeTab} onValueChange={setActiveTab}>
+                <TabsList className="grid w-full grid-cols-5">
+                  <TabsTrigger value="overview" data-testid="tab-overview">
+                    <Star className="w-4 h-4 mr-2" />
+                    개요
+                  </TabsTrigger>
+                  <TabsTrigger value="reviews" data-testid="tab-reviews">
+                    <MessageSquare className="w-4 h-4 mr-2" />
+                    리뷰
+                  </TabsTrigger>
+                  <TabsTrigger value="saved" data-testid="tab-saved">
+                    <Bookmark className="w-4 h-4 mr-2" />
+                    저장
+                  </TabsTrigger>
+                  <TabsTrigger value="inquiries" data-testid="tab-inquiries">
+                    <HelpCircle className="w-4 h-4 mr-2" />
+                    문의
+                  </TabsTrigger>
+                  <TabsTrigger value="settings" data-testid="tab-settings">
+                    설정
+                  </TabsTrigger>
+                </TabsList>
+
+                {/* Overview Tab */}
+                <TabsContent value="overview" className="space-y-4">
+                  <div className="grid grid-cols-3 gap-4">
+                    <Card className="p-4">
+                      <div className="text-sm text-muted-foreground">총 리뷰 수</div>
+                      <div className="text-2xl font-bold" data-testid="stat-total-reviews">
+                        {userDetails.stats.totalReviews}
+                      </div>
+                    </Card>
+                    <Card className="p-4">
+                      <div className="text-sm text-muted-foreground">평균 별점</div>
+                      <div className="text-2xl font-bold" data-testid="stat-average-rating">
+                        ⭐ {userDetails.stats.averageRating.toFixed(1)}
+                      </div>
+                    </Card>
+                    <Card className="p-4">
+                      <div className="text-sm text-muted-foreground">저장한 레스토랑</div>
+                      <div className="text-2xl font-bold" data-testid="stat-total-saved">
+                        {userDetails.stats.totalSaved}
+                      </div>
+                    </Card>
+                  </div>
+                </TabsContent>
+
+                {/* Reviews Tab */}
+                <TabsContent value="reviews">
+                  <Card>
+                    <div className="p-4 border-b">
+                      <h3 className="font-semibold">작성한 리뷰 ({userDetails.reviews.length})</h3>
+                    </div>
+                    <div className="divide-y max-h-96 overflow-y-auto">
+                      {userDetails.reviews.length === 0 ? (
+                        <div className="p-8 text-center text-muted-foreground">
+                          작성한 리뷰가 없습니다
+                        </div>
+                      ) : (
+                        userDetails.reviews.map((review) => (
+                          <div key={review.id} className="p-4" data-testid={`review-${review.id}`}>
+                            <div className="flex items-start justify-between mb-2">
+                              <div className="font-medium" data-testid={`review-restaurant-${review.id}`}>
+                                레스토랑 ID: {review.restaurantId.substring(0, 8)}...
+                              </div>
+                              <Badge variant="outline" data-testid={`review-rating-${review.id}`}>
+                                ⭐ {review.rating}
+                              </Badge>
+                            </div>
+                            <p className="text-sm text-muted-foreground mb-2" data-testid={`review-comment-${review.id}`}>
+                              {review.comment}
+                            </p>
+                            <div className="text-xs text-muted-foreground" data-testid={`review-date-${review.id}`}>
+                              {formatDate(review.createdAt)}
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </Card>
+                </TabsContent>
+
+                {/* Saved Restaurants Tab */}
+                <TabsContent value="saved">
+                  <Card>
+                    <div className="p-4 border-b">
+                      <h3 className="font-semibold">저장한 레스토랑 ({userDetails.savedRestaurants.length})</h3>
+                    </div>
+                    <div className="divide-y max-h-96 overflow-y-auto">
+                      {userDetails.savedRestaurants.length === 0 ? (
+                        <div className="p-8 text-center text-muted-foreground">
+                          저장한 레스토랑이 없습니다
+                        </div>
+                      ) : (
+                        userDetails.savedRestaurants.map((saved) => (
+                          <div key={saved.id} className="p-4" data-testid={`saved-${saved.id}`}>
+                            <div className="flex items-start justify-between mb-2">
+                              <div className="font-medium" data-testid={`saved-name-${saved.id}`}>
+                                {saved.restaurant.name}
+                              </div>
+                              <Badge variant="secondary" data-testid={`saved-category-${saved.id}`}>
+                                {saved.restaurant.category}
+                              </Badge>
+                            </div>
+                            <div className="text-sm text-muted-foreground mb-1" data-testid={`saved-cuisine-${saved.id}`}>
+                              {saved.restaurant.cuisine}
+                            </div>
+                            <div className="flex items-center justify-between text-xs text-muted-foreground">
+                              <span data-testid={`saved-location-${saved.id}`}>
+                                {saved.restaurant.city} > {saved.restaurant.districtDetail}
+                              </span>
+                              <span data-testid={`saved-date-${saved.id}`}>
+                                저장일: {formatDate(saved.createdAt)}
+                              </span>
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </Card>
+                </TabsContent>
+
+                {/* Customer Inquiries Tab */}
+                <TabsContent value="inquiries">
+                  <Card>
+                    <div className="p-4 border-b">
+                      <h3 className="font-semibold">고객 문의 ({userDetails.customerInquiries.length})</h3>
+                    </div>
+                    <div className="divide-y max-h-96 overflow-y-auto">
+                      {userDetails.customerInquiries.length === 0 ? (
+                        <div className="p-8 text-center text-muted-foreground">
+                          문의 내역이 없습니다
+                        </div>
+                      ) : (
+                        userDetails.customerInquiries.map((inquiry) => (
+                          <div key={inquiry.id} className="p-4" data-testid={`inquiry-${inquiry.id}`}>
+                            <div className="flex items-start justify-between mb-2">
+                              <div className="font-medium" data-testid={`inquiry-title-${inquiry.id}`}>
+                                {inquiry.title}
+                              </div>
+                              <div className="flex gap-2">
+                                <Badge variant="outline" data-testid={`inquiry-category-${inquiry.id}`}>
+                                  {inquiry.category}
+                                </Badge>
+                                <Badge 
+                                  variant={inquiry.status === 'answered' ? 'default' : inquiry.status === 'closed' ? 'secondary' : 'outline'}
+                                  data-testid={`inquiry-status-${inquiry.id}`}
+                                >
+                                  {inquiry.status}
+                                </Badge>
+                              </div>
+                            </div>
+                            <p className="text-sm text-muted-foreground mb-2" data-testid={`inquiry-content-${inquiry.id}`}>
+                              {inquiry.content}
+                            </p>
+                            {inquiry.adminResponse && (
+                              <div className="mt-2 p-2 bg-muted rounded text-sm" data-testid={`inquiry-response-${inquiry.id}`}>
+                                <div className="font-medium mb-1">관리자 답변:</div>
+                                {inquiry.adminResponse}
+                              </div>
+                            )}
+                            <div className="text-xs text-muted-foreground mt-2" data-testid={`inquiry-date-${inquiry.id}`}>
+                              작성일: {formatDate(inquiry.createdAt)}
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </Card>
+                </TabsContent>
+
+                {/* Settings Tab */}
+                <TabsContent value="settings">
+                  <Card className="p-6">
+                    <Form {...form}>
+                      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+                        <FormField
+                          control={form.control}
+                          name="tier"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>등급</FormLabel>
+                              <Select onValueChange={field.onChange} value={field.value}>
+                                <FormControl>
+                                  <SelectTrigger data-testid="input-tier">
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  <SelectItem value="bronze">Bronze</SelectItem>
+                                  <SelectItem value="silver">Silver</SelectItem>
+                                  <SelectItem value="gold">Gold</SelectItem>
+                                  <SelectItem value="platinum">Platinum</SelectItem>
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={form.control}
+                          name="language"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>언어</FormLabel>
+                              <Select onValueChange={field.onChange} value={field.value}>
+                                <FormControl>
+                                  <SelectTrigger data-testid="input-language">
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  {LANGUAGES.map((lang) => (
+                                    <SelectItem key={lang.value} value={lang.value}>
+                                      {lang.label}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={form.control}
+                          name="ssoProvider"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>SSO 제공자</FormLabel>
+                              <FormControl>
+                                <Input {...field} placeholder="예: Google, Apple, GitHub" data-testid="input-sso-provider" />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={form.control}
+                          name="region"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>지역</FormLabel>
+                              <FormControl>
+                                <Input {...field} placeholder="예: 서울" data-testid="input-region" />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <div className="flex justify-end gap-2 pt-4">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => setIsDetailsDialogOpen(false)}
+                            data-testid="button-cancel"
+                          >
+                            취소
+                          </Button>
+                          <Button
+                            type="submit"
+                            disabled={updateMutation.isPending}
+                            data-testid="button-save"
+                          >
+                            {updateMutation.isPending ? "저장 중..." : "저장"}
+                          </Button>
+                        </div>
+                      </form>
+                    </Form>
+                  </Card>
+                </TabsContent>
+              </Tabs>
+            </div>
+          ) : null}
         </DialogContent>
       </Dialog>
     </div>
