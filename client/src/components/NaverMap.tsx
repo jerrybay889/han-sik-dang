@@ -75,52 +75,65 @@ export function NaverMap({
   useEffect(() => {
     if (!mapLoaded || !mapRef.current || !window.naver) return;
 
-    const mapOptions = {
-      center: new window.naver.maps.LatLng(latitude, longitude),
-      zoom: zoom,
-      zoomControl: true,
-      zoomControlOptions: {
-        position: window.naver.maps.Position.TOP_RIGHT,
-      },
-      mapTypeControl: false,
-    };
+    try {
+      const mapOptions = {
+        center: new window.naver.maps.LatLng(latitude, longitude),
+        zoom: zoom,
+        zoomControl: true,
+        zoomControlOptions: {
+          position: window.naver.maps.Position.TOP_RIGHT,
+        },
+        mapTypeControl: false,
+      };
 
-    const map = new window.naver.maps.Map(mapRef.current, mapOptions);
+      const map = new window.naver.maps.Map(mapRef.current, mapOptions);
 
-    // Add marker
-    const marker = new window.naver.maps.Marker({
-      position: new window.naver.maps.LatLng(latitude, longitude),
-      map: map,
-      title: restaurantName,
-    });
+      // Add marker
+      const marker = new window.naver.maps.Marker({
+        position: new window.naver.maps.LatLng(latitude, longitude),
+        map: map,
+        title: restaurantName,
+      });
 
-    // Add info window
-    const contentString = [
-      `<div style="padding: 10px; min-width: 200px;">`,
-      `<h4 style="margin: 0 0 5px; font-weight: 600;">${restaurantName}</h4>`,
-      `<p style="margin: 0; font-size: 12px; color: #666;">${address}</p>`,
-      `</div>`,
-    ].join('');
+      // Add info window
+      const contentString = [
+        `<div style="padding: 10px; min-width: 200px;">`,
+        `<h4 style="margin: 0 0 5px; font-weight: 600;">${restaurantName}</h4>`,
+        `<p style="margin: 0; font-size: 12px; color: #666;">${address}</p>`,
+        `</div>`,
+      ].join('');
 
-    const infoWindow = new window.naver.maps.InfoWindow({
-      content: contentString,
-    });
+      const infoWindow = new window.naver.maps.InfoWindow({
+        content: contentString,
+      });
 
-    infoWindow.open(map, marker);
+      infoWindow.open(map, marker);
 
-    // Click marker to toggle info window
-    window.naver.maps.Event.addListener(marker, 'click', () => {
-      if (infoWindow.getMap()) {
-        infoWindow.close();
-      } else {
-        infoWindow.open(map, marker);
-      }
-    });
+      // Click marker to toggle info window
+      window.naver.maps.Event.addListener(marker, 'click', () => {
+        if (infoWindow.getMap()) {
+          infoWindow.close();
+        } else {
+          infoWindow.open(map, marker);
+        }
+      });
 
-    return () => {
-      marker.setMap(null);
-      infoWindow.close();
-    };
+      return () => {
+        try {
+          if (marker) {
+            marker.setMap(null);
+          }
+          if (infoWindow) {
+            infoWindow.close();
+          }
+        } catch (error) {
+          console.error('Naver Maps cleanup error:', error);
+        }
+      };
+    } catch (error) {
+      console.error('Naver Maps initialization error:', error);
+      setScriptError(true);
+    }
   }, [mapLoaded, latitude, longitude, restaurantName, address, zoom]);
 
   // Open in Naver Maps app or web
