@@ -9,7 +9,13 @@ import type {
   Review, 
   SavedRestaurant,
   CustomerInquiry,
-  Announcement 
+  Announcement,
+  Menu,
+  RestaurantImage,
+  RestaurantInsights,
+  ExternalReview,
+  Promotion,
+  ReviewResponse
 } from "./schema";
 
 // ==================== User Management ====================
@@ -123,4 +129,37 @@ export interface RestaurantFilterParams {
   maxRating?: number;
   isFeatured?: number;
   searchQuery?: string;
+}
+
+// ==================== Restaurant Detail Response ====================
+
+export interface RestaurantDetailResponse extends Restaurant {
+  menus: Menu[];
+  images: RestaurantImage[];
+  insights: RestaurantInsights | null;
+  externalReviews: ExternalReview[];
+  activePromotions: Promotion[];
+}
+
+export interface RestaurantWithReviewsResponse extends Restaurant {
+  reviews: Array<Review & { user?: { name: string; tier: string } }>;
+  userReview?: Review | null;
+}
+
+// ==================== Review with Response ====================
+
+export interface ReviewWithResponse extends Review {
+  response: ReviewResponse | null;
+  user?: { name: string; tier: string };
+}
+
+// ==================== Restaurant Dashboard ====================
+
+export interface RestaurantDashboardStatsResponse {
+  totalReviews: number;
+  averageRating: number;
+  ratingTrend: number;
+  reviewsThisMonth: number;
+  promotionsActive: number;
+  imagesCount: number;
 }

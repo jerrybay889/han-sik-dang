@@ -1316,7 +1316,7 @@ ${insights && insights.firstTimerTips ? `첫 방문 팁: ${insights.firstTimerTi
 
       res.status(201).json(image);
     } catch (error) {
-      logger.error("Upload image error:", { error });
+      logger.error("Upload image error", { error, path: "/api/restaurants/:id/upload-image", restaurantId: req.params.id, userId: req.user?.claims?.sub });
       res.status(500).json({ error: ErrorMessages.INTERNAL_ERROR });
     }
   });
@@ -1359,7 +1359,7 @@ ${insights && insights.firstTimerTips ? `첫 방문 팁: ${insights.firstTimerTi
 
       res.status(201).json(menu);
     } catch (error) {
-      logger.error("Create menu error:", { error });
+      logger.error("Create menu error", { error, path: "/api/menus", userId: req.user?.claims?.sub });
       res.status(500).json({ error: ErrorMessages.INTERNAL_ERROR });
     }
   });
@@ -1391,7 +1391,7 @@ ${insights && insights.firstTimerTips ? `첫 방문 팁: ${insights.firstTimerTi
 
       res.json(updatedMenu);
     } catch (error) {
-      logger.error("Update menu error:", { error });
+      logger.error("Update menu error", { error, path: "/api/menus/:id", menuId: req.params.id, userId: req.user?.claims?.sub });
       res.status(500).json({ error: ErrorMessages.INTERNAL_ERROR });
     }
   });
@@ -1418,7 +1418,7 @@ ${insights && insights.firstTimerTips ? `첫 방문 팁: ${insights.firstTimerTi
 
       res.status(204).send();
     } catch (error) {
-      logger.error("Delete menu error:", { error });
+      logger.error("Delete menu error", { error, path: "/api/menus/:id", menuId: req.params.id, userId: req.user?.claims?.sub });
       res.status(500).json({ error: ErrorMessages.INTERNAL_ERROR });
     }
   });
@@ -1521,7 +1521,7 @@ Provide a comprehensive analysis in the following JSON format:
         generatedAt: new Date().toISOString(),
       });
     } catch (error) {
-      logger.error("AI analysis error:", { error });
+      logger.error("AI analysis error", { error, path: "/api/restaurants/:id/ai-analysis", restaurantId: req.params.id, userId: req.user?.claims?.sub });
       res.status(500).json({ error: ErrorMessages.INTERNAL_ERROR });
     }
   });
@@ -1621,7 +1621,7 @@ Provide a comprehensive analysis in the following JSON format:
 
       res.json(user);
     } catch (error) {
-      logger.error("Error updating user tier:", { error });
+      logger.error("Error updating user tier", { error, path: "/api/admin/users/:id/tier", targetUserId: req.params.id, userId: req.user?.claims?.sub });
       res.status(500).json({ error: ErrorMessages.INTERNAL_ERROR });
     }
   });
@@ -1653,7 +1653,7 @@ Provide a comprehensive analysis in the following JSON format:
 
       res.json(user);
     } catch (error) {
-      logger.error("Error updating user:", { error });
+      logger.error("Error updating user", { error, path: "/api/admin/users/:id", targetUserId: req.params.id, userId: req.user?.claims?.sub });
       res.status(500).json({ error: ErrorMessages.INTERNAL_ERROR });
     }
   });
@@ -1670,7 +1670,7 @@ Provide a comprehensive analysis in the following JSON format:
 
       res.status(204).send();
     } catch (error) {
-      logger.error("Error deleting user:", { error });
+      logger.error("Error deleting user", { error, path: "/api/admin/users/:id", targetUserId: req.params.id, userId: req.user?.claims?.sub });
       res.status(500).json({ error: ErrorMessages.INTERNAL_ERROR });
     }
   });
@@ -1687,7 +1687,7 @@ Provide a comprehensive analysis in the following JSON format:
 
       res.json(restaurant);
     } catch (error) {
-      logger.error("Error updating restaurant:", { error });
+      logger.error("Error updating restaurant", { error, path: "/api/admin/restaurants/:id", restaurantId: req.params.id, userId: req.user?.claims?.sub });
       res.status(500).json({ error: ErrorMessages.INTERNAL_ERROR });
     }
   });
@@ -1704,7 +1704,7 @@ Provide a comprehensive analysis in the following JSON format:
 
       res.status(204).send();
     } catch (error) {
-      logger.error("Error deleting restaurant:", { error });
+      logger.error("Error deleting restaurant", { error, path: "/api/admin/restaurants/:id", restaurantId: req.params.id, userId: req.user?.claims?.sub });
       res.status(500).json({ error: ErrorMessages.INTERNAL_ERROR });
     }
   });
@@ -1716,7 +1716,7 @@ Provide a comprehensive analysis in the following JSON format:
       const reviews = await storage.getAllReviews(limit);
       res.json(reviews);
     } catch (error) {
-      logger.error("Error fetching all reviews:", { error });
+      logger.error("Error fetching all reviews", { error, path: "/api/admin/reviews", userId: req.user?.claims?.sub });
       res.status(500).json({ error: ErrorMessages.INTERNAL_ERROR });
     }
   });
@@ -1739,7 +1739,7 @@ Provide a comprehensive analysis in the following JSON format:
 
       res.json(updated);
     } catch (error) {
-      logger.error("Error updating review pin:", { error });
+      logger.error("Error updating review pin", { error, path: "/api/admin/reviews/:id/pin", reviewId: req.params.id, userId: req.user?.claims?.sub });
       res.status(500).json({ error: ErrorMessages.INTERNAL_ERROR });
     }
   });
@@ -1756,7 +1756,7 @@ Provide a comprehensive analysis in the following JSON format:
 
       res.status(204).send();
     } catch (error) {
-      logger.error("Error deleting review:", { error });
+      logger.error("Error deleting review", { error, path: "/api/admin/reviews/:id", reviewId: req.params.id, userId: req.user?.claims?.sub });
       res.status(500).json({ error: ErrorMessages.INTERNAL_ERROR });
     }
   });
@@ -1767,7 +1767,7 @@ Provide a comprehensive analysis in the following JSON format:
       const announcements = await storage.getAllAnnouncements();
       res.json(announcements);
     } catch (error) {
-      logger.error("Error fetching all announcements:", { error });
+      logger.error("Error fetching all announcements", { error, path: "/api/admin/announcements", userId: req.user?.claims?.sub });
       res.status(500).json({ error: ErrorMessages.INTERNAL_ERROR });
     }
   });
@@ -1778,7 +1778,7 @@ Provide a comprehensive analysis in the following JSON format:
       const announcement = await storage.createAnnouncement(req.body);
       res.status(201).json(announcement);
     } catch (error) {
-      logger.error("Error creating announcement:", { error });
+      logger.error("Error creating announcement", { error, path: "/api/admin/announcements", userId: req.user?.claims?.sub });
       res.status(500).json({ error: ErrorMessages.INTERNAL_ERROR });
     }
   });
@@ -1795,7 +1795,7 @@ Provide a comprehensive analysis in the following JSON format:
 
       res.json(announcement);
     } catch (error) {
-      logger.error("Error updating announcement:", { error });
+      logger.error("Error updating announcement", { error, path: "/api/admin/announcements/:id", announcementId: req.params.id, userId: req.user?.claims?.sub });
       res.status(500).json({ error: ErrorMessages.INTERNAL_ERROR });
     }
   });
@@ -1812,7 +1812,7 @@ Provide a comprehensive analysis in the following JSON format:
 
       res.status(204).send();
     } catch (error) {
-      logger.error("Error deleting announcement:", { error });
+      logger.error("Error deleting announcement", { error, path: "/api/admin/announcements/:id", announcementId: req.params.id, userId: req.user?.claims?.sub });
       res.status(500).json({ error: ErrorMessages.INTERNAL_ERROR });
     }
   });
@@ -1823,7 +1823,7 @@ Provide a comprehensive analysis in the following JSON format:
       const banners = await storage.getAllEventBanners();
       res.json(banners);
     } catch (error) {
-      logger.error("Error fetching all event banners:", { error });
+      logger.error("Error fetching all event banners", { error, path: "/api/admin/event-banners", userId: req.user?.claims?.sub });
       res.status(500).json({ error: ErrorMessages.INTERNAL_ERROR });
     }
   });
@@ -1834,7 +1834,7 @@ Provide a comprehensive analysis in the following JSON format:
       const banner = await storage.createEventBanner(req.body);
       res.status(201).json(banner);
     } catch (error) {
-      logger.error("Error creating event banner:", { error });
+      logger.error("Error creating event banner", { error, path: "/api/admin/event-banners", userId: req.user?.claims?.sub });
       res.status(500).json({ error: ErrorMessages.INTERNAL_ERROR });
     }
   });
@@ -1851,7 +1851,7 @@ Provide a comprehensive analysis in the following JSON format:
 
       res.json(banner);
     } catch (error) {
-      logger.error("Error updating event banner:", { error });
+      logger.error("Error updating event banner", { error, path: "/api/admin/event-banners/:id", bannerId: req.params.id, userId: req.user?.claims?.sub });
       res.status(500).json({ error: ErrorMessages.INTERNAL_ERROR });
     }
   });
@@ -1868,7 +1868,7 @@ Provide a comprehensive analysis in the following JSON format:
 
       res.status(204).send();
     } catch (error) {
-      logger.error("Error deleting event banner:", { error });
+      logger.error("Error deleting event banner", { error, path: "/api/admin/event-banners/:id", bannerId: req.params.id, userId: req.user?.claims?.sub });
       res.status(500).json({ error: ErrorMessages.INTERNAL_ERROR });
     }
   });
@@ -1881,7 +1881,7 @@ Provide a comprehensive analysis in the following JSON format:
       const tasks = await storage.getAdminPriorityTasks();
       res.json(tasks);
     } catch (error) {
-      logger.error("Error fetching priority tasks:", { error });
+      logger.error("Error fetching priority tasks", { error, path: "/api/admin/dashboard/priority-tasks", userId: req.user?.claims?.sub });
       res.status(500).json({ error: ErrorMessages.INTERNAL_ERROR });
     }
   });
@@ -1892,7 +1892,7 @@ Provide a comprehensive analysis in the following JSON format:
       const applications = await storage.getAllRestaurantApplications();
       res.json(applications);
     } catch (error) {
-      logger.error("Error fetching restaurant applications:", { error });
+      logger.error("Error fetching restaurant applications", { error, path: "/api/admin/restaurant-applications", userId: req.user?.claims?.sub });
       res.status(500).json({ error: ErrorMessages.INTERNAL_ERROR });
     }
   });
@@ -1909,7 +1909,7 @@ Provide a comprehensive analysis in the following JSON format:
 
       res.json(application);
     } catch (error) {
-      logger.error("Error processing restaurant application:", { error });
+      logger.error("Error processing restaurant application", { error, path: "/api/admin/restaurant-applications/:id/process", applicationId: req.params.id, userId: req.user?.claims?.sub });
       res.status(500).json({ error: ErrorMessages.INTERNAL_ERROR });
     }
   });
@@ -1920,7 +1920,7 @@ Provide a comprehensive analysis in the following JSON format:
       const inquiries = await storage.getAllOwnerInquiries();
       res.json(inquiries);
     } catch (error) {
-      logger.error("Error fetching owner inquiries:", { error });
+      logger.error("Error fetching owner inquiries", { error, path: "/api/admin/owner-inquiries", userId: req.user?.claims?.sub });
       res.status(500).json({ error: ErrorMessages.INTERNAL_ERROR });
     }
   });
@@ -1937,7 +1937,7 @@ Provide a comprehensive analysis in the following JSON format:
 
       res.json(inquiry);
     } catch (error) {
-      logger.error("Error responding to owner inquiry:", { error });
+      logger.error("Error responding to owner inquiry", { error, path: "/api/admin/owner-inquiries/:id/respond", inquiryId: req.params.id, userId: req.user?.claims?.sub });
       res.status(500).json({ error: ErrorMessages.INTERNAL_ERROR });
     }
   });
@@ -1948,7 +1948,7 @@ Provide a comprehensive analysis in the following JSON format:
       const inquiries = await storage.getAllCustomerInquiries();
       res.json(inquiries);
     } catch (error) {
-      logger.error("Error fetching customer inquiries:", { error });
+      logger.error("Error fetching customer inquiries", { error, path: "/api/admin/customer-inquiries", userId: req.user?.claims?.sub });
       res.status(500).json({ error: ErrorMessages.INTERNAL_ERROR });
     }
   });
@@ -1965,7 +1965,7 @@ Provide a comprehensive analysis in the following JSON format:
 
       res.json(inquiry);
     } catch (error) {
-      logger.error("Error responding to customer inquiry:", { error });
+      logger.error("Error responding to customer inquiry", { error, path: "/api/admin/customer-inquiries/:id/respond", inquiryId: req.params.id, userId: req.user?.claims?.sub });
       res.status(500).json({ error: ErrorMessages.INTERNAL_ERROR });
     }
   });
@@ -1976,7 +1976,7 @@ Provide a comprehensive analysis in the following JSON format:
       const inquiries = await storage.getAllPartnershipInquiries();
       res.json(inquiries);
     } catch (error) {
-      logger.error("Error fetching partnership inquiries:", { error });
+      logger.error("Error fetching partnership inquiries", { error, path: "/api/admin/partnership-inquiries", userId: req.user?.claims?.sub });
       res.status(500).json({ error: ErrorMessages.INTERNAL_ERROR });
     }
   });
@@ -1993,7 +1993,7 @@ Provide a comprehensive analysis in the following JSON format:
 
       res.json(inquiry);
     } catch (error) {
-      logger.error("Error processing partnership inquiry:", { error });
+      logger.error("Error processing partnership inquiry", { error, path: "/api/admin/partnership-inquiries/:id/process", inquiryId: req.params.id, userId: req.user?.claims?.sub });
       res.status(500).json({ error: ErrorMessages.INTERNAL_ERROR });
     }
   });
@@ -2004,7 +2004,7 @@ Provide a comprehensive analysis in the following JSON format:
       const notices = await storage.getAllOwnerNotices();
       res.json(notices);
     } catch (error) {
-      logger.error("Error fetching owner notices:", { error });
+      logger.error("Error fetching owner notices", { error, path: "/api/admin/owner-notices", userId: req.user?.claims?.sub });
       res.status(500).json({ error: ErrorMessages.INTERNAL_ERROR });
     }
   });
@@ -2014,7 +2014,7 @@ Provide a comprehensive analysis in the following JSON format:
       const notice = await storage.createOwnerNotice(req.body);
       res.status(201).json(notice);
     } catch (error) {
-      logger.error("Error creating owner notice:", { error });
+      logger.error("Error creating owner notice", { error, path: "/api/admin/owner-notices", userId: req.user?.claims?.sub });
       res.status(500).json({ error: ErrorMessages.INTERNAL_ERROR });
     }
   });
@@ -2025,7 +2025,7 @@ Provide a comprehensive analysis in the following JSON format:
       const payments = await storage.getAllPayments();
       res.json(payments);
     } catch (error) {
-      logger.error("Error fetching payments:", { error });
+      logger.error("Error fetching payments", { error, path: "/api/admin/payments", userId: req.user?.claims?.sub });
       res.status(500).json({ error: ErrorMessages.INTERNAL_ERROR });
     }
   });
@@ -2036,7 +2036,7 @@ Provide a comprehensive analysis in the following JSON format:
       const tierData = await storage.getUsersByTier();
       res.json(tierData);
     } catch (error) {
-      logger.error("Error fetching users by tier:", { error });
+      logger.error("Error fetching users by tier", { error, path: "/api/admin/users/by-tier", userId: req.user?.claims?.sub });
       res.status(500).json({ error: ErrorMessages.INTERNAL_ERROR });
     }
   });
@@ -2046,7 +2046,7 @@ Provide a comprehensive analysis in the following JSON format:
       const analytics = await storage.getUserAnalytics();
       res.json(analytics);
     } catch (error) {
-      logger.error("Error fetching user analytics:", { error });
+      logger.error("Error fetching user analytics", { error, path: "/api/admin/users/analytics", userId: req.user?.claims?.sub });
       res.status(500).json({ error: ErrorMessages.INTERNAL_ERROR });
     }
   });
@@ -2057,7 +2057,7 @@ Provide a comprehensive analysis in the following JSON format:
       const posts = await storage.getAllBlogPosts();
       res.json(posts);
     } catch (error) {
-      logger.error("Error fetching blog posts:", { error });
+      logger.error("Error fetching blog posts", { error, path: "/api/admin/blog-posts", userId: req.user?.claims?.sub });
       res.status(500).json({ error: ErrorMessages.INTERNAL_ERROR });
     }
   });
