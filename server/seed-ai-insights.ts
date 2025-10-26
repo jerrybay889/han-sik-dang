@@ -1,7 +1,7 @@
 import { storage } from "./storage";
 import { GoogleGenAI } from "@google/genai";
 
-const ai = new GoogleGenAI({ apiKey: process.env.GOOGLE_API_KEY_HANSIKDANG || "" });
+const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "" });
 
 async function generateAIInsights(restaurantData: {
   name: string;
@@ -82,7 +82,7 @@ Return ONLY the JSON object, no additional text.`;
 async function seedAIInsights() {
   console.log("🤖 Starting AI insights generation...");
   
-  if (!process.env.GOOGLE_API_KEY_HANSIKDANG) {
+  if (!process.env.GEMINI_API_KEY) {
     console.error("❌ GOOGLE_API_KEY_HANSIKDANG environment variable is not set");
     process.exit(1);
   }

@@ -9,7 +9,7 @@ import path from "path";
 import fs from "fs";
 
 const genAI = new GoogleGenAI({ 
-  apiKey: process.env.GOOGLE_API_KEY_HANSIKDANG || "" 
+  apiKey: process.env.GEMINI_API_KEY || "" 
 });
 
 // Configure multer for file uploads
