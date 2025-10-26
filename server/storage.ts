@@ -217,7 +217,7 @@ export interface IStorage {
   // User Analytics
   getUsersByTier(): Promise<{ tier: string; count: number; users: User[] }[]>;
   getUserAnalytics(): Promise<{
-    usersByCountry: { country: string | null; count: number }[];
+    usersBySsoProvider: { ssoProvider: string | null; count: number }[];
     usersByRegion: { region: string | null; count: number }[];
     usersByTier: { tier: string; count: number }[];
   }>;
@@ -1165,18 +1165,18 @@ export class DbStorage implements IStorage {
   }
 
   async getUserAnalytics(): Promise<{
-    usersByCountry: { country: string | null; count: number }[];
+    usersBySsoProvider: { ssoProvider: string | null; count: number }[];
     usersByRegion: { region: string | null; count: number }[];
     usersByTier: { tier: string; count: number }[];
   }> {
-    const usersByCountry = await db
+    const usersBySsoProvider = await db
       .select({
-        country: users.country,
+        ssoProvider: users.ssoProvider,
         count: sql<number>`cast(count(*) as int)`,
       })
       .from(users)
-      .where(sql`${users.country} IS NOT NULL`)
-      .groupBy(users.country)
+      .where(sql`${users.ssoProvider} IS NOT NULL`)
+      .groupBy(users.ssoProvider)
       .orderBy(desc(sql`count(*)`));
 
     const usersByRegion = await db
@@ -1200,7 +1200,7 @@ export class DbStorage implements IStorage {
       .orderBy(desc(sql`count(*)`));
 
     return {
-      usersByCountry,
+      usersBySsoProvider,
       usersByRegion,
       usersByTier,
     };
