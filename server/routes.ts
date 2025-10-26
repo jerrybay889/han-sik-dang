@@ -67,8 +67,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       res.json(user);
     } catch (error) {
-      console.error("Error fetching user:", error);
-      res.status(500).json({ message: "Failed to fetch user" });
+      logger.error("Error fetching user", { userId: req.user?.claims?.sub, error });
+      res.status(500).json({ message: ErrorMessages.INTERNAL_ERROR });
     }
   });
 
@@ -114,8 +114,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       });
     } catch (error) {
-      console.error("Error making user an owner:", error);
-      res.status(500).json({ message: "Failed to make you an owner" });
+      logger.error("Error making user an owner", { userId: req.user?.claims?.sub, error });
+      res.status(500).json({ message: ErrorMessages.INTERNAL_ERROR });
     }
   });
 
@@ -155,8 +155,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       });
     } catch (error) {
-      console.error("Error making user an admin:", error);
-      res.status(500).json({ message: "Failed to make you an admin" });
+      logger.error("Error making user an admin", { userId: req.user?.claims?.sub, error });
+      res.status(500).json({ message: ErrorMessages.INTERNAL_ERROR });
     }
   });
 
@@ -218,8 +218,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       res.json({ response: text });
     } catch (error) {
-      console.error("AI chat error:", error);
-      res.status(500).json({ error: "Failed to generate response" });
+      logger.error("AI chat error", { error, path: "/api/ai/chat" });
+      res.status(500).json({ error: ErrorMessages.INTERNAL_ERROR });
     }
   });
 
@@ -368,8 +368,8 @@ ${insights && insights.firstTimerTips ? `첫 방문 팁: ${insights.firstTimerTi
 
       res.json({ response: text });
     } catch (error) {
-      console.error("AI chat error:", error);
-      res.status(500).json({ error: "Failed to generate response" });
+      logger.error("AI chat error", { error, path: "/api/ai-chat" });
+      res.status(500).json({ error: ErrorMessages.INTERNAL_ERROR });
     }
   });
 
@@ -378,8 +378,8 @@ ${insights && insights.firstTimerTips ? `첫 방문 팁: ${insights.firstTimerTi
       const restaurants = await storage.getAllRestaurants();
       res.json(restaurants);
     } catch (error) {
-      console.error("Get restaurants error:", error);
-      res.status(500).json({ error: "Failed to fetch restaurants" });
+      logger.error("Get restaurants error", { error, path: "/api/restaurants" });
+      res.status(500).json({ error: ErrorMessages.INTERNAL_ERROR });
     }
   });
 
@@ -392,8 +392,8 @@ ${insights && insights.firstTimerTips ? `첫 방문 팁: ${insights.firstTimerTi
       const restaurants = await storage.searchRestaurants(query);
       res.json(restaurants);
     } catch (error) {
-      console.error("Search restaurants error:", error);
-      res.status(500).json({ error: "Failed to search restaurants" });
+      logger.error("Search restaurants error", { error, path: "/api/restaurants/search", query: req.params.query });
+      res.status(500).json({ error: ErrorMessages.INTERNAL_ERROR });
     }
   });
 
@@ -402,8 +402,8 @@ ${insights && insights.firstTimerTips ? `첫 방문 팁: ${insights.firstTimerTi
       const restaurants = await storage.getFeaturedRestaurants();
       res.json(restaurants);
     } catch (error) {
-      console.error("Get featured restaurants error:", error);
-      res.status(500).json({ error: "Failed to fetch featured restaurants" });
+      logger.error("Get featured restaurants error", { error, path: "/api/restaurants/featured" });
+      res.status(500).json({ error: ErrorMessages.INTERNAL_ERROR });
     }
   });
 
@@ -415,8 +415,8 @@ ${insights && insights.firstTimerTips ? `첫 방문 팁: ${insights.firstTimerTi
       }
       res.json(restaurant);
     } catch (error) {
-      console.error("Get restaurant error:", error);
-      res.status(500).json({ error: "Failed to fetch restaurant" });
+      logger.error("Get restaurant error", { error, path: "/api/restaurants/:id", restaurantId: req.params.id });
+      res.status(500).json({ error: ErrorMessages.INTERNAL_ERROR });
     }
   });
 
@@ -425,8 +425,8 @@ ${insights && insights.firstTimerTips ? `첫 방문 팁: ${insights.firstTimerTi
       const restaurants = await storage.getRestaurantsByDistrict(req.params.district);
       res.json(restaurants);
     } catch (error) {
-      console.error("Get restaurants by district error:", error);
-      res.status(500).json({ error: "Failed to fetch restaurants" });
+      logger.error("Get restaurants by district error", { error, path: "/api/restaurants/district", district: req.params.district });
+      res.status(500).json({ error: ErrorMessages.INTERNAL_ERROR });
     }
   });
 
@@ -435,8 +435,8 @@ ${insights && insights.firstTimerTips ? `첫 방문 팁: ${insights.firstTimerTi
       const reviews = await storage.getReviewsByRestaurant(req.params.restaurantId);
       res.json(reviews);
     } catch (error) {
-      console.error("Get reviews error:", error);
-      res.status(500).json({ error: "Failed to fetch reviews" });
+      logger.error("Get reviews error", { error, path: "/api/reviews/:restaurantId", restaurantId: req.params.restaurantId });
+      res.status(500).json({ error: ErrorMessages.INTERNAL_ERROR });
     }
   });
 
@@ -469,8 +469,8 @@ ${insights && insights.firstTimerTips ? `첫 방문 팁: ${insights.firstTimerTi
 
       res.json(review);
     } catch (error) {
-      console.error("Create review error:", error);
-      res.status(500).json({ error: "Failed to create review" });
+      logger.error("Create review error", { error, path: "/api/reviews", userId: req.user?.claims?.sub });
+      res.status(500).json({ error: ErrorMessages.INTERNAL_ERROR });
     }
   });
 
@@ -496,8 +496,8 @@ ${insights && insights.firstTimerTips ? `첫 방문 팁: ${insights.firstTimerTi
 
       res.json(updated);
     } catch (error) {
-      console.error("Update review error:", error);
-      res.status(500).json({ error: "Failed to update review" });
+      logger.error("Update review error", { error, path: "/api/reviews/:reviewId", reviewId: req.params.reviewId, userId: req.user?.claims?.sub });
+      res.status(500).json({ error: ErrorMessages.INTERNAL_ERROR });
     }
   });
 
@@ -514,8 +514,8 @@ ${insights && insights.firstTimerTips ? `첫 방문 팁: ${insights.firstTimerTi
 
       res.json({ success: true });
     } catch (error) {
-      console.error("Delete review error:", error);
-      res.status(500).json({ error: "Failed to delete review" });
+      logger.error("Delete review error", { error, path: "/api/reviews/:reviewId", reviewId: req.params.reviewId, userId: req.user?.claims?.sub });
+      res.status(500).json({ error: ErrorMessages.INTERNAL_ERROR });
     }
   });
 
@@ -529,8 +529,8 @@ ${insights && insights.firstTimerTips ? `첫 방문 팁: ${insights.firstTimerTi
       console.log(`[GET /api/saved] Returning data:`, JSON.stringify(savedRestaurants.map(r => ({ id: r.id, name: r.nameEn }))));
       res.json(savedRestaurants);
     } catch (error) {
-      console.error("Get saved restaurants error:", error);
-      res.status(500).json({ error: "Failed to fetch saved restaurants" });
+      logger.error("Get saved restaurants error", { error, path: "/api/saved", userId: req.user?.claims?.sub });
+      res.status(500).json({ error: ErrorMessages.INTERNAL_ERROR });
     }
   });
 
@@ -546,8 +546,8 @@ ${insights && insights.firstTimerTips ? `첫 방문 팁: ${insights.firstTimerTi
       console.log(`[POST /api/saved] Saved successfully:`, saved);
       res.json(saved);
     } catch (error) {
-      console.error("Save restaurant error:", error);
-      res.status(500).json({ error: "Failed to save restaurant" });
+      logger.error("Save restaurant error", { error, path: "/api/saved", userId: req.user?.claims?.sub, restaurantId: req.body.restaurantId });
+      res.status(500).json({ error: ErrorMessages.INTERNAL_ERROR });
     }
   });
 
@@ -558,8 +558,8 @@ ${insights && insights.firstTimerTips ? `첫 방문 팁: ${insights.firstTimerTi
       await storage.unsaveRestaurant(userId, restaurantId);
       res.json({ success: true });
     } catch (error) {
-      console.error("Unsave restaurant error:", error);
-      res.status(500).json({ error: "Failed to unsave restaurant" });
+      logger.error("Unsave restaurant error", { error, path: "/api/saved/:restaurantId", userId: req.user?.claims?.sub, restaurantId: req.params.restaurantId });
+      res.status(500).json({ error: ErrorMessages.INTERNAL_ERROR });
     }
   });
 
@@ -570,8 +570,8 @@ ${insights && insights.firstTimerTips ? `첫 방문 팁: ${insights.firstTimerTi
       const isSaved = await storage.isRestaurantSaved(userId, restaurantId);
       res.json({ isSaved });
     } catch (error) {
-      console.error("Check saved restaurant error:", error);
-      res.status(500).json({ error: "Failed to check saved status" });
+      logger.error("Check saved restaurant error", { error, path: "/api/saved/check/:restaurantId", userId: req.user?.claims?.sub, restaurantId: req.params.restaurantId });
+      res.status(500).json({ error: ErrorMessages.INTERNAL_ERROR });
     }
   });
 
@@ -581,8 +581,8 @@ ${insights && insights.firstTimerTips ? `첫 방문 팁: ${insights.firstTimerTi
       const announcements = await storage.getRecentAnnouncements(limit);
       res.json(announcements);
     } catch (error) {
-      console.error("Get announcements error:", error);
-      res.status(500).json({ error: "Failed to fetch announcements" });
+      logger.error("Get announcements error", { error, path: "/api/announcements" });
+      res.status(500).json({ error: ErrorMessages.INTERNAL_ERROR });
     }
   });
 
@@ -591,8 +591,8 @@ ${insights && insights.firstTimerTips ? `첫 방문 팁: ${insights.firstTimerTi
       const banners = await storage.getActiveEventBanners();
       res.json(banners);
     } catch (error) {
-      console.error("Get event banners error:", error);
-      res.status(500).json({ error: "Failed to fetch event banners" });
+      logger.error("Get event banners error", { error, path: "/api/event-banners" });
+      res.status(500).json({ error: ErrorMessages.INTERNAL_ERROR });
     }
   });
 
@@ -614,8 +614,8 @@ ${insights && insights.firstTimerTips ? `첫 방문 팁: ${insights.firstTimerTi
       const userWithoutPassword = { id: user.id, email: user.email, firstName: user.firstName, lastName: user.lastName };
       res.json(userWithoutPassword);
     } catch (error) {
-      console.error("Get current user error:", error);
-      res.status(500).json({ error: "Failed to get current user" });
+      logger.error("Get current user error", { error, path: "/api/auth/me", userId: req.query.userId });
+      res.status(500).json({ error: ErrorMessages.INTERNAL_ERROR });
     }
   });
 
@@ -624,8 +624,8 @@ ${insights && insights.firstTimerTips ? `첫 방문 팁: ${insights.firstTimerTi
       const insights = await storage.getRestaurantInsights(req.params.id);
       res.json(insights || null);
     } catch (error) {
-      console.error("Get restaurant insights error:", error);
-      res.status(500).json({ error: "Failed to fetch restaurant insights" });
+      logger.error("Get restaurant insights error", { error, path: "/api/restaurants/:id/insights", restaurantId: req.params.id });
+      res.status(500).json({ error: ErrorMessages.INTERNAL_ERROR });
     }
   });
 
@@ -634,8 +634,8 @@ ${insights && insights.firstTimerTips ? `첫 방문 팁: ${insights.firstTimerTi
       const menus = await storage.getMenusByRestaurant(req.params.id);
       res.json(menus);
     } catch (error) {
-      console.error("Get menus error:", error);
-      res.status(500).json({ error: "Failed to fetch menus" });
+      logger.error("Get menus error", { error, path: "/api/restaurants/:id/menus", restaurantId: req.params.id });
+      res.status(500).json({ error: ErrorMessages.INTERNAL_ERROR });
     }
   });
 
@@ -644,8 +644,8 @@ ${insights && insights.firstTimerTips ? `첫 방문 팁: ${insights.firstTimerTi
       const videos = await storage.getYoutubeVideosByRestaurant(req.params.id);
       res.json(videos);
     } catch (error) {
-      console.error("Get videos error:", error);
-      res.status(500).json({ error: "Failed to fetch videos" });
+      logger.error("Get videos error", { error, path: "/api/restaurants/:id/videos", restaurantId: req.params.id });
+      res.status(500).json({ error: ErrorMessages.INTERNAL_ERROR });
     }
   });
 
@@ -654,8 +654,8 @@ ${insights && insights.firstTimerTips ? `첫 방문 팁: ${insights.firstTimerTi
       const reviews = await storage.getExternalReviewsByRestaurant(req.params.id);
       res.json(reviews);
     } catch (error) {
-      console.error("Get external reviews error:", error);
-      res.status(500).json({ error: "Failed to fetch external reviews" });
+      logger.error("Get external reviews error", { error, path: "/api/restaurants/:id/external-reviews", restaurantId: req.params.id });
+      res.status(500).json({ error: ErrorMessages.INTERNAL_ERROR });
     }
   });
 
@@ -681,8 +681,8 @@ ${insights && insights.firstTimerTips ? `첫 방문 팁: ${insights.firstTimerTi
         generated: true
       });
     } catch (error) {
-      console.error("Generate insights error:", error);
-      res.status(500).json({ error: "Failed to generate insights" });
+      logger.error("Generate insights error", { error, path: "/api/admin/generate-insights/:restaurantId", restaurantId: req.params.restaurantId });
+      res.status(500).json({ error: ErrorMessages.INTERNAL_ERROR });
     }
   });
 
@@ -730,8 +730,8 @@ ${insights && insights.firstTimerTips ? `첫 방문 팁: ${insights.firstTimerTi
         results
       });
     } catch (error) {
-      console.error("Generate all insights error:", error);
-      res.status(500).json({ error: "Failed to generate all insights" });
+      logger.error("Generate all insights error", { error, path: "/api/admin/generate-all-insights" });
+      res.status(500).json({ error: ErrorMessages.INTERNAL_ERROR });
     }
   });
 
@@ -787,8 +787,8 @@ ${insights && insights.firstTimerTips ? `첫 방문 팁: ${insights.firstTimerTi
         results
       });
     } catch (error) {
-      console.error("Generate sample data error:", error);
-      res.status(500).json({ error: "Failed to generate sample data" });
+      logger.error("Generate sample data error", { error, path: "/api/admin/generate-sample-data/:restaurantId", restaurantId: req.params.restaurantId });
+      res.status(500).json({ error: ErrorMessages.INTERNAL_ERROR });
     }
   });
 
@@ -853,8 +853,8 @@ ${insights && insights.firstTimerTips ? `첫 방문 팁: ${insights.firstTimerTi
         results
       });
     } catch (error) {
-      console.error("Generate all sample data error:", error);
-      res.status(500).json({ error: "Failed to generate all sample data" });
+      logger.error("Generate all sample data error", { error, path: "/api/admin/generate-all-sample-data" });
+      res.status(500).json({ error: ErrorMessages.INTERNAL_ERROR });
     }
   });
 
@@ -871,8 +871,8 @@ ${insights && insights.firstTimerTips ? `첫 방문 팁: ${insights.firstTimerTi
       const restaurants = await storage.getRestaurantsByOwner(userId);
       res.json(restaurants);
     } catch (error) {
-      console.error("Get my restaurants error:", error);
-      res.status(500).json({ error: "Failed to fetch restaurants" });
+      logger.error("Get my restaurants error", { error, path: "/api/my-restaurants", userId: req.user?.claims?.sub });
+      res.status(500).json({ error: ErrorMessages.INTERNAL_ERROR });
     }
   });
 
@@ -888,8 +888,8 @@ ${insights && insights.firstTimerTips ? `첫 방문 팁: ${insights.firstTimerTi
       const isOwner = await storage.isRestaurantOwner(userId, id);
       res.json({ isOwner });
     } catch (error) {
-      console.error("Check ownership error:", error);
-      res.status(500).json({ error: "Failed to check ownership" });
+      logger.error("Check ownership error", { error, path: "/api/restaurants/:id/is-owner", userId: req.user?.claims?.sub, restaurantId: req.params.id });
+      res.status(500).json({ error: ErrorMessages.INTERNAL_ERROR });
     }
   });
 
@@ -910,8 +910,8 @@ ${insights && insights.firstTimerTips ? `첫 방문 팁: ${insights.firstTimerTi
       const stats = await storage.getRestaurantDashboardStats(id);
       res.json(stats);
     } catch (error) {
-      console.error("Get dashboard stats error:", error);
-      res.status(500).json({ error: "Failed to fetch dashboard statistics" });
+      logger.error("Get dashboard stats error", { error, path: "/api/restaurants/:id/dashboard-stats", userId: req.user?.claims?.sub, restaurantId: req.params.id });
+      res.status(500).json({ error: ErrorMessages.INTERNAL_ERROR });
     }
   });
 
@@ -924,8 +924,8 @@ ${insights && insights.firstTimerTips ? `첫 방문 팁: ${insights.firstTimerTi
       const response = await storage.getResponseByReviewId(reviewId);
       res.json(response || null);
     } catch (error) {
-      console.error("Get review response error:", error);
-      res.status(500).json({ error: "Failed to fetch review response" });
+      logger.error("Get review response error", { error, path: "/api/reviews/:reviewId/response", reviewId: req.params.reviewId });
+      res.status(500).json({ error: ErrorMessages.INTERNAL_ERROR });
     }
   });
 
@@ -964,8 +964,8 @@ ${insights && insights.firstTimerTips ? `첫 방문 팁: ${insights.firstTimerTi
       
       res.status(201).json(newResponse);
     } catch (error) {
-      console.error("Create review response error:", error);
-      res.status(500).json({ error: "Failed to create review response" });
+      logger.error("Create review response error", { error, path: "/api/review-responses", userId: req.user?.claims?.sub });
+      res.status(500).json({ error: ErrorMessages.INTERNAL_ERROR });
     }
   });
 
@@ -997,8 +997,8 @@ ${insights && insights.firstTimerTips ? `첫 방문 팁: ${insights.firstTimerTi
 
       res.json(updatedResponse);
     } catch (error) {
-      console.error("Update review response error:", error);
-      res.status(500).json({ error: "Failed to update review response" });
+      logger.error("Update review response error", { error, path: "/api/review-responses/:id", responseId: req.params.id, userId: req.user?.claims?.sub });
+      res.status(500).json({ error: ErrorMessages.INTERNAL_ERROR });
     }
   });
 
@@ -1030,8 +1030,8 @@ ${insights && insights.firstTimerTips ? `첫 방문 팁: ${insights.firstTimerTi
 
       res.status(204).send();
     } catch (error) {
-      console.error("Delete review response error:", error);
-      res.status(500).json({ error: "Failed to delete review response" });
+      logger.error("Delete review response error", { error, path: "/api/review-responses/:id", responseId: req.params.id, userId: req.user?.claims?.sub });
+      res.status(500).json({ error: ErrorMessages.INTERNAL_ERROR });
     }
   });
 
@@ -1066,8 +1066,8 @@ ${insights && insights.firstTimerTips ? `첫 방문 팁: ${insights.firstTimerTi
 
       res.json(reviewsWithResponses);
     } catch (error) {
-      console.error("Get reviews with responses error:", error);
-      res.status(500).json({ error: "Failed to fetch reviews with responses" });
+      logger.error("Get reviews with responses error", { error, path: "/api/restaurants/:id/reviews-with-responses", restaurantId: req.params.id, userId: req.user?.claims?.sub });
+      res.status(500).json({ error: ErrorMessages.INTERNAL_ERROR });
     }
   });
 
@@ -1080,8 +1080,8 @@ ${insights && insights.firstTimerTips ? `첫 방문 팁: ${insights.firstTimerTi
       const promotions = await storage.getActivePromotionsByRestaurant(id);
       res.json(promotions);
     } catch (error) {
-      console.error("Get promotions error:", error);
-      res.status(500).json({ error: "Failed to fetch promotions" });
+      logger.error("Get promotions error", { error, path: "/api/restaurants/:id/promotions", restaurantId: req.params.id });
+      res.status(500).json({ error: ErrorMessages.INTERNAL_ERROR });
     }
   });
 
@@ -1102,8 +1102,8 @@ ${insights && insights.firstTimerTips ? `첫 방문 팁: ${insights.firstTimerTi
       const promotions = await storage.getPromotionsByRestaurant(id);
       res.json(promotions);
     } catch (error) {
-      console.error("Get all promotions error:", error);
-      res.status(500).json({ error: "Failed to fetch promotions" });
+      logger.error("Get all promotions error", { error, path: "/api/restaurants/:id/all-promotions", restaurantId: req.params.id, userId: req.user?.claims?.sub });
+      res.status(500).json({ error: ErrorMessages.INTERNAL_ERROR });
     }
   });
 
@@ -1142,8 +1142,8 @@ ${insights && insights.firstTimerTips ? `첫 방문 팁: ${insights.firstTimerTi
 
       res.status(201).json(promotion);
     } catch (error) {
-      console.error("Create promotion error:", error);
-      res.status(500).json({ error: "Failed to create promotion" });
+      logger.error("Create promotion error", { error, path: "/api/promotions", userId: req.user?.claims?.sub });
+      res.status(500).json({ error: ErrorMessages.INTERNAL_ERROR });
     }
   });
 
@@ -1177,8 +1177,8 @@ ${insights && insights.firstTimerTips ? `첫 방문 팁: ${insights.firstTimerTi
 
       res.json(updatedPromotion);
     } catch (error) {
-      console.error("Update promotion error:", error);
-      res.status(500).json({ error: "Failed to update promotion" });
+      logger.error("Update promotion error", { error, path: "/api/promotions/:id", promotionId: req.params.id, userId: req.user?.claims?.sub });
+      res.status(500).json({ error: ErrorMessages.INTERNAL_ERROR });
     }
   });
 
@@ -1204,8 +1204,8 @@ ${insights && insights.firstTimerTips ? `첫 방문 팁: ${insights.firstTimerTi
 
       res.status(204).send();
     } catch (error) {
-      console.error("Delete promotion error:", error);
-      res.status(500).json({ error: "Failed to delete promotion" });
+      logger.error("Delete promotion error", { error, path: "/api/promotions/:id", promotionId: req.params.id, userId: req.user?.claims?.sub });
+      res.status(500).json({ error: ErrorMessages.INTERNAL_ERROR });
     }
   });
 
@@ -1218,8 +1218,8 @@ ${insights && insights.firstTimerTips ? `첫 방문 팁: ${insights.firstTimerTi
       const images = await storage.getRestaurantImages(id);
       res.json(images);
     } catch (error) {
-      console.error("Get restaurant images error:", error);
-      res.status(500).json({ error: "Failed to get restaurant images" });
+      logger.error("Get restaurant images error", { error, path: "/api/restaurants/:id/images", restaurantId: req.params.id });
+      res.status(500).json({ error: ErrorMessages.INTERNAL_ERROR });
     }
   });
 
@@ -1252,8 +1252,8 @@ ${insights && insights.firstTimerTips ? `첫 방문 팁: ${insights.firstTimerTi
 
       res.status(201).json(image);
     } catch (error) {
-      console.error("Create restaurant image error:", error);
-      res.status(500).json({ error: "Failed to add restaurant image" });
+      logger.error("Create restaurant image error", { error, path: "/api/restaurants/:id/images", restaurantId: req.params.id, userId: req.user?.claims?.sub });
+      res.status(500).json({ error: ErrorMessages.INTERNAL_ERROR });
     }
   });
 
@@ -1279,8 +1279,8 @@ ${insights && insights.firstTimerTips ? `첫 방문 팁: ${insights.firstTimerTi
 
       res.status(204).send();
     } catch (error) {
-      console.error("Delete restaurant image error:", error);
-      res.status(500).json({ error: "Failed to delete restaurant image" });
+      logger.error("Delete restaurant image error", { error, path: "/api/restaurant-images/:id", imageId: req.params.id, userId: req.user?.claims?.sub });
+      res.status(500).json({ error: ErrorMessages.INTERNAL_ERROR });
     }
   });
 
@@ -1316,8 +1316,8 @@ ${insights && insights.firstTimerTips ? `첫 방문 팁: ${insights.firstTimerTi
 
       res.status(201).json(image);
     } catch (error) {
-      console.error("Upload image error:", error);
-      res.status(500).json({ error: "Failed to upload image" });
+      logger.error("Upload image error:", { error });
+      res.status(500).json({ error: ErrorMessages.INTERNAL_ERROR });
     }
   });
 
@@ -1359,8 +1359,8 @@ ${insights && insights.firstTimerTips ? `첫 방문 팁: ${insights.firstTimerTi
 
       res.status(201).json(menu);
     } catch (error) {
-      console.error("Create menu error:", error);
-      res.status(500).json({ error: "Failed to create menu" });
+      logger.error("Create menu error:", { error });
+      res.status(500).json({ error: ErrorMessages.INTERNAL_ERROR });
     }
   });
 
@@ -1391,8 +1391,8 @@ ${insights && insights.firstTimerTips ? `첫 방문 팁: ${insights.firstTimerTi
 
       res.json(updatedMenu);
     } catch (error) {
-      console.error("Update menu error:", error);
-      res.status(500).json({ error: "Failed to update menu" });
+      logger.error("Update menu error:", { error });
+      res.status(500).json({ error: ErrorMessages.INTERNAL_ERROR });
     }
   });
 
@@ -1418,8 +1418,8 @@ ${insights && insights.firstTimerTips ? `첫 방문 팁: ${insights.firstTimerTi
 
       res.status(204).send();
     } catch (error) {
-      console.error("Delete menu error:", error);
-      res.status(500).json({ error: "Failed to delete menu" });
+      logger.error("Delete menu error:", { error });
+      res.status(500).json({ error: ErrorMessages.INTERNAL_ERROR });
     }
   });
 
@@ -1521,8 +1521,8 @@ Provide a comprehensive analysis in the following JSON format:
         generatedAt: new Date().toISOString(),
       });
     } catch (error) {
-      console.error("AI analysis error:", error);
-      res.status(500).json({ error: "Failed to generate AI analysis" });
+      logger.error("AI analysis error:", { error });
+      res.status(500).json({ error: ErrorMessages.INTERNAL_ERROR });
     }
   });
 
@@ -1621,8 +1621,8 @@ Provide a comprehensive analysis in the following JSON format:
 
       res.json(user);
     } catch (error) {
-      console.error("Error updating user tier:", error);
-      res.status(500).json({ error: "Failed to update user tier" });
+      logger.error("Error updating user tier:", { error });
+      res.status(500).json({ error: ErrorMessages.INTERNAL_ERROR });
     }
   });
 
@@ -1653,8 +1653,8 @@ Provide a comprehensive analysis in the following JSON format:
 
       res.json(user);
     } catch (error) {
-      console.error("Error updating user:", error);
-      res.status(500).json({ error: "Failed to update user" });
+      logger.error("Error updating user:", { error });
+      res.status(500).json({ error: ErrorMessages.INTERNAL_ERROR });
     }
   });
 
@@ -1670,8 +1670,8 @@ Provide a comprehensive analysis in the following JSON format:
 
       res.status(204).send();
     } catch (error) {
-      console.error("Error deleting user:", error);
-      res.status(500).json({ error: "Failed to delete user" });
+      logger.error("Error deleting user:", { error });
+      res.status(500).json({ error: ErrorMessages.INTERNAL_ERROR });
     }
   });
 
@@ -1687,8 +1687,8 @@ Provide a comprehensive analysis in the following JSON format:
 
       res.json(restaurant);
     } catch (error) {
-      console.error("Error updating restaurant:", error);
-      res.status(500).json({ error: "Failed to update restaurant" });
+      logger.error("Error updating restaurant:", { error });
+      res.status(500).json({ error: ErrorMessages.INTERNAL_ERROR });
     }
   });
 
@@ -1704,8 +1704,8 @@ Provide a comprehensive analysis in the following JSON format:
 
       res.status(204).send();
     } catch (error) {
-      console.error("Error deleting restaurant:", error);
-      res.status(500).json({ error: "Failed to delete restaurant" });
+      logger.error("Error deleting restaurant:", { error });
+      res.status(500).json({ error: ErrorMessages.INTERNAL_ERROR });
     }
   });
 
@@ -1716,8 +1716,8 @@ Provide a comprehensive analysis in the following JSON format:
       const reviews = await storage.getAllReviews(limit);
       res.json(reviews);
     } catch (error) {
-      console.error("Error fetching all reviews:", error);
-      res.status(500).json({ error: "Failed to fetch reviews" });
+      logger.error("Error fetching all reviews:", { error });
+      res.status(500).json({ error: ErrorMessages.INTERNAL_ERROR });
     }
   });
 
@@ -1739,8 +1739,8 @@ Provide a comprehensive analysis in the following JSON format:
 
       res.json(updated);
     } catch (error) {
-      console.error("Error updating review pin:", error);
-      res.status(500).json({ error: "Failed to update review pin" });
+      logger.error("Error updating review pin:", { error });
+      res.status(500).json({ error: ErrorMessages.INTERNAL_ERROR });
     }
   });
 
@@ -1756,8 +1756,8 @@ Provide a comprehensive analysis in the following JSON format:
 
       res.status(204).send();
     } catch (error) {
-      console.error("Error deleting review:", error);
-      res.status(500).json({ error: "Failed to delete review" });
+      logger.error("Error deleting review:", { error });
+      res.status(500).json({ error: ErrorMessages.INTERNAL_ERROR });
     }
   });
 
@@ -1767,8 +1767,8 @@ Provide a comprehensive analysis in the following JSON format:
       const announcements = await storage.getAllAnnouncements();
       res.json(announcements);
     } catch (error) {
-      console.error("Error fetching all announcements:", error);
-      res.status(500).json({ error: "Failed to fetch announcements" });
+      logger.error("Error fetching all announcements:", { error });
+      res.status(500).json({ error: ErrorMessages.INTERNAL_ERROR });
     }
   });
 
@@ -1778,8 +1778,8 @@ Provide a comprehensive analysis in the following JSON format:
       const announcement = await storage.createAnnouncement(req.body);
       res.status(201).json(announcement);
     } catch (error) {
-      console.error("Error creating announcement:", error);
-      res.status(500).json({ error: "Failed to create announcement" });
+      logger.error("Error creating announcement:", { error });
+      res.status(500).json({ error: ErrorMessages.INTERNAL_ERROR });
     }
   });
 
@@ -1795,8 +1795,8 @@ Provide a comprehensive analysis in the following JSON format:
 
       res.json(announcement);
     } catch (error) {
-      console.error("Error updating announcement:", error);
-      res.status(500).json({ error: "Failed to update announcement" });
+      logger.error("Error updating announcement:", { error });
+      res.status(500).json({ error: ErrorMessages.INTERNAL_ERROR });
     }
   });
 
@@ -1812,8 +1812,8 @@ Provide a comprehensive analysis in the following JSON format:
 
       res.status(204).send();
     } catch (error) {
-      console.error("Error deleting announcement:", error);
-      res.status(500).json({ error: "Failed to delete announcement" });
+      logger.error("Error deleting announcement:", { error });
+      res.status(500).json({ error: ErrorMessages.INTERNAL_ERROR });
     }
   });
 
@@ -1823,8 +1823,8 @@ Provide a comprehensive analysis in the following JSON format:
       const banners = await storage.getAllEventBanners();
       res.json(banners);
     } catch (error) {
-      console.error("Error fetching all event banners:", error);
-      res.status(500).json({ error: "Failed to fetch event banners" });
+      logger.error("Error fetching all event banners:", { error });
+      res.status(500).json({ error: ErrorMessages.INTERNAL_ERROR });
     }
   });
 
@@ -1834,8 +1834,8 @@ Provide a comprehensive analysis in the following JSON format:
       const banner = await storage.createEventBanner(req.body);
       res.status(201).json(banner);
     } catch (error) {
-      console.error("Error creating event banner:", error);
-      res.status(500).json({ error: "Failed to create event banner" });
+      logger.error("Error creating event banner:", { error });
+      res.status(500).json({ error: ErrorMessages.INTERNAL_ERROR });
     }
   });
 
@@ -1851,8 +1851,8 @@ Provide a comprehensive analysis in the following JSON format:
 
       res.json(banner);
     } catch (error) {
-      console.error("Error updating event banner:", error);
-      res.status(500).json({ error: "Failed to update event banner" });
+      logger.error("Error updating event banner:", { error });
+      res.status(500).json({ error: ErrorMessages.INTERNAL_ERROR });
     }
   });
 
@@ -1868,8 +1868,8 @@ Provide a comprehensive analysis in the following JSON format:
 
       res.status(204).send();
     } catch (error) {
-      console.error("Error deleting event banner:", error);
-      res.status(500).json({ error: "Failed to delete event banner" });
+      logger.error("Error deleting event banner:", { error });
+      res.status(500).json({ error: ErrorMessages.INTERNAL_ERROR });
     }
   });
 
@@ -1881,8 +1881,8 @@ Provide a comprehensive analysis in the following JSON format:
       const tasks = await storage.getAdminPriorityTasks();
       res.json(tasks);
     } catch (error) {
-      console.error("Error fetching priority tasks:", error);
-      res.status(500).json({ error: "Failed to fetch priority tasks" });
+      logger.error("Error fetching priority tasks:", { error });
+      res.status(500).json({ error: ErrorMessages.INTERNAL_ERROR });
     }
   });
 
@@ -1892,8 +1892,8 @@ Provide a comprehensive analysis in the following JSON format:
       const applications = await storage.getAllRestaurantApplications();
       res.json(applications);
     } catch (error) {
-      console.error("Error fetching restaurant applications:", error);
-      res.status(500).json({ error: "Failed to fetch restaurant applications" });
+      logger.error("Error fetching restaurant applications:", { error });
+      res.status(500).json({ error: ErrorMessages.INTERNAL_ERROR });
     }
   });
 
@@ -1909,8 +1909,8 @@ Provide a comprehensive analysis in the following JSON format:
 
       res.json(application);
     } catch (error) {
-      console.error("Error processing restaurant application:", error);
-      res.status(500).json({ error: "Failed to process application" });
+      logger.error("Error processing restaurant application:", { error });
+      res.status(500).json({ error: ErrorMessages.INTERNAL_ERROR });
     }
   });
 
@@ -1920,8 +1920,8 @@ Provide a comprehensive analysis in the following JSON format:
       const inquiries = await storage.getAllOwnerInquiries();
       res.json(inquiries);
     } catch (error) {
-      console.error("Error fetching owner inquiries:", error);
-      res.status(500).json({ error: "Failed to fetch owner inquiries" });
+      logger.error("Error fetching owner inquiries:", { error });
+      res.status(500).json({ error: ErrorMessages.INTERNAL_ERROR });
     }
   });
 
@@ -1937,8 +1937,8 @@ Provide a comprehensive analysis in the following JSON format:
 
       res.json(inquiry);
     } catch (error) {
-      console.error("Error responding to owner inquiry:", error);
-      res.status(500).json({ error: "Failed to respond to inquiry" });
+      logger.error("Error responding to owner inquiry:", { error });
+      res.status(500).json({ error: ErrorMessages.INTERNAL_ERROR });
     }
   });
 
@@ -1948,8 +1948,8 @@ Provide a comprehensive analysis in the following JSON format:
       const inquiries = await storage.getAllCustomerInquiries();
       res.json(inquiries);
     } catch (error) {
-      console.error("Error fetching customer inquiries:", error);
-      res.status(500).json({ error: "Failed to fetch customer inquiries" });
+      logger.error("Error fetching customer inquiries:", { error });
+      res.status(500).json({ error: ErrorMessages.INTERNAL_ERROR });
     }
   });
 
@@ -1965,8 +1965,8 @@ Provide a comprehensive analysis in the following JSON format:
 
       res.json(inquiry);
     } catch (error) {
-      console.error("Error responding to customer inquiry:", error);
-      res.status(500).json({ error: "Failed to respond to inquiry" });
+      logger.error("Error responding to customer inquiry:", { error });
+      res.status(500).json({ error: ErrorMessages.INTERNAL_ERROR });
     }
   });
 
@@ -1976,8 +1976,8 @@ Provide a comprehensive analysis in the following JSON format:
       const inquiries = await storage.getAllPartnershipInquiries();
       res.json(inquiries);
     } catch (error) {
-      console.error("Error fetching partnership inquiries:", error);
-      res.status(500).json({ error: "Failed to fetch partnership inquiries" });
+      logger.error("Error fetching partnership inquiries:", { error });
+      res.status(500).json({ error: ErrorMessages.INTERNAL_ERROR });
     }
   });
 
@@ -1993,8 +1993,8 @@ Provide a comprehensive analysis in the following JSON format:
 
       res.json(inquiry);
     } catch (error) {
-      console.error("Error processing partnership inquiry:", error);
-      res.status(500).json({ error: "Failed to process inquiry" });
+      logger.error("Error processing partnership inquiry:", { error });
+      res.status(500).json({ error: ErrorMessages.INTERNAL_ERROR });
     }
   });
 
@@ -2004,8 +2004,8 @@ Provide a comprehensive analysis in the following JSON format:
       const notices = await storage.getAllOwnerNotices();
       res.json(notices);
     } catch (error) {
-      console.error("Error fetching owner notices:", error);
-      res.status(500).json({ error: "Failed to fetch owner notices" });
+      logger.error("Error fetching owner notices:", { error });
+      res.status(500).json({ error: ErrorMessages.INTERNAL_ERROR });
     }
   });
 
@@ -2014,8 +2014,8 @@ Provide a comprehensive analysis in the following JSON format:
       const notice = await storage.createOwnerNotice(req.body);
       res.status(201).json(notice);
     } catch (error) {
-      console.error("Error creating owner notice:", error);
-      res.status(500).json({ error: "Failed to create owner notice" });
+      logger.error("Error creating owner notice:", { error });
+      res.status(500).json({ error: ErrorMessages.INTERNAL_ERROR });
     }
   });
 
@@ -2025,8 +2025,8 @@ Provide a comprehensive analysis in the following JSON format:
       const payments = await storage.getAllPayments();
       res.json(payments);
     } catch (error) {
-      console.error("Error fetching payments:", error);
-      res.status(500).json({ error: "Failed to fetch payments" });
+      logger.error("Error fetching payments:", { error });
+      res.status(500).json({ error: ErrorMessages.INTERNAL_ERROR });
     }
   });
 
@@ -2036,8 +2036,8 @@ Provide a comprehensive analysis in the following JSON format:
       const tierData = await storage.getUsersByTier();
       res.json(tierData);
     } catch (error) {
-      console.error("Error fetching users by tier:", error);
-      res.status(500).json({ error: "Failed to fetch users by tier" });
+      logger.error("Error fetching users by tier:", { error });
+      res.status(500).json({ error: ErrorMessages.INTERNAL_ERROR });
     }
   });
 
@@ -2046,8 +2046,8 @@ Provide a comprehensive analysis in the following JSON format:
       const analytics = await storage.getUserAnalytics();
       res.json(analytics);
     } catch (error) {
-      console.error("Error fetching user analytics:", error);
-      res.status(500).json({ error: "Failed to fetch user analytics" });
+      logger.error("Error fetching user analytics:", { error });
+      res.status(500).json({ error: ErrorMessages.INTERNAL_ERROR });
     }
   });
 
@@ -2057,8 +2057,8 @@ Provide a comprehensive analysis in the following JSON format:
       const posts = await storage.getAllBlogPosts();
       res.json(posts);
     } catch (error) {
-      console.error("Error fetching blog posts:", error);
-      res.status(500).json({ error: "Failed to fetch blog posts" });
+      logger.error("Error fetching blog posts:", { error });
+      res.status(500).json({ error: ErrorMessages.INTERNAL_ERROR });
     }
   });
 
