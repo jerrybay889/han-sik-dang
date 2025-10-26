@@ -3,6 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { GoogleGenAI } from "@google/genai";
 import { setupAuth, isAuthenticated, isAdmin } from "./replitAuth";
+import { logger, ErrorMessages } from "./logger";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
@@ -1533,8 +1534,11 @@ Provide a comprehensive analysis in the following JSON format:
       const stats = await storage.getAdminDashboardStats();
       res.json(stats);
     } catch (error) {
-      console.error("Error fetching admin dashboard stats:", error);
-      res.status(500).json({ error: "Failed to fetch dashboard statistics" });
+      logger.error("Failed to fetch admin dashboard stats", { 
+        userId: req.user?.id, 
+        path: req.path 
+      }, error as Error);
+      res.status(500).json({ error: ErrorMessages.INTERNAL_ERROR });
     }
   });
 
@@ -1544,8 +1548,11 @@ Provide a comprehensive analysis in the following JSON format:
       const users = await storage.getAllUsers();
       res.json(users);
     } catch (error) {
-      console.error("Error fetching all users:", error);
-      res.status(500).json({ error: "Failed to fetch users" });
+      logger.error("Failed to fetch all users", { 
+        userId: req.user?.id, 
+        path: req.path 
+      }, error as Error);
+      res.status(500).json({ error: ErrorMessages.INTERNAL_ERROR });
     }
   });
 
@@ -1556,18 +1563,22 @@ Provide a comprehensive analysis in the following JSON format:
       const { isAdmin } = req.body;
 
       if (typeof isAdmin !== "number" || (isAdmin !== 0 && isAdmin !== 1)) {
-        return res.status(400).json({ error: "Invalid isAdmin value. Must be 0 or 1" });
+        return res.status(400).json({ error: ErrorMessages.BAD_REQUEST });
       }
 
       const user = await storage.updateUserAdminStatus(id, isAdmin);
       if (!user) {
-        return res.status(404).json({ error: "User not found" });
+        return res.status(404).json({ error: ErrorMessages.NOT_FOUND });
       }
 
       res.json(user);
     } catch (error) {
-      console.error("Error updating user admin status:", error);
-      res.status(500).json({ error: "Failed to update user admin status" });
+      logger.error("Failed to update user admin status", { 
+        userId: req.user?.id, 
+        targetUserId: req.params.id,
+        path: req.path 
+      }, error as Error);
+      res.status(500).json({ error: ErrorMessages.INTERNAL_ERROR });
     }
   });
 
@@ -1578,13 +1589,17 @@ Provide a comprehensive analysis in the following JSON format:
       const details = await storage.getUserDetails(id);
       
       if (!details) {
-        return res.status(404).json({ error: "User not found" });
+        return res.status(404).json({ error: ErrorMessages.NOT_FOUND });
       }
 
       res.json(details);
     } catch (error) {
-      console.error("Error fetching user details:", error);
-      res.status(500).json({ error: "Failed to fetch user details" });
+      logger.error("Failed to fetch user details", { 
+        userId: req.user?.id, 
+        targetUserId: req.params.id,
+        path: req.path 
+      }, error as Error);
+      res.status(500).json({ error: ErrorMessages.INTERNAL_ERROR });
     }
   });
 
