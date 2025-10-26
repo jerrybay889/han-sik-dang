@@ -13,7 +13,8 @@ Preferred communication style: Simple, everyday language.
 ### Frontend
 
 -   **Framework**: React 18+ with TypeScript.
--   **Routing**: Wouter.
+-   **Routing**: Wouter with flat route structure in App.tsx (wouter does not support nested Switch components).
+-   **Admin Routing**: All admin routes registered directly in App.tsx via `admin-pages.tsx` wrapper system. Each admin page component is wrapped with `AdminLayout` using a Higher-Order Component (HOC) pattern. This maintains code-level separation between frontend and admin sections while using a single build output.
 -   **State Management**: TanStack React Query v5 for server state and caching.
 -   **UI Components**: shadcn/ui (New York style) built on Radix UI, styled with Tailwind CSS v4 and custom CSS variables.
 -   **Design System**: Fully responsive design (mobile/tablet/desktop), 8px grid, dual-mode theming, multi-language typography (Noto Sans KR, SF Pro Display), accessibility-focused.
