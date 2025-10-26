@@ -64,6 +64,7 @@ function Router() {
         {/* User Routes */}
         <Route path="/" component={MainScreen} />
         <Route path="/ai" component={AIPage} />
+        <Route path="/chat" component={AIPage} />
         <Route path="/content" component={ContentPage} />
         <Route path="/my" component={MyPage} />
         <Route path="/restaurant/:id" component={RestaurantDetailPage} />

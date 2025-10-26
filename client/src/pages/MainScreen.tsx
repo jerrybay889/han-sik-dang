@@ -233,7 +233,7 @@ export default function MainScreen() {
                   variant={nearbyFilter ? "default" : "outline"}
                   onClick={handleNearbyFilter}
                   className="flex-shrink-0"
-                  data-testid="button-nearby"
+                  data-testid="button-nearby-mobile"
                 >
                   <Navigation className="w-4 h-4 mr-1" />
                   {t("filters.nearby")}
@@ -243,7 +243,7 @@ export default function MainScreen() {
                   value={priceFilter?.toString() || "all"}
                   onValueChange={(value) => setPriceFilter(value === "all" ? null : parseInt(value))}
                 >
-                  <SelectTrigger className="w-[120px] h-8" data-testid="select-price">
+                  <SelectTrigger className="w-[120px] h-8" data-testid="select-price-mobile">
                     <DollarSign className="w-4 h-4 mr-1" />
                     <SelectValue />
                   </SelectTrigger>
@@ -259,7 +259,7 @@ export default function MainScreen() {
                   value={cuisineFilter || "all"}
                   onValueChange={(value) => setCuisineFilter(value === "all" ? null : value)}
                 >
-                  <SelectTrigger className="w-[140px] h-8" data-testid="select-cuisine">
+                  <SelectTrigger className="w-[140px] h-8" data-testid="select-cuisine-mobile">
                     <UtensilsCrossed className="w-4 h-4 mr-1" />
                     <SelectValue />
                   </SelectTrigger>
@@ -275,7 +275,7 @@ export default function MainScreen() {
                   value={sortBy}
                   onValueChange={(value: any) => setSortBy(value)}
                 >
-                  <SelectTrigger className="w-[120px] h-8" data-testid="select-sort">
+                  <SelectTrigger className="w-[120px] h-8" data-testid="select-sort-mobile">
                     <ArrowUpDown className="w-4 h-4 mr-1" />
                     <SelectValue />
                   </SelectTrigger>
@@ -308,7 +308,7 @@ export default function MainScreen() {
                     variant={nearbyFilter ? "default" : "outline"}
                     onClick={handleNearbyFilter}
                     className="w-full"
-                    data-testid="button-nearby"
+                    data-testid="button-nearby-desktop"
                   >
                     <Navigation className="w-4 h-4 mr-2" />
                     {t("filters.nearby")}
@@ -322,7 +322,7 @@ export default function MainScreen() {
                     value={priceFilter?.toString() || "all"}
                     onValueChange={(value) => setPriceFilter(value === "all" ? null : parseInt(value))}
                   >
-                    <SelectTrigger className="w-full" data-testid="select-price">
+                    <SelectTrigger className="w-full" data-testid="select-price-desktop">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -341,7 +341,7 @@ export default function MainScreen() {
                     value={cuisineFilter || "all"}
                     onValueChange={(value) => setCuisineFilter(value === "all" ? null : value)}
                   >
-                    <SelectTrigger className="w-full" data-testid="select-cuisine">
+                    <SelectTrigger className="w-full" data-testid="select-cuisine-desktop">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -360,7 +360,7 @@ export default function MainScreen() {
                     value={sortBy}
                     onValueChange={(value: any) => setSortBy(value)}
                   >
-                    <SelectTrigger className="w-full" data-testid="select-sort">
+                    <SelectTrigger className="w-full" data-testid="select-sort-desktop">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
