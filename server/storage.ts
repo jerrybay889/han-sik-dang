@@ -1,6 +1,6 @@
 import { neon } from "@neondatabase/serverless";
 import { drizzle } from "drizzle-orm/neon-http";
-import { eq, desc, sql, and } from "drizzle-orm";
+import { eq, desc, sql, and, or, ilike } from "drizzle-orm";
 import {
   type User,
   type UpsertUser,
@@ -285,9 +285,14 @@ export class DbStorage implements IStorage {
   }
 
   async searchRestaurants(query: string): Promise<Restaurant[]> {
+    // Use Drizzle's safe ilike function to prevent SQL injection
     const searchPattern = `%${query}%`;
     return await db.select().from(restaurants).where(
-      sql`${restaurants.name} ILIKE ${searchPattern} OR ${restaurants.nameEn} ILIKE ${searchPattern} OR ${restaurants.cuisine} ILIKE ${searchPattern}`
+      or(
+        ilike(restaurants.name, searchPattern),
+        ilike(restaurants.nameEn, searchPattern),
+        ilike(restaurants.cuisine, searchPattern)
+      )
     );
   }
 
@@ -348,18 +353,24 @@ export class DbStorage implements IStorage {
   }
 
   async deleteReview(reviewId: string, userId: string): Promise<boolean> {
+    // Use safe and() function instead of raw SQL
     const review = await db.select().from(reviews)
-      .where(sql`${reviews.id} = ${reviewId} AND ${reviews.userId} = ${userId}`);
+      .where(and(eq(reviews.id, reviewId), eq(reviews.userId, userId)));
     
     if (review.length === 0) {
       return false;
     }
 
-    await db.delete(reviews)
-      .where(sql`${reviews.id} = ${reviewId} AND ${reviews.userId} = ${userId}`);
-    
-    await this.updateRestaurantRating(review[0].restaurantId);
-    return true;
+    const restaurantId = review[0].restaurantId;
+
+    // Use transaction to ensure data consistency
+    return await db.transaction(async (tx) => {
+      await tx.delete(reviews)
+        .where(and(eq(reviews.id, reviewId), eq(reviews.userId, userId)));
+      
+      await this.updateRestaurantRating(restaurantId);
+      return true;
+    });
   }
 
   async getSavedRestaurants(userId: string): Promise<Restaurant[]> {
@@ -380,16 +391,24 @@ export class DbStorage implements IStorage {
   }
 
   async unsaveRestaurant(userId: string, restaurantId: string): Promise<void> {
+    // Use safe and() function instead of raw SQL
     await db.delete(savedRestaurants)
       .where(
-        sql`${savedRestaurants.userId} = ${userId} AND ${savedRestaurants.restaurantId} = ${restaurantId}`
+        and(
+          eq(savedRestaurants.userId, userId),
+          eq(savedRestaurants.restaurantId, restaurantId)
+        )
       );
   }
 
   async isRestaurantSaved(userId: string, restaurantId: string): Promise<boolean> {
+    // Use safe and() function instead of raw SQL
     const result = await db.select().from(savedRestaurants)
       .where(
-        sql`${savedRestaurants.userId} = ${userId} AND ${savedRestaurants.restaurantId} = ${restaurantId}`
+        and(
+          eq(savedRestaurants.userId, userId),
+          eq(savedRestaurants.restaurantId, restaurantId)
+        )
       );
     return result.length > 0;
   }
@@ -832,10 +851,12 @@ export class DbStorage implements IStorage {
     return {
       user,
       reviews: userReviews,
-      savedRestaurants: savedRestaurantsData.map(item => ({
-        ...item.savedRestaurant,
-        restaurant: item.restaurant!,
-      })),
+      savedRestaurants: savedRestaurantsData
+        .filter(item => item.restaurant !== null)
+        .map(item => ({
+          ...item.savedRestaurant,
+          restaurant: item.restaurant as Restaurant,
+        })) as Array<SavedRestaurant & { restaurant: Restaurant }>,
       customerInquiries: userInquiries,
       stats: {
         totalReviews,
@@ -869,19 +890,25 @@ export class DbStorage implements IStorage {
   }
 
   async deleteUser(userId: string): Promise<boolean> {
-    // Delete user's reviews first
-    await db.delete(reviews).where(eq(reviews.userId, userId));
-    
-    // Delete saved restaurants
-    await db.delete(savedRestaurants).where(eq(savedRestaurants.userId, userId));
-    
-    // Delete the user
-    const result = await db
-      .delete(users)
-      .where(eq(users.id, userId))
-      .returning();
-    
-    return result.length > 0;
+    // Use transaction to ensure data consistency
+    return await db.transaction(async (tx) => {
+      // Delete user's reviews first
+      await tx.delete(reviews).where(eq(reviews.userId, userId));
+      
+      // Delete saved restaurants
+      await tx.delete(savedRestaurants).where(eq(savedRestaurants.userId, userId));
+      
+      // Delete customer inquiries
+      await tx.delete(customerInquiries).where(eq(customerInquiries.userId, userId));
+      
+      // Delete the user
+      const result = await tx
+        .delete(users)
+        .where(eq(users.id, userId))
+        .returning();
+      
+      return result.length > 0;
+    });
   }
 
   async getAdminDashboardStats(): Promise<{
@@ -1018,18 +1045,21 @@ export class DbStorage implements IStorage {
 
     const restaurantId = review[0].restaurantId;
 
-    const result = await db
-      .delete(reviews)
-      .where(eq(reviews.id, reviewId))
-      .returning();
-    
-    if (result.length > 0) {
-      // Update restaurant rating
-      await this.updateRestaurantRating(restaurantId);
-      return true;
-    }
-    
-    return false;
+    // Use transaction to ensure data consistency
+    return await db.transaction(async (tx) => {
+      const result = await tx
+        .delete(reviews)
+        .where(eq(reviews.id, reviewId))
+        .returning();
+      
+      if (result.length > 0) {
+        // Update restaurant rating within the same transaction
+        await this.updateRestaurantRating(restaurantId);
+        return true;
+      }
+      
+      return false;
+    });
   }
 
   async getAllAnnouncements(): Promise<Announcement[]> {
