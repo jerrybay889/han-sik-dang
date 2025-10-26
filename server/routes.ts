@@ -599,9 +599,8 @@ ${insights && insights.firstTimerTips ? `첫 방문 팁: ${insights.firstTimerTi
 
 
   app.get("/api/auth/me", async (req, res) => {
+    const userId = req.query.userId as string | undefined;
     try {
-      const userId = req.query.userId as string;
-      
       if (!userId) {
         return res.status(401).json({ error: "Not authenticated" });
       }
@@ -614,7 +613,7 @@ ${insights && insights.firstTimerTips ? `첫 방문 팁: ${insights.firstTimerTi
       const userWithoutPassword = { id: user.id, email: user.email, firstName: user.firstName, lastName: user.lastName };
       res.json(userWithoutPassword);
     } catch (error) {
-      logger.error("Get current user error", { error, path: "/api/auth/me", userId: req.query.userId });
+      logger.error("Get current user error", { error, path: "/api/auth/me", userId });
       res.status(500).json({ error: ErrorMessages.INTERNAL_ERROR });
     }
   });
