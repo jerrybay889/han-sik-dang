@@ -698,7 +698,7 @@ export default function AdminUsers() {
                             </div>
                             <div className="flex items-center justify-between text-xs text-muted-foreground">
                               <span data-testid={`saved-location-${saved.id}`}>
-                                {saved.restaurant.city} > {saved.restaurant.districtDetail}
+                                {saved.restaurant.city}{' > '}{saved.restaurant.districtDetail}
                               </span>
                               <span data-testid={`saved-date-${saved.id}`}>
                                 저장일: {formatDate(saved.createdAt)}
