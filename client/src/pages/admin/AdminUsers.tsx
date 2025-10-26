@@ -3,62 +3,218 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { Eye, Trash2, Star, MapPin, MessageSquare } from "lucide-react";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Search, Trash2, ChevronUp, ChevronDown, ChevronsUpDown } from "lucide-react";
 import { queryClient, apiRequest } from "@/lib/queryClient";
-import type { User, Review, Restaurant } from "@shared/schema";
+import { useToast } from "@/hooks/use-toast";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import type { User } from "@shared/schema";
 
-interface UserDetails {
-  user: User;
-  reviews: Review[];
-  savedRestaurants: Restaurant[];
-  stats: {
-    totalReviews: number;
-    averageRating: number;
-    totalSaved: number;
-  };
+type SortField = "id" | "tier" | "language" | "country" | "savedCount" | "visitors";
+type SortDirection = "asc" | "desc";
+
+interface UserWithStats extends User {
+  savedCount: number;
 }
 
-export default function AdminUsers() {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
-  const [deleteUserId, setDeleteUserId] = useState<string | null>(null);
+const updateUserSchema = z.object({
+  tier: z.string(),
+  language: z.string().optional(),
+  country: z.string().optional(),
+  region: z.string().optional(),
+});
 
-  const { data: users, isLoading } = useQuery<User[]>({
+type UpdateUserForm = z.infer<typeof updateUserSchema>;
+
+export default function AdminUsers() {
+  const { toast } = useToast();
+  
+  // Search & Filter State
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedTier, setSelectedTier] = useState<string>("all");
+  const [selectedLanguage, setSelectedLanguage] = useState<string>("all");
+  const [selectedCountry, setSelectedCountry] = useState<string>("all");
+  const [visitorPeriod, setVisitorPeriod] = useState<"1d" | "7d" | "10d" | "30d">("30d");
+  
+  // Sorting State
+  const [sortField, setSortField] = useState<SortField>("visitors");
+  const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
+  
+  // Dialog State
+  const [editingUser, setEditingUser] = useState<UserWithStats | null>(null);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+
+  const { data: users = [], isLoading } = useQuery<UserWithStats[]>({
     queryKey: ["/api/admin/users"],
   });
 
-  const { data: userDetails, isLoading: isLoadingDetails } = useQuery<UserDetails>({
-    queryKey: ["/api/admin/users", selectedUserId, "details"],
-    enabled: !!selectedUserId,
-  });
+  // Filter & Sort
+  const filteredAndSortedUsers = users
+    .filter(u => {
+      // Search query
+      if (searchQuery) {
+        const query = searchQuery.toLowerCase();
+        const matchesEmail = u.email?.toLowerCase().includes(query);
+        const matchesName = u.firstName?.toLowerCase().includes(query) || 
+                          u.lastName?.toLowerCase().includes(query);
+        const matchesId = u.id.toLowerCase().includes(query);
+        if (!matchesEmail && !matchesName && !matchesId) return false;
+      }
 
-  const updateTierMutation = useMutation({
-    mutationFn: async ({ userId, tier }: { userId: string; tier: string }) => {
-      return apiRequest("PATCH", `/api/admin/users/${userId}/tier`, { tier });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
-    },
-  });
+      // Tier filter
+      if (selectedTier !== "all" && u.tier !== selectedTier) return false;
 
-  const deleteUserMutation = useMutation({
+      // Language filter
+      if (selectedLanguage !== "all" && u.language !== selectedLanguage) return false;
+
+      // Country filter
+      if (selectedCountry !== "all" && u.country !== selectedCountry) return false;
+
+      return true;
+    })
+    .sort((a, b) => {
+      let comparison = 0;
+      
+      switch (sortField) {
+        case "id":
+          comparison = a.id.localeCompare(b.id);
+          break;
+        case "tier":
+          const tierOrder = { bronze: 1, silver: 2, gold: 3, platinum: 4 };
+          comparison = (tierOrder[a.tier as keyof typeof tierOrder] || 0) - 
+                      (tierOrder[b.tier as keyof typeof tierOrder] || 0);
+          break;
+        case "language":
+          comparison = (a.language || "").localeCompare(b.language || "");
+          break;
+        case "country":
+          comparison = (a.country || "").localeCompare(b.country || "");
+          break;
+        case "savedCount":
+          comparison = a.savedCount - b.savedCount;
+          break;
+        case "visitors":
+          const aVisitors = visitorPeriod === "1d" ? a.visitors1d :
+                          visitorPeriod === "7d" ? a.visitors7d :
+                          visitorPeriod === "10d" ? a.visitors10d : a.visitors30d;
+          const bVisitors = visitorPeriod === "1d" ? b.visitors1d :
+                          visitorPeriod === "7d" ? b.visitors7d :
+                          visitorPeriod === "10d" ? b.visitors10d : b.visitors30d;
+          comparison = aVisitors - bVisitors;
+          break;
+      }
+      
+      return sortDirection === "asc" ? comparison : -comparison;
+    });
+
+  // Delete mutation
+  const deleteMutation = useMutation({
     mutationFn: async (userId: string) => {
       return apiRequest("DELETE", `/api/admin/users/${userId}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
-      setDeleteUserId(null);
+      toast({
+        title: "삭제 완료",
+        description: "사용자가 삭제되었습니다.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "오류",
+        description: "사용자 삭제 중 오류가 발생했습니다.",
+        variant: "destructive",
+      });
     },
   });
 
-  const filteredUsers = users?.filter((u) =>
-    u.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    u.firstName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    u.lastName?.toLowerCase().includes(searchQuery.toLowerCase())
-  ) || [];
+  // Update mutation
+  const updateMutation = useMutation({
+    mutationFn: async (data: { id: string; updates: UpdateUserForm }) => {
+      return apiRequest("PATCH", `/api/admin/users/${data.id}`, data.updates);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
+      setIsEditDialogOpen(false);
+      toast({
+        title: "수정 완료",
+        description: "사용자 정보가 수정되었습니다.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "오류",
+        description: "사용자 수정 중 오류가 발생했습니다.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const form = useForm<UpdateUserForm>({
+    resolver: zodResolver(updateUserSchema),
+    defaultValues: {
+      tier: "bronze",
+      language: "ko",
+      country: "",
+      region: "",
+    },
+  });
+
+  const handleSort = (field: SortField) => {
+    if (sortField === field) {
+      setSortDirection(prev => prev === "asc" ? "desc" : "asc");
+    } else {
+      setSortField(field);
+      setSortDirection("desc");
+    }
+  };
+
+  const getSortIcon = (field: SortField) => {
+    if (sortField !== field) {
+      return <ChevronsUpDown className="w-4 h-4 ml-1 text-muted-foreground" />;
+    }
+    return sortDirection === "asc" ? 
+      <ChevronUp className="w-4 h-4 ml-1" /> : 
+      <ChevronDown className="w-4 h-4 ml-1" />;
+  };
+
+  const handleEdit = (user: UserWithStats) => {
+    setEditingUser(user);
+    form.reset({
+      tier: user.tier,
+      language: user.language || "ko",
+      country: user.country || "",
+      region: user.region || "",
+    });
+    setIsEditDialogOpen(true);
+  };
+
+  const handleSubmit = (data: UpdateUserForm) => {
+    if (editingUser) {
+      updateMutation.mutate({ id: editingUser.id, updates: data });
+    }
+  };
+
+  const handleDelete = (id: string, email: string) => {
+    if (confirm(`"${email}" 사용자를 삭제하시겠습니까?`)) {
+      deleteMutation.mutate(id);
+    }
+  };
+
+  const getVisitorCount = (user: UserWithStats) => {
+    switch (visitorPeriod) {
+      case "1d": return user.visitors1d;
+      case "7d": return user.visitors7d;
+      case "10d": return user.visitors10d;
+      case "30d": return user.visitors30d;
+    }
+  };
 
   const getTierColor = (tier: string) => {
     switch (tier?.toLowerCase()) {
@@ -70,255 +226,398 @@ export default function AdminUsers() {
     }
   };
 
+  const getLanguageName = (lang: string) => {
+    const languages: Record<string, string> = {
+      ko: "한국어",
+      en: "English",
+      ja: "日本語",
+      "zh-CN": "简体中文",
+      "zh-TW": "繁體中文",
+      es: "Español",
+      fr: "Français",
+      de: "Deutsch",
+      ru: "Русский",
+    };
+    return languages[lang] || lang;
+  };
+
+  // Get unique values for filters
+  const uniqueTiers = Array.from(new Set(users.map(u => u.tier)));
+  const uniqueLanguages = Array.from(new Set(users.map(u => u.language).filter(Boolean)));
+  const uniqueCountries = Array.from(new Set(users.map(u => u.country).filter(Boolean)));
+
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold">Users</h1>
-        <p className="text-muted-foreground">Manage all users and their activity</p>
+      <div className="flex items-center justify-between">
+        <h1 className="text-3xl font-bold">이용자 관리</h1>
       </div>
 
-      <div>
-        <input
-          type="search"
-          placeholder="Search users by name or email..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full h-10 px-4 rounded-lg border bg-background"
-          data-testid="input-search-users"
-        />
-      </div>
+      {/* Search & Filter Section */}
+      <Card className="p-6">
+        <div className="space-y-4">
+          {/* Search Bar */}
+          <div className="flex gap-2">
+            <Input
+              placeholder="이름, 이메일, ID 검색..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              data-testid="input-search"
+              className="flex-1"
+            />
+            <Button onClick={() => {}} data-testid="button-search">
+              <Search className="w-4 h-4 mr-2" />
+              검색
+            </Button>
+          </div>
 
-      {isLoading ? (
-        <div className="flex items-center justify-center h-64">
-          <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+          {/* Filters */}
+          <div className="grid grid-cols-3 gap-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">등급</label>
+              <Select value={selectedTier} onValueChange={setSelectedTier}>
+                <SelectTrigger data-testid="select-tier">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">전체</SelectItem>
+                  {uniqueTiers.map((tier) => (
+                    <SelectItem key={tier} value={tier}>
+                      {tier.charAt(0).toUpperCase() + tier.slice(1)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium">언어</label>
+              <Select value={selectedLanguage} onValueChange={setSelectedLanguage}>
+                <SelectTrigger data-testid="select-language">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">전체</SelectItem>
+                  {uniqueLanguages.map((lang) => (
+                    <SelectItem key={lang} value={lang!}>
+                      {getLanguageName(lang!)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium">국가</label>
+              <Select value={selectedCountry} onValueChange={setSelectedCountry}>
+                <SelectTrigger data-testid="select-country">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">전체</SelectItem>
+                  {uniqueCountries.map((country) => (
+                    <SelectItem key={country} value={country!}>
+                      {country}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
         </div>
-      ) : (
-        <Card>
-          <div className="divide-y">
-            {filteredUsers.map((user) => (
-              <div key={user.id} className="flex items-center justify-between p-4 gap-4">
-                <div className="flex items-center gap-3 flex-1 min-w-0">
-                  <div className="w-10 h-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-semibold flex-shrink-0">
-                    {user.firstName?.[0] || "U"}
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="font-medium truncate">{user.firstName} {user.lastName}</p>
-                    <p className="text-sm text-muted-foreground truncate">{user.email}</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-center gap-3 flex-shrink-0">
-                  {user.isAdmin === 1 && (
-                    <Badge variant="default">Admin</Badge>
-                  )}
-                  
-                  <Badge className={getTierColor(user.tier || "bronze")}>
-                    {user.tier || "Bronze"}
-                  </Badge>
+      </Card>
 
-                  <Select
-                    value={user.tier || "bronze"}
-                    onValueChange={(value) => updateTierMutation.mutate({ userId: user.id, tier: value })}
-                    disabled={updateTierMutation.isPending}
-                  >
-                    <SelectTrigger className="w-32" data-testid={`select-tier-${user.id}`}>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="bronze">Bronze</SelectItem>
-                      <SelectItem value="silver">Silver</SelectItem>
-                      <SelectItem value="gold">Gold</SelectItem>
-                      <SelectItem value="platinum">Platinum</SelectItem>
-                    </SelectContent>
-                  </Select>
+      {/* Results */}
+      <Card>
+        <div className="p-4 border-b">
+          <div className="flex items-center justify-between">
+            <p className="text-sm text-muted-foreground">
+              총 {filteredAndSortedUsers.length}명
+            </p>
+            <div className="flex items-center gap-2">
+              <label className="text-sm">방문횟수 기준:</label>
+              <Select value={visitorPeriod} onValueChange={(v) => setVisitorPeriod(v as any)}>
+                <SelectTrigger className="w-32" data-testid="select-visitor-period">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="1d">1일</SelectItem>
+                  <SelectItem value="7d">7일</SelectItem>
+                  <SelectItem value="10d">10일</SelectItem>
+                  <SelectItem value="30d">30일</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        </div>
 
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setSelectedUserId(user.id)}
-                    data-testid={`button-view-details-${user.id}`}
-                  >
-                    <Eye className="w-4 h-4 mr-2" />
-                    View
-                  </Button>
+        {isLoading ? (
+          <div className="flex items-center justify-center h-64">
+            <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleSort("id")}
+                      className="hover-elevate"
+                      data-testid="sort-id"
+                    >
+                      ID
+                      {getSortIcon("id")}
+                    </Button>
+                  </TableHead>
+                  <TableHead>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleSort("tier")}
+                      className="hover-elevate"
+                      data-testid="sort-tier"
+                    >
+                      등급
+                      {getSortIcon("tier")}
+                    </Button>
+                  </TableHead>
+                  <TableHead>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleSort("language")}
+                      className="hover-elevate"
+                      data-testid="sort-language"
+                    >
+                      언어
+                      {getSortIcon("language")}
+                    </Button>
+                  </TableHead>
+                  <TableHead>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleSort("country")}
+                      className="hover-elevate"
+                      data-testid="sort-country"
+                    >
+                      국가
+                      {getSortIcon("country")}
+                    </Button>
+                  </TableHead>
+                  <TableHead>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleSort("savedCount")}
+                      className="hover-elevate"
+                      data-testid="sort-saved"
+                    >
+                      저장수
+                      {getSortIcon("savedCount")}
+                    </Button>
+                  </TableHead>
+                  <TableHead>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleSort("visitors")}
+                      className="hover-elevate"
+                      data-testid="sort-visitors"
+                    >
+                      방문횟수
+                      {getSortIcon("visitors")}
+                    </Button>
+                  </TableHead>
+                  <TableHead>작업</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredAndSortedUsers.map((user) => (
+                  <TableRow key={user.id}>
+                    <TableCell>
+                      <button
+                        onClick={() => handleEdit(user)}
+                        className="text-left hover:underline font-medium text-sm"
+                        data-testid={`link-edit-${user.id}`}
+                      >
+                        {user.id.substring(0, 8)}...
+                      </button>
+                    </TableCell>
+                    <TableCell>
+                      <Badge className={getTierColor(user.tier)}>
+                        {user.tier.charAt(0).toUpperCase() + user.tier.slice(1)}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>{getLanguageName(user.language || "ko")}</TableCell>
+                    <TableCell>{user.country || "-"}</TableCell>
+                    <TableCell>{user.savedCount}</TableCell>
+                    <TableCell>{getVisitorCount(user).toLocaleString()}</TableCell>
+                    <TableCell>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleDelete(user.id, user.email || user.id)}
+                        data-testid={`button-delete-${user.id}`}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
 
-                  <Button
-                    variant="destructive"
-                    size="sm"
-                    onClick={() => setDeleteUserId(user.id)}
-                    data-testid={`button-delete-${user.id}`}
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
-                </div>
-              </div>
-            ))}
-
-            {filteredUsers.length === 0 && (
+            {filteredAndSortedUsers.length === 0 && (
               <div className="p-8 text-center text-muted-foreground">
-                No users found
+                검색 결과가 없습니다
               </div>
             )}
           </div>
-        </Card>
-      )}
+        )}
+      </Card>
 
-      {/* User Details Modal */}
-      <Dialog open={!!selectedUserId} onOpenChange={(open) => !open && setSelectedUserId(null)}>
-        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+      {/* Edit Dialog */}
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle>User Details</DialogTitle>
-            <DialogDescription>View user activity and information</DialogDescription>
+            <DialogTitle>사용자 수정</DialogTitle>
+            <DialogDescription>
+              사용자 정보를 수정합니다.
+            </DialogDescription>
           </DialogHeader>
 
-          {isLoadingDetails ? (
-            <div className="flex items-center justify-center h-64">
-              <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-            </div>
-          ) : userDetails ? (
-            <div className="space-y-6">
-              {/* User Info */}
-              <Card className="p-6">
-                <h3 className="text-lg font-semibold mb-4">User Information</h3>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <p className="text-sm text-muted-foreground">Name</p>
-                    <p className="font-medium">{userDetails.user.firstName} {userDetails.user.lastName}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Email</p>
-                    <p className="font-medium">{userDetails.user.email}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Tier</p>
-                    <Badge className={getTierColor(userDetails.user.tier || "bronze")}>
-                      {userDetails.user.tier || "Bronze"}
-                    </Badge>
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Admin Status</p>
-                    <Badge variant={userDetails.user.isAdmin === 1 ? "default" : "outline"}>
-                      {userDetails.user.isAdmin === 1 ? "Admin" : "User"}
-                    </Badge>
-                  </div>
+          {editingUser && (
+            <div className="mb-4 p-4 bg-muted rounded-lg">
+              <div className="grid grid-cols-2 gap-3 text-sm">
+                <div>
+                  <span className="text-muted-foreground">이메일:</span>
+                  <span className="ml-2 font-medium">{editingUser.email}</span>
                 </div>
-              </Card>
-
-              {/* Stats */}
-              <div className="grid grid-cols-3 gap-4">
-                <Card className="p-4">
-                  <div className="flex items-center gap-3">
-                    <MessageSquare className="w-8 h-8 text-primary" />
-                    <div>
-                      <p className="text-2xl font-bold">{userDetails.stats.totalReviews}</p>
-                      <p className="text-sm text-muted-foreground">Reviews</p>
-                    </div>
-                  </div>
-                </Card>
-                <Card className="p-4">
-                  <div className="flex items-center gap-3">
-                    <Star className="w-8 h-8 text-yellow-500" />
-                    <div>
-                      <p className="text-2xl font-bold">{userDetails.stats.averageRating.toFixed(1)}</p>
-                      <p className="text-sm text-muted-foreground">Avg Rating</p>
-                    </div>
-                  </div>
-                </Card>
-                <Card className="p-4">
-                  <div className="flex items-center gap-3">
-                    <MapPin className="w-8 h-8 text-red-500" />
-                    <div>
-                      <p className="text-2xl font-bold">{userDetails.stats.totalSaved}</p>
-                      <p className="text-sm text-muted-foreground">Saved</p>
-                    </div>
-                  </div>
-                </Card>
+                <div>
+                  <span className="text-muted-foreground">이름:</span>
+                  <span className="ml-2 font-medium">{editingUser.firstName} {editingUser.lastName}</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">저장수:</span>
+                  <span className="ml-2 font-medium">{editingUser.savedCount}</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">가입일:</span>
+                  <span className="ml-2 font-medium">
+                    {editingUser.createdAt ? new Date(editingUser.createdAt).toLocaleDateString() : "-"}
+                  </span>
+                </div>
               </div>
-
-              {/* Reviews */}
-              <Card className="p-6">
-                <h3 className="text-lg font-semibold mb-4">Reviews ({userDetails.reviews.length})</h3>
-                <div className="space-y-3 max-h-64 overflow-y-auto">
-                  {userDetails.reviews.length > 0 ? (
-                    userDetails.reviews.map((review) => (
-                      <div key={review.id} className="border-b pb-3 last:border-0">
-                        <div className="flex items-start justify-between gap-2">
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium">Restaurant ID: {review.restaurantId}</p>
-                            <div className="flex items-center gap-2 mt-1">
-                              <div className="flex">
-                                {[...Array(5)].map((_, i) => (
-                                  <Star
-                                    key={i}
-                                    className={`w-3 h-3 ${
-                                      i < review.rating ? "fill-yellow-400 text-yellow-400" : "text-gray-300"
-                                    }`}
-                                  />
-                                ))}
-                              </div>
-                              <span className="text-xs text-muted-foreground">
-                                {new Date(review.createdAt).toLocaleDateString()}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                        {review.comment && (
-                          <p className="text-sm text-muted-foreground mt-2 line-clamp-2">{review.comment}</p>
-                        )}
-                      </div>
-                    ))
-                  ) : (
-                    <p className="text-sm text-muted-foreground text-center py-4">No reviews yet</p>
-                  )}
-                </div>
-              </Card>
-
-              {/* Saved Restaurants */}
-              <Card className="p-6">
-                <h3 className="text-lg font-semibold mb-4">Saved Restaurants ({userDetails.savedRestaurants.length})</h3>
-                <div className="space-y-3 max-h-64 overflow-y-auto">
-                  {userDetails.savedRestaurants.length > 0 ? (
-                    userDetails.savedRestaurants.map((restaurant) => (
-                      <div key={restaurant.id} className="flex items-center gap-3 border-b pb-3 last:border-0">
-                        <MapPin className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                        <div className="flex-1 min-w-0">
-                          <p className="font-medium truncate">{restaurant.name}</p>
-                          <p className="text-sm text-muted-foreground truncate">{restaurant.address}</p>
-                        </div>
-                        <Badge variant="outline">{restaurant.cuisine}</Badge>
-                      </div>
-                    ))
-                  ) : (
-                    <p className="text-sm text-muted-foreground text-center py-4">No saved restaurants</p>
-                  )}
-                </div>
-              </Card>
             </div>
-          ) : null}
+          )}
+
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+              <FormField
+                control={form.control}
+                name="tier"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>등급</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger data-testid="input-tier">
+                          <SelectValue />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="bronze">Bronze</SelectItem>
+                        <SelectItem value="silver">Silver</SelectItem>
+                        <SelectItem value="gold">Gold</SelectItem>
+                        <SelectItem value="platinum">Platinum</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="language"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>언어</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger data-testid="input-language">
+                          <SelectValue />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="ko">한국어</SelectItem>
+                        <SelectItem value="en">English</SelectItem>
+                        <SelectItem value="ja">日本語</SelectItem>
+                        <SelectItem value="zh-CN">简体中文</SelectItem>
+                        <SelectItem value="zh-TW">繁體中文</SelectItem>
+                        <SelectItem value="es">Español</SelectItem>
+                        <SelectItem value="fr">Français</SelectItem>
+                        <SelectItem value="de">Deutsch</SelectItem>
+                        <SelectItem value="ru">Русский</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="country"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>국가</FormLabel>
+                    <FormControl>
+                      <Input {...field} placeholder="예: South Korea" data-testid="input-country" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="region"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>지역</FormLabel>
+                    <FormControl>
+                      <Input {...field} placeholder="예: Seoul" data-testid="input-region" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <div className="flex justify-end gap-2 pt-4">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setIsEditDialogOpen(false)}
+                  data-testid="button-cancel"
+                >
+                  취소
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={updateMutation.isPending}
+                  data-testid="button-save"
+                >
+                  {updateMutation.isPending ? "저장 중..." : "저장"}
+                </Button>
+              </div>
+            </form>
+          </Form>
         </DialogContent>
       </Dialog>
-
-      {/* Delete Confirmation Dialog */}
-      <AlertDialog open={!!deleteUserId} onOpenChange={(open) => !open && setDeleteUserId(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete User</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to delete this user? This will permanently remove the user and all their reviews and saved restaurants. This action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel data-testid="button-cancel-delete">Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={() => deleteUserId && deleteUserMutation.mutate(deleteUserId)}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-              data-testid="button-confirm-delete"
-            >
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </div>
   );
 }

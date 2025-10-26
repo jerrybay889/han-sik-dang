@@ -1611,6 +1611,38 @@ Provide a comprehensive analysis in the following JSON format:
     }
   });
 
+  // Update user (admin)
+  app.patch("/api/admin/users/:id", isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const { tier, language, country, region } = req.body;
+
+      const updates: any = {};
+      
+      if (tier) {
+        const validTiers = ['bronze', 'silver', 'gold', 'platinum'];
+        if (!validTiers.includes(tier.toLowerCase())) {
+          return res.status(400).json({ error: "Invalid tier. Must be one of: bronze, silver, gold, platinum" });
+        }
+        updates.tier = tier.toLowerCase();
+      }
+
+      if (language !== undefined) updates.language = language;
+      if (country !== undefined) updates.country = country;
+      if (region !== undefined) updates.region = region;
+
+      const user = await storage.updateUser(id, updates);
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      res.json(user);
+    } catch (error) {
+      console.error("Error updating user:", error);
+      res.status(500).json({ error: "Failed to update user" });
+    }
+  });
+
   // Delete user (admin)
   app.delete("/api/admin/users/:id", isAuthenticated, isAdmin, async (req: any, res) => {
     try {

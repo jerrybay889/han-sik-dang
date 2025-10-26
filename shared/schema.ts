@@ -23,8 +23,13 @@ export const users = pgTable("users", {
   profileImageUrl: varchar("profile_image_url"),
   isAdmin: integer("is_admin").notNull().default(0),
   tier: varchar("tier").notNull().default("bronze"), // bronze, silver, gold, platinum
+  language: varchar("language").default("ko"), // ko, en, ja, zh-CN, zh-TW, es, fr, de, ru
   country: varchar("country"),
   region: varchar("region"),
+  visitors1d: integer("visitors_1d").notNull().default(0),
+  visitors7d: integer("visitors_7d").notNull().default(0),
+  visitors10d: integer("visitors_10d").notNull().default(0),
+  visitors30d: integer("visitors_30d").notNull().default(0),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

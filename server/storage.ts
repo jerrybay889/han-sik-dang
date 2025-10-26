@@ -150,7 +150,7 @@ export interface IStorage {
   updateImageOrder(id: string, displayOrder: number): Promise<void>;
   
   // Admin operations
-  getAllUsers(): Promise<User[]>;
+  getAllUsers(): Promise<Array<User & { savedCount: number }>>;
   updateUserAdminStatus(userId: string, isAdmin: number): Promise<User | undefined>;
   getUserDetails(userId: string): Promise<{
     user: User;
@@ -163,6 +163,12 @@ export interface IStorage {
     };
   } | undefined>;
   updateUserTier(userId: string, tier: string): Promise<User | undefined>;
+  updateUser(userId: string, data: Partial<{
+    tier: string;
+    language: string;
+    country: string;
+    region: string;
+  }>): Promise<User | undefined>;
   deleteUser(userId: string): Promise<boolean>;
   getAdminDashboardStats(): Promise<{
     totalRestaurants: number;
@@ -211,8 +217,8 @@ export interface IStorage {
   // User Analytics
   getUsersByTier(): Promise<{ tier: string; count: number; users: User[] }[]>;
   getUserAnalytics(): Promise<{
-    usersByCountry: { country: string; count: number }[];
-    usersByRegion: { region: string; count: number }[];
+    usersByCountry: { country: string | null; count: number }[];
+    usersByRegion: { region: string | null; count: number }[];
     usersByTier: { tier: string; count: number }[];
   }>;
   
@@ -734,8 +740,25 @@ export class DbStorage implements IStorage {
   }
 
   // Admin operations
-  async getAllUsers(): Promise<User[]> {
-    return await db.select().from(users).orderBy(desc(users.createdAt));
+  async getAllUsers(): Promise<Array<User & { savedCount: number }>> {
+    const allUsers = await db.select().from(users).orderBy(desc(users.createdAt));
+    
+    // Get saved count for each user
+    const usersWithCounts = await Promise.all(
+      allUsers.map(async (user) => {
+        const saved = await db
+          .select()
+          .from(savedRestaurants)
+          .where(eq(savedRestaurants.userId, user.id));
+        
+        return {
+          ...user,
+          savedCount: saved.length,
+        };
+      })
+    );
+    
+    return usersWithCounts;
   }
 
   async updateUserAdminStatus(userId: string, isAdmin: number): Promise<User | undefined> {
@@ -805,6 +828,20 @@ export class DbStorage implements IStorage {
     const result = await db
       .update(users)
       .set({ tier, updatedAt: new Date() })
+      .where(eq(users.id, userId))
+      .returning();
+    return result[0];
+  }
+
+  async updateUser(userId: string, data: Partial<{
+    tier: string;
+    language: string;
+    country: string;
+    region: string;
+  }>): Promise<User | undefined> {
+    const result = await db
+      .update(users)
+      .set({ ...data, updatedAt: new Date() })
       .where(eq(users.id, userId))
       .returning();
     return result[0];
@@ -1128,8 +1165,8 @@ export class DbStorage implements IStorage {
   }
 
   async getUserAnalytics(): Promise<{
-    usersByCountry: { country: string; count: number }[];
-    usersByRegion: { region: string; count: number }[];
+    usersByCountry: { country: string | null; count: number }[];
+    usersByRegion: { region: string | null; count: number }[];
     usersByTier: { tier: string; count: number }[];
   }> {
     const usersByCountry = await db
