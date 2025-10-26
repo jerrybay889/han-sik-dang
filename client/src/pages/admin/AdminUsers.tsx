@@ -173,15 +173,6 @@ export default function AdminUsers() {
     },
   });
 
-  // Quick update language mutation
-  const updateLanguageMutation = useMutation({
-    mutationFn: async (data: { id: string; language: string }) => {
-      return apiRequest("PATCH", `/api/admin/users/${data.id}`, { language: data.language });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
-    },
-  });
 
   const form = useForm<UpdateUserForm>({
     resolver: zodResolver(updateUserSchema),
@@ -487,22 +478,9 @@ export default function AdminUsers() {
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      <Select
-                        value={user.language || "ko"}
-                        onValueChange={(value) => updateLanguageMutation.mutate({ id: user.id, language: value })}
-                        disabled={updateLanguageMutation.isPending}
-                      >
-                        <SelectTrigger className="w-36" data-testid={`select-language-${user.id}`}>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {LANGUAGES.map((lang) => (
-                            <SelectItem key={lang.value} value={lang.value}>
-                              {lang.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <span className="text-sm" data-testid={`text-language-${user.id}`}>
+                        {getLanguageName(user.language || "ko")}
+                      </span>
                     </TableCell>
                     <TableCell>{user.ssoProvider || "-"}</TableCell>
                     <TableCell>{user.savedCount}</TableCell>
