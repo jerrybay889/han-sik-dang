@@ -8,6 +8,33 @@ han sik dang is a hybrid content platform and utility app designed for discoveri
 
 Preferred communication style: Simple, everyday language.
 
+## Recent Technical Improvements (October 2025)
+
+### Security & Data Integrity
+-   **SQL Injection Prevention**: Migrated from raw SQL template literals to Drizzle's safe parameterized methods (`ilike()`, `or()`, `and()`) throughout the application, eliminating SQL injection vulnerabilities in search and filter operations.
+-   **Database Transactions**: Implemented atomic transactions for critical multi-step operations:
+    -   `deleteUser`: Reviews, saved restaurants, customer inquiries, and user deletion in single transaction
+    -   `deleteReview` & `deleteReviewAsAdmin`: Review deletion with automatic rating recalculation
+    -   Prevents orphaned data and ensures data consistency
+    
+### Error Handling & Logging
+-   **Structured Logging System**: Created `server/logger.ts` with context-aware logging (userId, action, path) and JSON-formatted output
+-   **Secure Error Messages**: Implemented `ErrorMessages` constants preventing sensitive information leakage to clients
+-   **Consistent Error Handling**: Applied standardized error handling patterns across admin API routes with proper HTTP status codes
+
+### TypeScript Type Safety
+-   **API Response Types**: Created `shared/types.ts` with strongly-typed interfaces:
+    -   `UserDetailsResponse`: Complete user profile with reviews, saved restaurants, and statistics
+    -   `AdminDashboardStatsResponse`: Platform-wide analytics
+    -   `AdminReviewWithRestaurant`: Extended review data for admin views
+    -   Filter parameter interfaces for type-safe query building
+-   **Type-Safe Queries**: Applied response types to TanStack Query hooks throughout admin frontend
+
+### Code Quality
+-   **Eliminated LSP Errors**: Resolved all TypeScript diagnostics in storage layer and admin components
+-   **Implicit Any Removal**: Added explicit types to map callbacks and function parameters
+-   **Interface Consistency**: Aligned implementation types with interface definitions
+
 ## System Architecture
 
 ### Frontend
@@ -31,8 +58,9 @@ Preferred communication style: Simple, everyday language.
 
 -   **Framework**: Express.js with TypeScript on Node.js (ESM).
 -   **Build System**: `esbuild` for production, `tsx` for development.
--   **API Structure**: RESTful, logging middleware, standardized error handling, session management.
--   **Storage**: Interface-based `IStorage` implemented by `DbStorage` using PostgreSQL via Drizzle ORM.
+-   **API Structure**: RESTful, structured logging (`server/logger.ts`), standardized error handling with secure error messages, session management.
+-   **Storage**: Interface-based `IStorage` implemented by `DbStorage` using PostgreSQL via Drizzle ORM with transaction support for critical operations.
+-   **Query Safety**: All database queries use Drizzle's parameterized methods (`eq()`, `ilike()`, `or()`, `and()`) to prevent SQL injection.
 -   **Authentication**: Replit Auth with OIDC via Passport.js, session-based (`connect-pg-simple`), auto-upsert on login, JWT refresh token support.
 -   **Authorization**: Role-based access control with `isAdmin` field and middleware for admin routes.
 -   **Admin Dashboard**: Comprehensive master admin dashboard with 30+ API endpoints (`/api/admin/*`) for complete platform management including:
