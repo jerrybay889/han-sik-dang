@@ -1706,6 +1706,29 @@ Provide a comprehensive analysis in the following JSON format:
     }
   });
 
+  // Toggle review pin (admin)
+  app.patch("/api/admin/reviews/:id/pin", isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const { isPinned } = req.body;
+      
+      if (isPinned === undefined) {
+        return res.status(400).json({ error: "isPinned is required" });
+      }
+
+      const updated = await storage.updateReviewPin(id, isPinned);
+      
+      if (!updated) {
+        return res.status(404).json({ error: "Review not found" });
+      }
+
+      res.json(updated);
+    } catch (error) {
+      console.error("Error updating review pin:", error);
+      res.status(500).json({ error: "Failed to update review pin" });
+    }
+  });
+
   // Delete review (admin)
   app.delete("/api/admin/reviews/:id", isAuthenticated, isAdmin, async (req: any, res) => {
     try {

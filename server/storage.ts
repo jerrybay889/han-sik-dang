@@ -972,12 +972,37 @@ export class DbStorage implements IStorage {
     return result.length > 0;
   }
 
-  async getAllReviews(limit: number = 100): Promise<Review[]> {
-    return await db
-      .select()
+  async getAllReviews(limit: number = 1000): Promise<any[]> {
+    const result = await db
+      .select({
+        id: reviews.id,
+        restaurantId: reviews.restaurantId,
+        userId: reviews.userId,
+        userName: reviews.userName,
+        rating: reviews.rating,
+        comment: reviews.comment,
+        imageUrls: reviews.imageUrls,
+        videoUrls: reviews.videoUrls,
+        isPinned: reviews.isPinned,
+        createdAt: reviews.createdAt,
+        restaurantName: restaurants.name,
+        restaurantNameEn: restaurants.nameEn,
+      })
       .from(reviews)
+      .leftJoin(restaurants, eq(reviews.restaurantId, restaurants.id))
       .orderBy(desc(reviews.createdAt))
       .limit(limit);
+    
+    return result;
+  }
+
+  async updateReviewPin(reviewId: string, isPinned: number): Promise<Review | undefined> {
+    const result = await db
+      .update(reviews)
+      .set({ isPinned })
+      .where(eq(reviews.id, reviewId))
+      .returning();
+    return result[0];
   }
 
   async deleteReviewAsAdmin(reviewId: string): Promise<boolean> {
