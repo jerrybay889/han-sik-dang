@@ -48,6 +48,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Setup Replit Auth
   await setupAuth(app);
 
+  // Config endpoint - Get public configuration
+  app.get('/api/config', (req, res) => {
+    res.json({
+      naverMapsClientId: process.env.NAVER_MAPS_CLIENT_ID || ''
+    });
+  });
+
   // Auth endpoint - get current user
   app.get('/api/auth/user', async (req: any, res) => {
     try {

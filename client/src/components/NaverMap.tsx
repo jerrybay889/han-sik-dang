@@ -16,7 +16,6 @@ interface NaverMapProps {
 declare global {
   interface Window {
     naver: any;
-    NAVER_MAPS_CLIENT_ID: string;
   }
 }
 
@@ -32,9 +31,20 @@ export function NaverMap({
   const mapRef = useRef<HTMLDivElement>(null);
   const [mapLoaded, setMapLoaded] = useState(false);
   const [scriptError, setScriptError] = useState(false);
+  const [clientId, setClientId] = useState<string | null>(null);
+
+  // Fetch Naver Maps Client ID from API
+  useEffect(() => {
+    fetch('/api/config')
+      .then(res => res.json())
+      .then(data => setClientId(data.naverMapsClientId))
+      .catch(() => setScriptError(true));
+  }, []);
 
   // Load Naver Maps script dynamically
   useEffect(() => {
+    if (!clientId) return;
+
     // Check if already loaded
     if (window.naver && window.naver.maps) {
       setMapLoaded(true);
@@ -46,7 +56,7 @@ export function NaverMap({
     const mapLanguage = ['ko', 'en', 'zh', 'ja'].includes(language) ? language : 'en';
 
     const script = document.createElement('script');
-    script.src = `https://oapi.map.naver.com/openapi/v3/maps.js?ncpClientId=${window.NAVER_MAPS_CLIENT_ID}&language=${mapLanguage}`;
+    script.src = `https://oapi.map.naver.com/openapi/v3/maps.js?ncpClientId=${clientId}&language=${mapLanguage}`;
     script.async = true;
     script.onload = () => setMapLoaded(true);
     script.onerror = () => setScriptError(true);
@@ -59,7 +69,7 @@ export function NaverMap({
         script.parentNode.removeChild(script);
       }
     };
-  }, [language]);
+  }, [language, clientId]);
 
   // Initialize map when script is loaded
   useEffect(() => {
