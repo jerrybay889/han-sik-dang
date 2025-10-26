@@ -16,24 +16,13 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import type { User, Review, SavedRestaurant, Restaurant, CustomerInquiry } from "@shared/schema";
+import type { UserDetailsResponse } from "@shared/types";
 
 type SortField = "id" | "tier" | "language" | "ssoProvider" | "savedCount" | "visitors" | "createdAt";
 type SortDirection = "asc" | "desc";
 
 interface UserWithStats extends User {
   savedCount: number;
-}
-
-interface UserDetails {
-  user: User;
-  reviews: Review[];
-  savedRestaurants: Array<SavedRestaurant & { restaurant: Restaurant }>;
-  customerInquiries: CustomerInquiry[];
-  stats: {
-    totalReviews: number;
-    averageRating: number;
-    totalSaved: number;
-  };
 }
 
 const updateUserSchema = z.object({
@@ -81,7 +70,7 @@ export default function AdminUsers() {
   });
 
   // Fetch user details when dialog is opened
-  const { data: userDetails, isLoading: isLoadingDetails } = useQuery<UserDetails>({
+  const { data: userDetails, isLoading: isLoadingDetails } = useQuery<UserDetailsResponse>({
     queryKey: ["/api/admin/users", selectedUserId, "details"],
     enabled: !!selectedUserId && isDetailsDialogOpen,
   });
@@ -648,7 +637,7 @@ export default function AdminUsers() {
                           작성한 리뷰가 없습니다
                         </div>
                       ) : (
-                        userDetails.reviews.map((review) => (
+                        userDetails.reviews.map((review: Review) => (
                           <div key={review.id} className="p-4" data-testid={`review-${review.id}`}>
                             <div className="flex items-start justify-between mb-2">
                               <div className="font-medium" data-testid={`review-restaurant-${review.id}`}>
@@ -683,7 +672,7 @@ export default function AdminUsers() {
                           저장한 레스토랑이 없습니다
                         </div>
                       ) : (
-                        userDetails.savedRestaurants.map((saved) => (
+                        userDetails.savedRestaurants.map((saved: SavedRestaurant & { restaurant: Restaurant }) => (
                           <div key={saved.id} className="p-4" data-testid={`saved-${saved.id}`}>
                             <div className="flex items-start justify-between mb-2">
                               <div className="font-medium" data-testid={`saved-name-${saved.id}`}>
@@ -723,7 +712,7 @@ export default function AdminUsers() {
                           문의 내역이 없습니다
                         </div>
                       ) : (
-                        userDetails.customerInquiries.map((inquiry) => (
+                        userDetails.customerInquiries.map((inquiry: CustomerInquiry) => (
                           <div key={inquiry.id} className="p-4" data-testid={`inquiry-${inquiry.id}`}>
                             <div className="flex items-start justify-between mb-2">
                               <div className="font-medium" data-testid={`inquiry-title-${inquiry.id}`}>
