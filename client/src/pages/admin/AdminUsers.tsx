@@ -16,7 +16,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import type { User } from "@shared/schema";
 
-type SortField = "id" | "tier" | "language" | "country" | "savedCount" | "visitors";
+type SortField = "id" | "tier" | "language" | "ssoProvider" | "savedCount" | "visitors" | "createdAt";
 type SortDirection = "asc" | "desc";
 
 interface UserWithStats extends User {
@@ -26,11 +26,23 @@ interface UserWithStats extends User {
 const updateUserSchema = z.object({
   tier: z.string(),
   language: z.string().optional(),
-  country: z.string().optional(),
+  ssoProvider: z.string().optional(),
   region: z.string().optional(),
 });
 
 type UpdateUserForm = z.infer<typeof updateUserSchema>;
+
+const LANGUAGES = [
+  { value: "ko", label: "한국어" },
+  { value: "en", label: "English" },
+  { value: "ja", label: "日本語" },
+  { value: "zh-CN", label: "简体中文" },
+  { value: "zh-TW", label: "繁體中文" },
+  { value: "es", label: "Español" },
+  { value: "fr", label: "Français" },
+  { value: "de", label: "Deutsch" },
+  { value: "ru", label: "Русский" },
+];
 
 export default function AdminUsers() {
   const { toast } = useToast();
@@ -39,11 +51,11 @@ export default function AdminUsers() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedTier, setSelectedTier] = useState<string>("all");
   const [selectedLanguage, setSelectedLanguage] = useState<string>("all");
-  const [selectedCountry, setSelectedCountry] = useState<string>("all");
+  const [selectedSsoProvider, setSelectedSsoProvider] = useState<string>("all");
   const [visitorPeriod, setVisitorPeriod] = useState<"1d" | "7d" | "10d" | "30d">("30d");
   
   // Sorting State
-  const [sortField, setSortField] = useState<SortField>("visitors");
+  const [sortField, setSortField] = useState<SortField>("createdAt");
   const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
   
   // Dialog State
@@ -73,8 +85,8 @@ export default function AdminUsers() {
       // Language filter
       if (selectedLanguage !== "all" && u.language !== selectedLanguage) return false;
 
-      // Country filter
-      if (selectedCountry !== "all" && u.country !== selectedCountry) return false;
+      // SSO Provider filter
+      if (selectedSsoProvider !== "all" && u.ssoProvider !== selectedSsoProvider) return false;
 
       return true;
     })
@@ -93,8 +105,8 @@ export default function AdminUsers() {
         case "language":
           comparison = (a.language || "").localeCompare(b.language || "");
           break;
-        case "country":
-          comparison = (a.country || "").localeCompare(b.country || "");
+        case "ssoProvider":
+          comparison = (a.ssoProvider || "").localeCompare(b.ssoProvider || "");
           break;
         case "savedCount":
           comparison = a.savedCount - b.savedCount;
@@ -107,6 +119,11 @@ export default function AdminUsers() {
                           visitorPeriod === "7d" ? b.visitors7d :
                           visitorPeriod === "10d" ? b.visitors10d : b.visitors30d;
           comparison = aVisitors - bVisitors;
+          break;
+        case "createdAt":
+          const aDate = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+          const bDate = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+          comparison = aDate - bDate;
           break;
       }
       
@@ -156,12 +173,22 @@ export default function AdminUsers() {
     },
   });
 
+  // Quick update language mutation
+  const updateLanguageMutation = useMutation({
+    mutationFn: async (data: { id: string; language: string }) => {
+      return apiRequest("PATCH", `/api/admin/users/${data.id}`, { language: data.language });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
+    },
+  });
+
   const form = useForm<UpdateUserForm>({
     resolver: zodResolver(updateUserSchema),
     defaultValues: {
       tier: "bronze",
       language: "ko",
-      country: "",
+      ssoProvider: "",
       region: "",
     },
   });
@@ -189,7 +216,7 @@ export default function AdminUsers() {
     form.reset({
       tier: user.tier,
       language: user.language || "ko",
-      country: user.country || "",
+      ssoProvider: user.ssoProvider || "",
       region: user.region || "",
     });
     setIsEditDialogOpen(true);
@@ -227,24 +254,20 @@ export default function AdminUsers() {
   };
 
   const getLanguageName = (lang: string) => {
-    const languages: Record<string, string> = {
-      ko: "한국어",
-      en: "English",
-      ja: "日本語",
-      "zh-CN": "简体中文",
-      "zh-TW": "繁體中文",
-      es: "Español",
-      fr: "Français",
-      de: "Deutsch",
-      ru: "Русский",
-    };
-    return languages[lang] || lang;
+    const language = LANGUAGES.find(l => l.value === lang);
+    return language?.label || lang;
+  };
+
+  const formatDate = (date: Date | string | null | undefined) => {
+    if (!date) return "-";
+    const d = new Date(date);
+    return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, '0')}.${String(d.getDate()).padStart(2, '0')}`;
   };
 
   // Get unique values for filters
   const uniqueTiers = Array.from(new Set(users.map(u => u.tier)));
   const uniqueLanguages = Array.from(new Set(users.map(u => u.language).filter(Boolean)));
-  const uniqueCountries = Array.from(new Set(users.map(u => u.country).filter(Boolean)));
+  const uniqueSsoProviders = Array.from(new Set(users.map(u => u.ssoProvider).filter(Boolean)));
 
   return (
     <div className="space-y-6">
@@ -307,16 +330,16 @@ export default function AdminUsers() {
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium">국가</label>
-              <Select value={selectedCountry} onValueChange={setSelectedCountry}>
-                <SelectTrigger data-testid="select-country">
+              <label className="text-sm font-medium">SSO 제공자</label>
+              <Select value={selectedSsoProvider} onValueChange={setSelectedSsoProvider}>
+                <SelectTrigger data-testid="select-sso-provider">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">전체</SelectItem>
-                  {uniqueCountries.map((country) => (
-                    <SelectItem key={country} value={country!}>
-                      {country}
+                  {uniqueSsoProviders.map((provider) => (
+                    <SelectItem key={provider} value={provider!}>
+                      {provider}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -399,12 +422,12 @@ export default function AdminUsers() {
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => handleSort("country")}
+                      onClick={() => handleSort("ssoProvider")}
                       className="hover-elevate"
-                      data-testid="sort-country"
+                      data-testid="sort-sso-provider"
                     >
-                      국가
-                      {getSortIcon("country")}
+                      SSO
+                      {getSortIcon("ssoProvider")}
                     </Button>
                   </TableHead>
                   <TableHead>
@@ -431,6 +454,18 @@ export default function AdminUsers() {
                       {getSortIcon("visitors")}
                     </Button>
                   </TableHead>
+                  <TableHead>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleSort("createdAt")}
+                      className="hover-elevate"
+                      data-testid="sort-created-at"
+                    >
+                      가입일
+                      {getSortIcon("createdAt")}
+                    </Button>
+                  </TableHead>
                   <TableHead>작업</TableHead>
                 </TableRow>
               </TableHeader>
@@ -451,10 +486,28 @@ export default function AdminUsers() {
                         {user.tier.charAt(0).toUpperCase() + user.tier.slice(1)}
                       </Badge>
                     </TableCell>
-                    <TableCell>{getLanguageName(user.language || "ko")}</TableCell>
-                    <TableCell>{user.country || "-"}</TableCell>
+                    <TableCell>
+                      <Select
+                        value={user.language || "ko"}
+                        onValueChange={(value) => updateLanguageMutation.mutate({ id: user.id, language: value })}
+                        disabled={updateLanguageMutation.isPending}
+                      >
+                        <SelectTrigger className="w-36" data-testid={`select-language-${user.id}`}>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {LANGUAGES.map((lang) => (
+                            <SelectItem key={lang.value} value={lang.value}>
+                              {lang.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </TableCell>
+                    <TableCell>{user.ssoProvider || "-"}</TableCell>
                     <TableCell>{user.savedCount}</TableCell>
                     <TableCell>{getVisitorCount(user).toLocaleString()}</TableCell>
+                    <TableCell>{formatDate(user.createdAt)}</TableCell>
                     <TableCell>
                       <Button
                         variant="ghost"
@@ -506,9 +559,7 @@ export default function AdminUsers() {
                 </div>
                 <div>
                   <span className="text-muted-foreground">가입일:</span>
-                  <span className="ml-2 font-medium">
-                    {editingUser.createdAt ? new Date(editingUser.createdAt).toLocaleDateString() : "-"}
-                  </span>
+                  <span className="ml-2 font-medium">{formatDate(editingUser.createdAt)}</span>
                 </div>
               </div>
             </div>
@@ -553,15 +604,11 @@ export default function AdminUsers() {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="ko">한국어</SelectItem>
-                        <SelectItem value="en">English</SelectItem>
-                        <SelectItem value="ja">日本語</SelectItem>
-                        <SelectItem value="zh-CN">简体中文</SelectItem>
-                        <SelectItem value="zh-TW">繁體中文</SelectItem>
-                        <SelectItem value="es">Español</SelectItem>
-                        <SelectItem value="fr">Français</SelectItem>
-                        <SelectItem value="de">Deutsch</SelectItem>
-                        <SelectItem value="ru">Русский</SelectItem>
+                        {LANGUAGES.map((lang) => (
+                          <SelectItem key={lang.value} value={lang.value}>
+                            {lang.label}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -571,12 +618,12 @@ export default function AdminUsers() {
 
               <FormField
                 control={form.control}
-                name="country"
+                name="ssoProvider"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>국가</FormLabel>
+                    <FormLabel>SSO 제공자</FormLabel>
                     <FormControl>
-                      <Input {...field} placeholder="예: South Korea" data-testid="input-country" />
+                      <Input {...field} placeholder="예: Google, Apple, GitHub" data-testid="input-sso-provider" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

@@ -166,7 +166,7 @@ export interface IStorage {
   updateUser(userId: string, data: Partial<{
     tier: string;
     language: string;
-    country: string;
+    ssoProvider: string;
     region: string;
   }>): Promise<User | undefined>;
   deleteUser(userId: string): Promise<boolean>;
@@ -836,7 +836,7 @@ export class DbStorage implements IStorage {
   async updateUser(userId: string, data: Partial<{
     tier: string;
     language: string;
-    country: string;
+    ssoProvider: string;
     region: string;
   }>): Promise<User | undefined> {
     const result = await db

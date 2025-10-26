@@ -1615,7 +1615,7 @@ Provide a comprehensive analysis in the following JSON format:
   app.patch("/api/admin/users/:id", isAuthenticated, isAdmin, async (req: any, res) => {
     try {
       const { id } = req.params;
-      const { tier, language, country, region } = req.body;
+      const { tier, language, ssoProvider, region } = req.body;
 
       const updates: any = {};
       
@@ -1628,7 +1628,7 @@ Provide a comprehensive analysis in the following JSON format:
       }
 
       if (language !== undefined) updates.language = language;
-      if (country !== undefined) updates.country = country;
+      if (ssoProvider !== undefined) updates.ssoProvider = ssoProvider;
       if (region !== undefined) updates.region = region;
 
       const user = await storage.updateUser(id, updates);

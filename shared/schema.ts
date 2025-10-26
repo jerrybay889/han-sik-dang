@@ -24,7 +24,7 @@ export const users = pgTable("users", {
   isAdmin: integer("is_admin").notNull().default(0),
   tier: varchar("tier").notNull().default("bronze"), // bronze, silver, gold, platinum
   language: varchar("language").default("ko"), // ko, en, ja, zh-CN, zh-TW, es, fr, de, ru
-  country: varchar("country"),
+  ssoProvider: varchar("sso_provider"), // google, apple, github, replit, etc.
   region: varchar("region"),
   visitors1d: integer("visitors_1d").notNull().default(0),
   visitors7d: integer("visitors_7d").notNull().default(0),
