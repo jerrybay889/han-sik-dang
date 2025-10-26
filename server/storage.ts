@@ -221,6 +221,17 @@ export interface IStorage {
     usersByRegion: { region: string | null; count: number }[];
     usersByTier: { tier: string; count: number }[];
   }>;
+  getUserDetails(userId: string): Promise<{
+    user: User;
+    reviews: Review[];
+    savedRestaurants: Array<SavedRestaurant & { restaurant: Restaurant }>;
+    customerInquiries: CustomerInquiry[];
+    stats: {
+      totalReviews: number;
+      averageRating: number;
+      totalSaved: number;
+    };
+  } | undefined>;
   
   // Blog Posts
   getAllBlogPosts(): Promise<BlogPost[]>;
@@ -773,7 +784,8 @@ export class DbStorage implements IStorage {
   async getUserDetails(userId: string): Promise<{
     user: User;
     reviews: Review[];
-    savedRestaurants: Restaurant[];
+    savedRestaurants: Array<SavedRestaurant & { restaurant: Restaurant }>;
+    customerInquiries: CustomerInquiry[];
     stats: {
       totalReviews: number;
       averageRating: number;
@@ -792,30 +804,39 @@ export class DbStorage implements IStorage {
       .where(eq(reviews.userId, userId))
       .orderBy(desc(reviews.createdAt));
 
-    // Get saved restaurants
-    const savedRestaurantIds = await db
-      .select()
+    // Get saved restaurants with join
+    const savedRestaurantsData = await db
+      .select({
+        savedRestaurant: savedRestaurants,
+        restaurant: restaurants,
+      })
       .from(savedRestaurants)
-      .where(eq(savedRestaurants.userId, userId));
+      .leftJoin(restaurants, eq(savedRestaurants.restaurantId, restaurants.id))
+      .where(eq(savedRestaurants.userId, userId))
+      .orderBy(desc(savedRestaurants.createdAt));
 
-    const savedRestaurantsList = savedRestaurantIds.length > 0
-      ? await db
-          .select()
-          .from(restaurants)
-          .where(sql`${restaurants.id} IN ${sql.raw(`(${savedRestaurantIds.map(s => `'${s.restaurantId}'`).join(',')})`)}`)
-      : [];
+    // Get customer inquiries
+    const userInquiries = await db
+      .select()
+      .from(customerInquiries)
+      .where(eq(customerInquiries.userId, userId))
+      .orderBy(desc(customerInquiries.createdAt));
 
     // Calculate stats
     const totalReviews = userReviews.length;
     const averageRating = totalReviews > 0
       ? userReviews.reduce((sum, r) => sum + r.rating, 0) / totalReviews
       : 0;
-    const totalSaved = savedRestaurantIds.length;
+    const totalSaved = savedRestaurantsData.length;
 
     return {
       user,
       reviews: userReviews,
-      savedRestaurants: savedRestaurantsList,
+      savedRestaurants: savedRestaurantsData.map(item => ({
+        ...item.savedRestaurant,
+        restaurant: item.restaurant!,
+      })),
+      customerInquiries: userInquiries,
       stats: {
         totalReviews,
         averageRating,
