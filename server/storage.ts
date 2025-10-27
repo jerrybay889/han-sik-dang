@@ -438,7 +438,11 @@ export class DbStorage implements IStorage {
     const now = new Date();
     return await db.select().from(eventBanners)
       .where(
-        sql`${eventBanners.isActive} = 1 AND ${eventBanners.startDate} <= ${now} AND ${eventBanners.endDate} >= ${now}`
+        and(
+          eq(eventBanners.isActive, 1),
+          sql`${eventBanners.startDate} <= ${now}`,
+          sql`${eventBanners.endDate} >= ${now}`
+        )
       )
       .orderBy(eventBanners.displayOrder);
   }
