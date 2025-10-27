@@ -2071,6 +2071,168 @@ Provide a comprehensive analysis in the following JSON format:
   });
 
   // ============================================
+  // External Data Collection API (For Future Scalability)
+  // ============================================
+  
+  // Middleware to verify API key for external data collection
+  const verifyDataCollectionApiKey = (req: any, res: any, next: any) => {
+    const apiKey = req.headers['x-api-key'];
+    const validApiKey = process.env.DATA_COLLECTION_API_KEY;
+    
+    if (!validApiKey) {
+      return res.status(500).json({ error: "API key not configured on server" });
+    }
+    
+    if (!apiKey || apiKey !== validApiKey) {
+      return res.status(401).json({ error: "Invalid API key" });
+    }
+    
+    next();
+  };
+
+  // Bulk import restaurants from external data source
+  app.post("/api/external/restaurants", verifyDataCollectionApiKey, async (req: any, res) => {
+    try {
+      const restaurants = req.body.restaurants;
+      if (!Array.isArray(restaurants)) {
+        return res.status(400).json({ error: "restaurants must be an array" });
+      }
+
+      const results = {
+        success: 0,
+        failed: 0,
+        errors: [] as Array<{ name: string; error: string }>,
+      };
+
+      for (const restaurantData of restaurants) {
+        try {
+          await storage.createRestaurant(restaurantData);
+          results.success++;
+        } catch (error: any) {
+          results.failed++;
+          results.errors.push({
+            name: restaurantData.name || "Unknown",
+            error: error.message,
+          });
+        }
+      }
+
+      logger.info("Bulk restaurant import completed", { 
+        success: results.success, 
+        failed: results.failed,
+        path: "/api/external/restaurants"
+      });
+
+      res.status(200).json(results);
+    } catch (error) {
+      logger.error("Error in bulk restaurant import", { error, path: "/api/external/restaurants" });
+      res.status(500).json({ error: ErrorMessages.INTERNAL_ERROR });
+    }
+  });
+
+  // Bulk import external reviews
+  app.post("/api/external/reviews", verifyDataCollectionApiKey, async (req: any, res) => {
+    try {
+      const reviews = req.body.reviews;
+      if (!Array.isArray(reviews)) {
+        return res.status(400).json({ error: "reviews must be an array" });
+      }
+
+      const results = {
+        success: 0,
+        failed: 0,
+        errors: [] as Array<{ restaurantId: number; error: string }>,
+      };
+
+      for (const reviewData of reviews) {
+        try {
+          await storage.createExternalReview(reviewData);
+          results.success++;
+        } catch (error: any) {
+          results.failed++;
+          results.errors.push({
+            restaurantId: reviewData.restaurantId,
+            error: error.message,
+          });
+        }
+      }
+
+      logger.info("Bulk review import completed", { 
+        success: results.success, 
+        failed: results.failed,
+        path: "/api/external/reviews"
+      });
+
+      res.status(200).json(results);
+    } catch (error) {
+      logger.error("Error in bulk review import", { error, path: "/api/external/reviews" });
+      res.status(500).json({ error: ErrorMessages.INTERNAL_ERROR });
+    }
+  });
+
+  // Bulk import menu items
+  app.post("/api/external/menus", verifyDataCollectionApiKey, async (req: any, res) => {
+    try {
+      const menus = req.body.menus;
+      if (!Array.isArray(menus)) {
+        return res.status(400).json({ error: "menus must be an array" });
+      }
+
+      const results = {
+        success: 0,
+        failed: 0,
+        errors: [] as Array<{ restaurantId: number; error: string }>,
+      };
+
+      for (const menuData of menus) {
+        try {
+          await storage.createMenu(menuData);
+          results.success++;
+        } catch (error: any) {
+          results.failed++;
+          results.errors.push({
+            restaurantId: menuData.restaurantId,
+            error: error.message,
+          });
+        }
+      }
+
+      logger.info("Bulk menu import completed", { 
+        success: results.success, 
+        failed: results.failed,
+        path: "/api/external/menus"
+      });
+
+      res.status(200).json(results);
+    } catch (error) {
+      logger.error("Error in bulk menu import", { error, path: "/api/external/menus" });
+      res.status(500).json({ error: ErrorMessages.INTERNAL_ERROR });
+    }
+  });
+
+  // Get data collection status and statistics
+  app.get("/api/external/status", verifyDataCollectionApiKey, async (req: any, res) => {
+    try {
+      const restaurantCount = await storage.getRestaurantCount();
+      const reviewCount = await storage.getReviewCount();
+      const menuCount = await storage.getMenuCount();
+
+      res.json({
+        timestamp: new Date().toISOString(),
+        database: process.env.USE_SUPABASE === "true" ? "Supabase" : "Neon",
+        statistics: {
+          restaurants: restaurantCount,
+          reviews: reviewCount,
+          menus: menuCount,
+        },
+      });
+    } catch (error) {
+      logger.error("Error fetching data collection status", { error, path: "/api/external/status" });
+      res.status(500).json({ error: ErrorMessages.INTERNAL_ERROR });
+    }
+  });
+
+  // ============================================
   // Object Storage Endpoints (For Scalable Image Storage)
   // ============================================
 

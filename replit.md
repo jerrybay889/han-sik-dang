@@ -1,227 +1,152 @@
 # han sik dang (한식당) - Korean Restaurant Discovery Platform
 
 ## Overview
-
-han sik dang is a hybrid content platform and utility app designed for discovering Korean restaurants, featuring content monetization through advertising. It offers restaurant search, rich media content (videos, blogs), and a mobile-first, visually-driven design emphasizing Korean food culture. The platform is a full-stack TypeScript web application utilizing React for the frontend and Express for the backend, built with Progressive Web App (PWA) capabilities. The project aims for a content-first approach with integrated ad monetization and strong SEO. It includes a comprehensive Admin Dashboard for platform management and a backend for a B2B Restaurant Dashboard. All 30 initial restaurants have pre-generated AI insights.
+han sik dang is a hybrid content platform and utility app for discovering Korean restaurants, integrating content monetization through advertising. It offers restaurant search, rich media, and a mobile-first, visually-driven design emphasizing Korean food culture. The platform is a full-stack TypeScript web application using React for the frontend and Express for the backend, built with PWA capabilities. It aims for a content-first approach with integrated ad monetization, strong SEO, and includes a comprehensive Admin Dashboard and a B2B Restaurant Dashboard. All 30 initial restaurants feature pre-generated AI insights. The platform is architected for enterprise scalability, supporting tens of thousands of restaurants, hundreds of thousands of images, and millions of users.
 
 ## User Preferences
-
 Preferred communication style: Simple, everyday language.
-
-## Deployment Readiness (October 26, 2025)
-
-### Pre-Deployment Verification Complete ✅
-
-All 8-stage deployment checklist successfully completed:
-
-1. **Environment Configuration** - All 5 required secrets verified (GEMINI_API_KEY, NAVER_MAPS_CLIENT_ID, SESSION_SECRET, VITE_GA_MEASUREMENT_ID, DATABASE_URL)
-2. **Database Optimization** - 30 restaurants with complete data (145 menus, 130 reviews), optimized indexes on all critical columns
-3. **Production Build** - Build verified (19s, frontend 399KB → 129KB gzipped, backend 151KB)
-4. **SEO & PWA** - Validated manifest.json, robots.txt, sitemap.xml, service worker, multilingual SEO
-5. **Performance** - Lazy loading (loading="lazy"), API caching (5min stale/10min gc), code splitting
-6. **Security** - SQL injection prevention (Drizzle parameterized queries), secure error messages, HTTPS ready
-7. **Monitoring** - Structured logging system (JSON format, context-aware)
-8. **E2E Testing** - All core features verified (homepage, filters, restaurant details, language switching, AI chat)
-
-### Final Fixes (October 26, 2025)
-
-- **Duplicate data-testid Resolution**: Desktop filters use `-desktop` suffix, mobile filters use `-mobile` suffix for unique test identification
-- **Missing /chat Route**: Added `/chat` as alias to `/ai` route for improved chatbot accessibility
-- **Naver Maps Security Enhancement**: Refactored NaverMap component to fetch Client ID from `/api/config` endpoint instead of window global
-
-### Production-Ready Features
-
-- ✅ 30 Korean restaurants with complete menu data and AI insights
-- ✅ 9-language internationalization support
-- ✅ Google Gemini 2.0 Flash AI integration
-- ✅ Naver Maps with GPS location services
-- ✅ Progressive Web App (PWA) capabilities
-- ✅ Responsive design (mobile/tablet/desktop)
-- ✅ Comprehensive admin dashboard
-- ✅ Restaurant owner B2B dashboard
-- ✅ Structured error logging and monitoring
-
-## Recent Technical Improvements (October 2025)
-
-### Security & Data Integrity
--   **SQL Injection Prevention**: Migrated from raw SQL template literals to Drizzle's safe parameterized methods (`ilike()`, `or()`, `and()`) throughout the application, eliminating SQL injection vulnerabilities in search and filter operations.
--   **Database Transactions**: Implemented atomic transactions for critical multi-step operations:
-    -   `deleteUser`: Reviews, saved restaurants, customer inquiries, and user deletion in single transaction
-    -   `deleteReview` & `deleteReviewAsAdmin`: Review deletion with automatic rating recalculation
-    -   Prevents orphaned data and ensures data consistency
-    
-### Error Handling & Logging (Phase 3 Complete)
--   **Structured Logging System**: Created `server/logger.ts` with context-aware logging (userId, action, path) and JSON-formatted output
--   **Complete Migration**: All 90+ `console.error` instances in `server/routes.ts` migrated to structured `logger.error` with contextual data
--   **Secure Error Messages**: Implemented `ErrorMessages` constants preventing sensitive information leakage to clients
--   **Consistent Error Handling**: Applied standardized error handling patterns across all API routes (user auth, AI chat, restaurants, reviews, dashboard, admin) with proper HTTP status codes
--   **Context-Rich Logging**: Every error log includes request path, user ID, and relevant entity IDs (restaurantId, reviewId, etc.) for effective debugging
-
-### TypeScript Type Safety (Phase 4 In Progress)
--   **API Response Types**: Created `shared/types.ts` with strongly-typed interfaces:
-    -   `UserDetailsResponse`: Complete user profile with reviews, saved restaurants, and statistics
-    -   `AdminDashboardStatsResponse`: Platform-wide analytics
-    -   `AdminReviewWithRestaurant`: Extended review data for admin views
-    -   `RestaurantDetailResponse`: Complete restaurant data with menus, images, insights, and promotions
-    -   `RestaurantWithReviewsResponse`: Restaurant with user reviews and ratings
-    -   `ReviewWithResponse`: Reviews with owner responses
-    -   `RestaurantDashboardStatsResponse`: Restaurant owner dashboard statistics
-    -   Filter parameter interfaces for type-safe query building
--   **Type-Safe Queries**: Applied response types to TanStack Query hooks throughout admin frontend
-
-### Code Quality
--   **Zero LSP Errors**: Resolved all TypeScript diagnostics across codebase (storage layer, admin components, shared types)
--   **Implicit Any Removal**: Added explicit types to map callbacks and function parameters
--   **Interface Consistency**: Aligned implementation types with interface definitions
--   **Monitorable System**: All errors logged with structured context for production monitoring
 
 ## System Architecture
 
 ### Frontend
-
 -   **Framework**: React 18+ with TypeScript.
--   **Routing**: Wouter with flat route structure in App.tsx (wouter does not support nested Switch components).
--   **Admin Routing**: All admin routes registered directly in App.tsx via `admin-pages.tsx` wrapper system. Each admin page component is wrapped with `AdminLayout` using a Higher-Order Component (HOC) pattern. This maintains code-level separation between frontend and admin sections while using a single build output.
+-   **Routing**: Wouter with a flat route structure; Admin routes use an HOC pattern for code separation within a single build.
 -   **State Management**: TanStack React Query v5 for server state and caching.
 -   **UI Components**: shadcn/ui (New York style) built on Radix UI, styled with Tailwind CSS v4 and custom CSS variables.
--   **Design System**: Fully responsive design (mobile/tablet/desktop), 8px grid, dual-mode theming, multi-language typography (Noto Sans KR, SF Pro Display), accessibility-focused.
--   **Responsive Layout**: 
-    - **Desktop (≥1280px)**: 3-column restaurant grid with left filter sidebar (264px fixed width), max-width 1280px container
-    - **Tablet (768px-1279px)**: 2-column restaurant grid with horizontal scroll filters, no sidebar
-    - **Mobile (<768px)**: 1-column vertical layout with horizontal scroll filters, optimized for touch interactions
--   **Internationalization (i18n)**: i18next with 9-language support (English, Korean, Japanese, Chinese Simplified/Traditional, Spanish, French, German, Russian), HTTP backend for translations, automatic language detection, localStorage persistence.
+-   **Design System**: Fully responsive (mobile/tablet/desktop), 8px grid, dual-mode theming, multi-language typography, accessibility-focused.
+-   **Internationalization (i18n)**: i18next with 9-language support, HTTP backend for translations, automatic language detection, localStorage persistence.
 -   **SEO**: `react-helmet-async` for dynamic meta tags, structured data (Schema.org JSON-LD), sitemap, robots.txt, multilingual SEO.
--   **PWA**: `manifest.json`, Service Worker for offline caching, installability, standalone display, app icons, shortcuts.
--   **Features**: Naver Maps integration with multi-language support, GPS location services for "Nearby" filtering, advanced multi-criteria filtering (price, cuisine, sort), image lazy loading, code splitting.
+-   **PWA**: `manifest.json`, Service Worker for offline caching, installability.
+-   **Features**: Naver Maps integration with GPS, advanced multi-criteria filtering, image lazy loading, code splitting.
 
 ### Backend
-
 -   **Framework**: Express.js with TypeScript on Node.js (ESM).
 -   **Build System**: `esbuild` for production, `tsx` for development.
--   **API Structure**: RESTful, structured logging (`server/logger.ts`), standardized error handling with secure error messages, session management.
--   **Storage**: Interface-based `IStorage` implemented by `DbStorage` using PostgreSQL via Drizzle ORM with transaction support for critical operations.
--   **Query Safety**: All database queries use Drizzle's parameterized methods (`eq()`, `ilike()`, `or()`, `and()`) to prevent SQL injection.
--   **Authentication**: Replit Auth with OIDC via Passport.js, session-based (`connect-pg-simple`), auto-upsert on login, JWT refresh token support.
--   **Authorization**: Role-based access control with `isAdmin` field and middleware for admin routes.
--   **Admin Dashboard**: Comprehensive master admin dashboard with 30+ API endpoints (`/api/admin/*`) for complete platform management including:
-    - Restaurant Applications: Review and process new restaurant partnership applications
-    - Multi-Channel Inquiries: Manage owner, customer, and partnership inquiries with response system
-    - Owner Notices: Publish platform-wide notices for restaurant owners
-    - Payment Tracking: Monitor all payment transactions
-    - User Analytics: Analyze users by tier, country, and region with visualization
-    - Blog Posts: Content management system
-    - AI Priority Tasks: Intelligent task prioritization showing pending applications and inquiries
-    - Platform Statistics: Comprehensive charts and analytics dashboard
--   **Restaurant Dashboard**: Complete B2B restaurant management system with frontend UI and backend API (15+ authenticated endpoints) for ownership verification, review response management (CRUD operations), promotions, image management, and analytics.
+-   **API Structure**: RESTful, structured logging, standardized error handling with secure messages, session management.
+-   **Storage**: Interface-based `IStorage` implemented by `DbStorage` using PostgreSQL via Drizzle ORM with transaction support.
+-   **Query Safety**: Drizzle's parameterized methods prevent SQL injection.
+-   **Authentication**: Replit Auth with OIDC via Passport.js, session-based (`connect-pg-simple`), JWT refresh token support.
+-   **Authorization**: Role-based access control with `isAdmin` field and middleware.
+-   **Admin Dashboard**: 30+ API endpoints (`/api/admin/*`) for platform management (restaurant applications, inquiries, notices, payments, user analytics, blog posts, AI task prioritization, platform statistics).
+-   **Restaurant Dashboard**: B2B management system with 15+ authenticated endpoints for ownership verification, review response, promotions, image management, and analytics.
 
 ### Data Storage
-
 -   **Database**: PostgreSQL (Neon) with `@neondatabase/serverless`.
--   **ORM**: Drizzle ORM, with Zod validation for schema defined in `shared/schema.ts`.
--   **Content**: 30 restaurant records with complete menu data, external reviews, YouTube content integration, and AI insights.
--   **User Reviews**: CRUD operations with ownership validation, automatic restaurant rating recalculation.
--   **Admin Tables**: 7 additional management tables (restaurantApplications, ownerInquiries, customerInquiries, partnershipInquiries, ownerNotices, payments, blogPosts) for comprehensive platform management.
+-   **ORM**: Drizzle ORM, with Zod validation.
+-   **Content**: 30 restaurant records with menus, reviews, YouTube content, and AI insights.
+-   **User Reviews**: CRUD operations with ownership validation and automatic rating recalculation.
+-   **Admin Tables**: 7 additional tables for comprehensive platform management.
 
 ### AI Integration
-
--   **Mechanism**: Pre-generated AI insights (review summaries, "best for" scenarios, cultural tips) stored in `restaurantInsights` table for all 30 restaurants.
+-   **Mechanism**: Pre-generated AI insights (review summaries, "best for" scenarios, cultural tips) stored in `restaurantInsights` table.
 -   **AI Tool**: Google Gemini 2.5 Flash (`@google/genai`) for bilingual content generation.
 
 ### Analytics
-
--   **Platform**: Google Analytics 4 (GA4) with custom utility for tracking page views and events.
-
-## Restaurant Owner Dashboard Features
-
-The restaurant owner dashboard is a complete B2B management system accessible at `/dashboard` for authenticated restaurant owners.
-
-### Key Features
-
-1. **Restaurant Selection & Statistics**
-   - Multi-restaurant support for owners with multiple locations
-   - Real-time statistics: total reviews, average rating, rating trend
-   - Visual indicators for rating changes
-
-2. **Review Response Management** (Recently Completed)
-   - View all customer reviews with existing responses
-   - Create new responses to reviews
-   - Edit existing responses
-   - Delete responses
-   - Real-time UI updates using React Query refetchQueries
-   - Professional response templates and guidelines
-
-3. **Promotions Management**
-   - Create bilingual promotions (Korean/English)
-   - Set promotion active dates
-   - Enable/disable promotions
-   - Track promotion status
-
-4. **Image Management**
-   - Upload restaurant images with drag-and-drop
-   - Image preview and management
-   - Showcase restaurant ambiance
-
-### Technical Implementation
-
-- **Frontend**: React with TanStack Query v5 for state management
-- **Cache Strategy**: refetchQueries for immediate UI updates after mutations
-- **API Endpoints**: 15+ authenticated endpoints with ownership verification
-- **Authentication**: Replit Auth (OIDC) with session-based authorization
-- **Data Validation**: Zod schemas for all request/response payloads
+-   **Platform**: Google Analytics 4 (GA4) for tracking page views and events.
 
 ## External Dependencies
 
 ### AI Integration
-
 -   `@google/genai`: Google Generative AI SDK.
 
 ### UI Framework & Utilities
-
 -   `@radix-ui/*`: Accessible UI primitives.
--   `class-variance-authority`: Type-safe variant styling.
--   `cmdk`: Command menu.
--   `embla-carousel-react`: Carousel/slider.
 -   `lucide-react`: Icon library.
--   `react-day-picker`: Date picker.
--   `react-hook-form`: Form state management.
--   `vaul`: Drawer component.
--   `recharts`: Charting library for admin dashboard.
+-   `shadcn/ui`: UI components built on Radix UI.
+-   `tailwindcss`: CSS framework.
+-   `recharts`: Charting library.
 
 ### Data & Validation
-
 -   `zod`: Schema validation.
--   `@hookform/resolvers`: Form validation integration.
--   `date-fns`: Date manipulation utilities.
-
-### Database & ORM
-
 -   `drizzle-orm`: TypeScript ORM.
--   `drizzle-zod`: Zod schema generation from Drizzle schemas.
 -   `@neondatabase/serverless`: Serverless PostgreSQL driver for Neon.
--   `connect-pg-simple`: PostgreSQL session store for Express.
-
-### Build & Development Tools
-
--   `vite`: Frontend build tool and dev server.
--   `@vitejs/plugin-react`: React integration for Vite.
--   `tailwindcss`, `autoprefixer`: CSS processing.
--   `tsx`: TypeScript execution for development.
--   `esbuild`: Fast JavaScript bundler for production.
 
 ### Routing & State
-
 -   `wouter`: Lightweight client-side routing.
--   `@tanstack/react-query`: Server state management with caching.
+-   `@tanstack/react-query`: Server state management.
 
 ### Internationalization
-
 -   `i18next`: Internationalization framework.
 -   `react-i18next`: React bindings for i18next.
--   `i18next-browser-languagedetector`: Browser language detection plugin.
 
 ### Other Integrations
+-   Google AdSense: Content monetization.
+-   Naver Maps API: Interactive maps.
+-   Google Analytics 4 (GA4): Platform analytics.
+-   Replit Auth: User authentication.
+-   `@google-cloud/storage`: Google Cloud Storage client for Replit Object Storage.
+-   `@uppy/core`, `@uppy/react`, `@uppy/dashboard`, `@uppy/aws-s3`: File upload components.
+-   `postgres`: PostgreSQL client with connection pooling support.
 
--   Google AdSense: For content monetization.
--   Naver Maps API: For interactive maps.
--   Google Analytics 4 (GA4): For platform analytics.
--   Replit Auth: For user authentication.
+## Enterprise Scalability Architecture (October 27, 2025)
+
+### Overview
+The platform has been architected to scale from MVP (30-50 restaurants) to enterprise-level (tens of thousands of restaurants, hundreds of thousands of images, millions of users).
+
+### Scalability Features
+
+#### 1. Database Layer - Flexible PostgreSQL Backend
+-   **Dual Database Support**: Seamless switching between Neon (development) and Supabase (production) via `USE_SUPABASE` environment variable
+-   **Connection Pooling**: postgres.js client with max 10 concurrent connections, 20s idle timeout, 10s connect timeout
+-   **Query Optimization**: Composite indexes on critical columns (district+cuisineType+priceRange for restaurants)
+-   **Transaction Support**: Atomic multi-step operations preventing orphaned data
+-   **SQL Injection Prevention**: Drizzle ORM parameterized queries (`eq()`, `ilike()`, `or()`, `and()`)
+
+#### 2. Object Storage - Scalable Image Management
+-   **Replit Object Storage**: Google Cloud Storage backend for unlimited image storage
+-   **ACL Policies**: Fine-grained access control with public/private visibility settings
+-   **Two-Bucket Architecture**:
+    -   `PRIVATE_OBJECT_DIR`: User-uploaded images with authentication
+    -   `PUBLIC_OBJECT_SEARCH_PATHS`: Static assets with public access
+-   **Upload Flow**: Client → Presigned URL → Direct GCS upload → Server metadata update
+-   **Components**: `ObjectUploader.tsx` (frontend), `ObjectStorageService` (backend), `ObjectAcl` (permissions)
+
+#### 3. External Data Collection API
+-   **API Key Authentication**: Secure endpoints with `DATA_COLLECTION_API_KEY` validation
+-   **Bulk Import Endpoints**:
+    -   `POST /api/external/restaurants`: Batch restaurant creation
+    -   `POST /api/external/reviews`: Batch external review import
+    -   `POST /api/external/menus`: Batch menu item creation
+    -   `GET /api/external/status`: Data collection statistics
+-   **Error Handling**: Detailed success/failure tracking per batch item
+-   **Use Case**: Connect with future web scraping/data collection projects
+
+#### 4. Performance Optimizations
+-   **API Response Caching**: 5-minute stale-while-revalidate for restaurant listings
+-   **Image Lazy Loading**: `loading="lazy"` attribute on all images
+-   **Code Splitting**: Vite-based route-level code splitting
+-   **Structured Logging**: `server/logger.ts` with context-aware JSON formatting
+
+### Environment Variables for Scalability
+
+```bash
+# Database (Supabase for Production)
+DATABASE_URL=postgresql://postgres:[PASSWORD]@db.xxxxx.supabase.co:5432/postgres
+USE_SUPABASE=true
+
+# Object Storage
+PRIVATE_OBJECT_DIR=/hansikdang-private
+PUBLIC_OBJECT_SEARCH_PATHS=/hansikdang-public/assets,/hansikdang-public/static
+
+# External Data Collection
+DATA_COLLECTION_API_KEY=<32-byte-hex-key>
+
+# Existing
+GEMINI_API_KEY=<key>
+NAVER_MAPS_CLIENT_ID=<key>
+SESSION_SECRET=<key>
+VITE_GA_MEASUREMENT_ID=<key>
+```
+
+### Migration Guide
+See `SCALABILITY_MIGRATION_GUIDE.md` for detailed instructions on:
+-   Migrating from Neon to Supabase
+-   Setting up Object Storage buckets
+-   Connecting external data collection projects
+-   Performance monitoring and optimization
+
+### Current Status
+-   **Database**: Neon PostgreSQL (development), Supabase-ready (production)
+-   **Images**: Local filesystem (30 restaurants), Object Storage-ready
+-   **Data Collection**: REST API endpoints deployed, awaiting external project connection
+-   **Scale Target**: 10,000+ restaurants, 100,000+ images, 1M+ users
