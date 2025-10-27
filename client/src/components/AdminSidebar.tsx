@@ -246,7 +246,7 @@ export function AdminSidebar() {
       <SidebarHeader className="border-b p-4">
         <div className="flex items-center gap-2">
           <img
-            src="/attached_assets/배경제거 -Gemini_Generated_Image_1ac1sb1ac1sb1ac1_ALTools_AIRemoveBG_1760940109625.png"
+            src="/attached_assets/logo-hansikdang.png"
             alt="한식당"
             className="h-8"
           />

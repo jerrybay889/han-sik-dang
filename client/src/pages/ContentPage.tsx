@@ -102,7 +102,7 @@ export default function ContentPage() {
         <div className="max-w-7xl mx-auto px-4 xl:px-6 py-4">
           <div className="flex items-center justify-between">
             <img
-              src="/attached_assets/배경제거 -Gemini_Generated_Image_1ac1sb1ac1sb1ac1_ALTools_AIRemoveBG_1760940109625.png"
+              src="/attached_assets/logo-hansikdang.png"
               alt="한식당"
               className="h-8"
             />

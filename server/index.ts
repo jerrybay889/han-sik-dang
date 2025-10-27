@@ -10,6 +10,9 @@ app.use(express.urlencoded({ extended: false }));
 // Serve uploaded files
 app.use('/uploaded_files', express.static(path.join(process.cwd(), 'uploaded_files')));
 
+// Serve attached assets (logos, images, etc.)
+app.use('/attached_assets', express.static(path.join(process.cwd(), 'attached_assets')));
+
 // Serve static files from client/public (for logos, icons, etc.)
 app.use(express.static(path.join(process.cwd(), 'client', 'public')));
 

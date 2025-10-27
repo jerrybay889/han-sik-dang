@@ -15,7 +15,7 @@ export function SEO({
   title,
   description,
   keywords = [],
-  image = "/attached_assets/배경제거 -Gemini_Generated_Image_1ac1sb1ac1sb1ac1_ALTools_AIRemoveBG_1760940109625.png",
+  image = "/attached_assets/logo-hansikdang.png",
   url,
   type = "website",
   structuredData,

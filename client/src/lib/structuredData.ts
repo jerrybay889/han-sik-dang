@@ -4,7 +4,7 @@ export const createOrganizationSchema = (baseUrl: string) => ({
   name: "한식당 (Hansikdang)",
   alternateName: "Hansikdang",
   url: baseUrl,
-  logo: `${baseUrl}/attached_assets/배경제거 -Gemini_Generated_Image_1ac1sb1ac1sb1ac1_ALTools_AIRemoveBG_1760940109625.png`,
+  logo: `${baseUrl}/attached_assets/logo-hansikdang.png`,
   description: "AI-powered Korean restaurant discovery platform for tourists visiting Korea",
   address: {
     "@type": "PostalAddress",
@@ -119,7 +119,7 @@ export const createArticleSchema = (article: {
     name: "Hansikdang",
     logo: {
       "@type": "ImageObject",
-      url: "/attached_assets/배경제거 -Gemini_Generated_Image_1ac1sb1ac1sb1ac1_ALTools_AIRemoveBG_1760940109625.png",
+      url: "/attached_assets/logo-hansikdang.png",
     },
   },
 });
