@@ -1,7 +1,11 @@
-const CACHE_NAME = 'hansikdang-v1';
+const CACHE_NAME = 'hansikdang-v2-logos';
 const urlsToCache = [
   '/',
   '/manifest.json',
+  '/favicon.ico',
+  '/apple-touch-icon.png',
+  '/pwa-icon-192.png',
+  '/pwa-icon-512.png',
 ];
 
 self.addEventListener('install', (event) => {
