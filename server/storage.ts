@@ -1,5 +1,7 @@
 import { neon } from "@neondatabase/serverless";
-import { drizzle } from "drizzle-orm/neon-http";
+import { drizzle as drizzleNeon } from "drizzle-orm/neon-http";
+import postgres from "postgres";
+import { drizzle as drizzlePostgres } from "drizzle-orm/postgres-js";
 import { eq, desc, sql, and, or, ilike } from "drizzle-orm";
 import {
   type User,
@@ -67,8 +69,16 @@ import {
   blogPosts,
 } from "@shared/schema";
 
-const client = neon(process.env.DATABASE_URL!);
-const db = drizzle(client);
+const DATABASE_URL = process.env.DATABASE_URL!;
+const USE_SUPABASE = process.env.USE_SUPABASE === "true";
+
+const db = USE_SUPABASE
+  ? drizzlePostgres(postgres(DATABASE_URL, {
+      max: 10,
+      idle_timeout: 20,
+      connect_timeout: 10,
+    }))
+  : drizzleNeon(neon(DATABASE_URL));
 
 export interface IStorage {
   // User operations for Replit Auth
