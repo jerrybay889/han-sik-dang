@@ -10,6 +10,9 @@ app.use(express.urlencoded({ extended: false }));
 // Serve uploaded files
 app.use('/uploaded_files', express.static(path.join(process.cwd(), 'uploaded_files')));
 
+// Serve static files from client/public (for logos, icons, etc.)
+app.use(express.static(path.join(process.cwd(), 'client', 'public')));
+
 app.use((req, res, next) => {
   const start = Date.now();
   const path = req.path;
