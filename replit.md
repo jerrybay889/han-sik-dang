@@ -31,11 +31,11 @@ Preferred communication style: Simple, everyday language.
 -   **Restaurant Dashboard**: B2B management system with 15+ authenticated endpoints for ownership verification, review response, promotions, image management, and analytics.
 
 ### Data Storage
--   **Database**: PostgreSQL (Neon) with `@neondatabase/serverless`.
+-   **Database**: PostgreSQL (Supabase) with `postgres` client and connection pooling.
 -   **ORM**: Drizzle ORM, with Zod validation.
--   **Content**: 30 restaurant records with menus, reviews, YouTube content, and AI insights.
+-   **Content**: 30 restaurant records seeded (ready for menus, reviews, YouTube content, and AI insights).
 -   **User Reviews**: CRUD operations with ownership validation and automatic rating recalculation.
--   **Admin Tables**: 7 additional tables for comprehensive platform management.
+-   **Admin Tables**: 23 total tables including platform management, restaurant operations, and AI insights.
 
 ### AI Integration
 -   **Mechanism**: Pre-generated AI insights (review summaries, "best for" scenarios, cultural tips) stored in `restaurantInsights` table.
@@ -145,8 +145,14 @@ See `SCALABILITY_MIGRATION_GUIDE.md` for detailed instructions on:
 -   Connecting external data collection projects
 -   Performance monitoring and optimization
 
-### Current Status
--   **Database**: Neon PostgreSQL (development), Supabase-ready (production)
--   **Images**: Local filesystem (30 restaurants), Object Storage-ready
--   **Data Collection**: REST API endpoints deployed, awaiting external project connection
--   **Scale Target**: 10,000+ restaurants, 100,000+ images, 1M+ users
+### Current Status (Updated: October 27, 2025)
+-   **Database**: ✅ **Supabase PostgreSQL (Active)** - 23 tables migrated, 30 restaurants seeded
+-   **Images**: ✅ **Object Storage Configured** - Environment variables set (`PRIVATE_OBJECT_DIR`, `PUBLIC_OBJECT_SEARCH_PATHS`)
+-   **Data Collection**: ✅ **External API Active** - API key generated (`DATA_COLLECTION_API_KEY`), endpoints ready
+-   **Scale Target**: Ready for 10,000+ restaurants, 100,000+ images, 1M+ users
+
+### Migration Completed
+-   **From**: Neon PostgreSQL (local development)
+-   **To**: Supabase PostgreSQL (production-ready)
+-   **Method**: Transaction Pooler (port 6543) for IPv4 compatibility
+-   **Status**: All enterprise scalability features activated
