@@ -162,16 +162,6 @@ export interface IStorage {
   // Admin operations
   getAllUsers(): Promise<Array<User & { savedCount: number }>>;
   updateUserAdminStatus(userId: string, isAdmin: number): Promise<User | undefined>;
-  getUserDetails(userId: string): Promise<{
-    user: User;
-    reviews: Review[];
-    savedRestaurants: Restaurant[];
-    stats: {
-      totalReviews: number;
-      averageRating: number;
-      totalSaved: number;
-    };
-  } | undefined>;
   updateUserTier(userId: string, tier: string): Promise<User | undefined>;
   updateUser(userId: string, data: Partial<{
     tier: string;
