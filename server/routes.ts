@@ -7,6 +7,8 @@ import { logger, ErrorMessages } from "./logger";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
+import { ObjectStorageService, ObjectNotFoundError } from "./objectStorage";
+import { ObjectPermission } from "./objectAcl";
 
 const genAI = new GoogleGenAI({ 
   apiKey: process.env.GEMINI_API_KEY || "" 
@@ -2064,6 +2066,100 @@ Provide a comprehensive analysis in the following JSON format:
       res.json(posts);
     } catch (error) {
       logger.error("Error fetching blog posts", { error, path: "/api/admin/blog-posts", userId: req.user?.claims?.sub });
+      res.status(500).json({ error: ErrorMessages.INTERNAL_ERROR });
+    }
+  });
+
+  // ============================================
+  // Object Storage Endpoints (For Scalable Image Storage)
+  // ============================================
+
+  // Get upload URL for object storage (Protected)
+  app.post("/api/objects/upload", isAuthenticated, async (req: any, res) => {
+    try {
+      const objectStorageService = new ObjectStorageService();
+      const uploadURL = await objectStorageService.getObjectEntityUploadURL();
+      res.json({ uploadURL });
+    } catch (error) {
+      logger.error("Error getting upload URL", { error, path: "/api/objects/upload", userId: req.user?.claims?.sub });
+      res.status(500).json({ error: ErrorMessages.INTERNAL_ERROR });
+    }
+  });
+
+  // Serve private objects with ACL check
+  app.get("/objects/:objectPath(*)", isAuthenticated, async (req: any, res) => {
+    const userId = req.user?.claims?.sub;
+    const objectStorageService = new ObjectStorageService();
+    try {
+      const objectFile = await objectStorageService.getObjectEntityFile(req.path);
+      const canAccess = await objectStorageService.canAccessObjectEntity({
+        objectFile,
+        userId: userId,
+        requestedPermission: ObjectPermission.READ,
+      });
+      if (!canAccess) {
+        return res.sendStatus(401);
+      }
+      objectStorageService.downloadObject(objectFile, res);
+    } catch (error) {
+      logger.error("Error accessing object", { error, path: req.path, userId });
+      if (error instanceof ObjectNotFoundError) {
+        return res.sendStatus(404);
+      }
+      return res.sendStatus(500);
+    }
+  });
+
+  // Serve public objects
+  app.get("/public-objects/:filePath(*)", async (req, res) => {
+    const filePath = req.params.filePath;
+    const objectStorageService = new ObjectStorageService();
+    try {
+      const file = await objectStorageService.searchPublicObject(filePath);
+      if (!file) {
+        return res.status(404).json({ error: "File not found" });
+      }
+      objectStorageService.downloadObject(file, res);
+    } catch (error) {
+      logger.error("Error serving public object", { error, filePath });
+      return res.status(500).json({ error: ErrorMessages.INTERNAL_ERROR });
+    }
+  });
+
+  // Update restaurant image after upload (Protected, sets ACL policy)
+  app.put("/api/restaurant-images", isAuthenticated, async (req: any, res) => {
+    if (!req.body.imageURL || !req.body.restaurantId) {
+      return res.status(400).json({ error: "imageURL and restaurantId are required" });
+    }
+
+    const userId = req.user?.claims?.sub;
+
+    try {
+      // Verify user owns the restaurant
+      const isOwner = await storage.isRestaurantOwner(userId, req.body.restaurantId);
+      if (!isOwner) {
+        return res.status(403).json({ error: "You don't own this restaurant" });
+      }
+
+      const objectStorageService = new ObjectStorageService();
+      const objectPath = await objectStorageService.trySetObjectEntityAclPolicy(
+        req.body.imageURL,
+        {
+          owner: userId,
+          visibility: "public", // Restaurant images are public
+        },
+      );
+
+      // Save to database
+      const image = await storage.createRestaurantImage({
+        restaurantId: req.body.restaurantId,
+        imageUrl: objectPath,
+        displayOrder: req.body.displayOrder || 0,
+      });
+
+      res.status(200).json(image);
+    } catch (error) {
+      logger.error("Error setting restaurant image", { error, userId, restaurantId: req.body.restaurantId });
       res.status(500).json({ error: ErrorMessages.INTERNAL_ERROR });
     }
   });
