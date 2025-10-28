@@ -1,0 +1,4060 @@
+[{
+  "title": "강남 돼지상회 무한리필 홍대점 | Hongdae Korean BBQ restaurant All you can eat | サムギョプサル 焼き肉 焼肉 | 烤肉",
+  "price": "₩10,000~20,000",
+  "categoryName": "한식 고기구이 레스토랑",
+  "address": "대한민국 서울특별시 마포구 서교동 홍익로5안길 28",
+  "neighborhood": null,
+  "street": "서교동 홍익로5안길 28",
+  "city": "마포구",
+  "postalCode": "04039",
+  "state": "서울특별시",
+  "countryCode": "KR",
+  "website": "https://naver.me/5JJQHElC",
+  "phone": "+82 2-322-8891",
+  "phoneUnformatted": "+8223228891",
+  "claimThisBusiness": false,
+  "location": {
+    "lat": 37.5535385,
+    "lng": 126.921178
+  },
+  "totalScore": 4.9,
+  "permanentlyClosed": false,
+  "temporarilyClosed": false,
+  "placeId": "ChIJZ-YgONuYfDUR2w8zpfOvpvE",
+  "categories": [
+    "한식 고기구이 레스토랑",
+    "고기 요리 전문점",
+    "삼겹살 전문점",
+    "음식점"
+  ],
+  "fid": "0x357c98db3820e667:0xf1a6aff3a5330fdb",
+  "cid": "17412798470258102235",
+  "reviewsCount": 3891,
+  "imagesCount": 1981,
+  "imageCategories": [],
+  "scrapedAt": "2025-10-28T07:32:20.746Z",
+  "googleFoodUrl": null,
+  "hotelAds": [],
+  "openingHours": [
+    {
+      "day": "화요일",
+      "hours": "오전 11:30~오전 12:00"
+    },
+    {
+      "day": "수요일",
+      "hours": "오전 11:30~오전 12:00"
+    },
+    {
+      "day": "목요일",
+      "hours": "오전 11:30~오전 12:00"
+    },
+    {
+      "day": "금요일",
+      "hours": "오전 11:30~오전 12:00"
+    },
+    {
+      "day": "토요일",
+      "hours": "오전 11:30~오전 12:00"
+    },
+    {
+      "day": "일요일",
+      "hours": "오전 11:30~오전 12:00"
+    },
+    {
+      "day": "월요일",
+      "hours": "오전 11:30~오전 12:00"
+    }
+  ],
+  "peopleAlsoSearch": [],
+  "placesTags": [],
+  "reviewsTags": [],
+  "additionalInfo": {
+    "서비스 옵션": [
+      {
+        "매장 내 식사": true
+      },
+      {
+        "배달 서비스": false
+      },
+      {
+        "테이크아웃": false
+      }
+    ],
+    "특색": [
+      {
+        "스포츠 경기 관람": true
+      }
+    ],
+    "인기 있는 이유": [
+      {
+        "점심식사": true
+      },
+      {
+        "저녁식사": true
+      }
+    ],
+    "접근성": [
+      {
+        "휠체어 이용 가능 출입구": false
+      },
+      {
+        "휠체어 이용가능 좌석": false
+      },
+      {
+        "휠체어 이용가능 주차장": false
+      },
+      {
+        "휠체어 이용가능 화장실": false
+      },
+      {
+        "히어링 루프 보조 시스템": false
+      }
+    ],
+    "상품/서비스": [
+      {
+        "맥주": true
+      },
+      {
+        "뷔페 식당": true
+      },
+      {
+        "샐러드 바": true
+      },
+      {
+        "주류 제공": true
+      }
+    ],
+    "식사 옵션": [
+      {
+        "점심식사": true
+      },
+      {
+        "저녁식사": true
+      },
+      {
+        "좌석": true
+      },
+      {
+        "테이블 주문 서비스": true
+      }
+    ],
+    "편의 시설": [
+      {
+        "화장실": true
+      },
+      {
+        "Wi-Fi": true
+      },
+      {
+        "무료 Wi-Fi": true
+      }
+    ],
+    "분위기": [
+      {
+        "유행하는 스타일": true
+      },
+      {
+        "캐주얼": true
+      }
+    ],
+    "주요 방문자": [
+      {
+        "관광객": true
+      },
+      {
+        "단체석": true
+      },
+      {
+        "대학생": true
+      },
+      {
+        "유아동반/가족모임에 적합": true
+      },
+      {
+        "트랜스젠더 안전 구역": true
+      },
+      {
+        "LGBTQ+ 친화적": true
+      }
+    ],
+    "계획": [
+      {
+        "예약 가능": true
+      }
+    ],
+    "결제": [
+      {
+        "개인수표": true
+      },
+      {
+        "신용카드": true
+      },
+      {
+        "체크카드": true
+      },
+      {
+        "NFC 모바일 결제": true
+      },
+      {
+        "신용카드": true
+      }
+    ],
+    "아동": [
+      {
+        "어린이에게 적합함": true
+      }
+    ],
+    "주차": [
+      {
+        "주차 공간이 많음": true
+      }
+    ]
+  },
+  "gasPrices": [],
+  "url": "https://www.google.com/maps/search/?api=1&query=%EA%B0%95%EB%82%A8%20%EB%8F%BC%EC%A7%80%EC%83%81%ED%9A%8C%20%EB%AC%B4%ED%95%9C%EB%A6%AC%ED%95%84%20%ED%99%8D%EB%8C%80%EC%A0%90%20%7C%20Hongdae%20Korean%20BBQ%20restaurant%20All%20you%20can%20eat%20%7C%20%E3%82%B5%E3%83%A0%E3%82%AE%E3%83%A7%E3%83%97%E3%82%B5%E3%83%AB%20%E7%84%BC%E3%81%8D%E8%82%89%20%E7%84%BC%E8%82%89%20%7C%20%E7%83%A4%E8%82%89&query_place_id=ChIJZ-YgONuYfDUR2w8zpfOvpvE",
+  "searchPageUrl": "https://www.google.com/maps/search/Korean%20food%20near%20Hongdae,%20Seoul/@37.67378831800816,127.0425915330295,13z?hl=ko",
+  "searchString": "Korean food near Hongdae, Seoul",
+  "language": "ko",
+  "rank": 1,
+  "isAdvertisement": false,
+  "imageUrl": "https://lh3.googleusercontent.com/gps-cs-s/AG0ilSwQeG8HTgx59UuPw_z5xtQtDk43VaGrF9OET4ueBPK-wr3kkHpV4F1dPj9obRa3pX1VKE6xMWzoAFhN3MvuDODmSILBaoSQuGCg6Ep1Ewh9EDFrJe82V8z3ZsWvtgbjJCxaRi67naw0nrtD=w408-h306-k-no",
+  "kgmid": "/g/11h6d58syl"
+},
+{
+  "title": "도마",
+  "price": "$$",
+  "categoryName": "한식 고기구이 레스토랑",
+  "address": "대한민국 서울특별시 마포구 양화로16길 33",
+  "neighborhood": null,
+  "street": "양화로16길 33",
+  "city": "마포구",
+  "postalCode": "04039",
+  "state": "서울특별시",
+  "countryCode": "KR",
+  "website": "https://naver.me/5iTd7l6O",
+  "phone": "+82 2-3143-0365",
+  "phoneUnformatted": "+82231430365",
+  "claimThisBusiness": false,
+  "location": {
+    "lat": 37.5530461,
+    "lng": 126.9214019
+  },
+  "totalScore": 4.5,
+  "permanentlyClosed": false,
+  "temporarilyClosed": false,
+  "placeId": "ChIJTeqjMduYfDURYXYng-yVBrU",
+  "categories": [
+    "한식 고기구이 레스토랑",
+    "고기 요리 전문점",
+    "음식점"
+  ],
+  "fid": "0x357c98db31a3ea4d:0xb50695ec83277661",
+  "cid": "13044278213770442337",
+  "reviewsCount": 957,
+  "imagesCount": 1660,
+  "imageCategories": [],
+  "scrapedAt": "2025-10-28T07:32:20.748Z",
+  "googleFoodUrl": null,
+  "hotelAds": [],
+  "openingHours": [
+    {
+      "day": "화요일",
+      "hours": "오후 2:00~11:30"
+    },
+    {
+      "day": "수요일",
+      "hours": "오후 2:00~11:30"
+    },
+    {
+      "day": "목요일",
+      "hours": "오후 2:00~11:30"
+    },
+    {
+      "day": "금요일",
+      "hours": "오후 2:00~오전 12:30"
+    },
+    {
+      "day": "토요일",
+      "hours": "오후 2:00~오전 12:30"
+    },
+    {
+      "day": "일요일",
+      "hours": "오후 2:00~11:30"
+    },
+    {
+      "day": "월요일",
+      "hours": "오후 2:00~11:30"
+    }
+  ],
+  "peopleAlsoSearch": [],
+  "placesTags": [],
+  "reviewsTags": [],
+  "additionalInfo": {
+    "서비스 옵션": [
+      {
+        "테이크아웃": true
+      },
+      {
+        "매장 내 식사": true
+      },
+      {
+        "배달 서비스": false
+      },
+      {
+        "현장 서비스": false
+      }
+    ],
+    "인기 있는 이유": [
+      {
+        "저녁식사": true
+      }
+    ],
+    "접근성": [
+      {
+        "휠체어 이용 가능 출입구": true
+      },
+      {
+        "휠체어 이용가능 좌석": true
+      },
+      {
+        "휠체어 이용가능 주차장": false
+      },
+      {
+        "휠체어 이용가능 화장실": false
+      },
+      {
+        "히어링 루프 보조 시스템": false
+      }
+    ],
+    "상품/서비스": [
+      {
+        "맥주": true
+      },
+      {
+        "심야 시간대 음식": true
+      },
+      {
+        "전용 식당": true
+      },
+      {
+        "주류 제공": true
+      }
+    ],
+    "식사 옵션": [
+      {
+        "저녁식사": true
+      },
+      {
+        "좌석": true
+      },
+      {
+        "테이블 주문 서비스": false
+      }
+    ],
+    "편의 시설": [
+      {
+        "화장실": true
+      },
+      {
+        "Wi-Fi": true
+      },
+      {
+        "무료 Wi-Fi": true
+      }
+    ],
+    "분위기": [
+      {
+        "유행하는 스타일": true
+      },
+      {
+        "인기 급상승": true
+      },
+      {
+        "캐주얼": true
+      }
+    ],
+    "주요 방문자": [
+      {
+        "관광객": true
+      },
+      {
+        "단체석": true
+      },
+      {
+        "대학생": true
+      },
+      {
+        "유아동반/가족모임에 적합": true
+      },
+      {
+        "트랜스젠더 안전 구역": true
+      },
+      {
+        "LGBTQ+ 친화적": true
+      }
+    ],
+    "계획": [
+      {
+        "예약 가능": true
+      },
+      {
+        "일반적으로 대기 시간이 있음": true
+      }
+    ],
+    "결제": [
+      {
+        "개인수표": true
+      },
+      {
+        "신용카드": true
+      },
+      {
+        "체크카드": true
+      },
+      {
+        "NFC 모바일 결제": true
+      },
+      {
+        "신용카드": true
+      }
+    ],
+    "아동": [
+      {
+        "어린이에게 적합함": true
+      }
+    ],
+    "주차": [
+      {
+        "유료 주차 빌딩": true
+      },
+      {
+        "유료 주차장": true
+      }
+    ],
+    "반려동물": [
+      {
+        "야외에서 반려견 허용": true
+      }
+    ]
+  },
+  "gasPrices": [],
+  "url": "https://www.google.com/maps/search/?api=1&query=%EB%8F%84%EB%A7%88&query_place_id=ChIJTeqjMduYfDURYXYng-yVBrU",
+  "searchPageUrl": "https://www.google.com/maps/search/Korean%20food%20near%20Hongdae,%20Seoul/@37.67378831800816,127.0425915330295,13z?hl=ko",
+  "searchString": "Korean food near Hongdae, Seoul",
+  "language": "ko",
+  "rank": 2,
+  "isAdvertisement": false,
+  "imageUrl": "https://lh3.googleusercontent.com/gps-cs-s/AG0ilSyPIL7XMB9SqCfvsCLgh0ic0zdJQjb8ePkkypNvFk5CLSksItNVCcDQt1U4k1V1Cyfk8oPTUuxfHc9g5NXrh6wFthg8AcanPpHHhNXbrkvG15geNDYK-V1sZVmxdwV5Je32LvjrtQ=w408-h306-k-no",
+  "kgmid": "/g/1tdjzj7t"
+},
+{
+  "title": "육몽 홍대본점",
+  "price": null,
+  "categoryName": "한식 고기구이 레스토랑",
+  "address": "대한민국 서울특별시 마포구 양화로16길 19",
+  "neighborhood": null,
+  "street": "양화로16길 19",
+  "city": "마포구",
+  "postalCode": "04039",
+  "state": "서울특별시",
+  "countryCode": "KR",
+  "website": "https://naver.me/FY3yAWtF",
+  "phone": "+82 2-338-1142",
+  "phoneUnformatted": "+8223381142",
+  "claimThisBusiness": false,
+  "location": {
+    "lat": 37.5532162,
+    "lng": 126.9206942
+  },
+  "totalScore": 4.7,
+  "permanentlyClosed": false,
+  "temporarilyClosed": false,
+  "placeId": "ChIJZ0HZItuYfDUR_abSmRXxgA8",
+  "categories": [
+    "한식 고기구이 레스토랑",
+    "한국식 소고기 전문 음식점",
+    "한식당",
+    "고기 요리 전문점",
+    "음식점"
+  ],
+  "fid": "0x357c98db22d94167:0xf80f11599d2a6fd",
+  "cid": "1117157782665209597",
+  "reviewsCount": 1617,
+  "imagesCount": 2125,
+  "imageCategories": [],
+  "scrapedAt": "2025-10-28T07:32:20.750Z",
+  "googleFoodUrl": null,
+  "hotelAds": [],
+  "openingHours": [
+    {
+      "day": "화요일",
+      "hours": "오전 11:30~오전 12:00"
+    },
+    {
+      "day": "수요일",
+      "hours": "오전 11:30~오전 12:00"
+    },
+    {
+      "day": "목요일",
+      "hours": "오전 11:30~오전 12:00"
+    },
+    {
+      "day": "금요일",
+      "hours": "오전 11:30~오전 1:00"
+    },
+    {
+      "day": "토요일",
+      "hours": "오전 11:30~오전 1:00"
+    },
+    {
+      "day": "일요일",
+      "hours": "오전 11:30~오전 1:00"
+    },
+    {
+      "day": "월요일",
+      "hours": "오전 11:30~오전 12:00"
+    }
+  ],
+  "peopleAlsoSearch": [],
+  "placesTags": [],
+  "reviewsTags": [],
+  "additionalInfo": {
+    "서비스 옵션": [
+      {
+        "야외 좌석": true
+      },
+      {
+        "매장 내 식사": true
+      },
+      {
+        "배달 서비스": false
+      },
+      {
+        "현장 서비스": false
+      },
+      {
+        "테이크아웃": false
+      }
+    ],
+    "특색": [
+      {
+        "다양한 맥주": true
+      }
+    ],
+    "인기 있는 이유": [
+      {
+        "점심식사": true
+      },
+      {
+        "저녁식사": true
+      }
+    ],
+    "접근성": [
+      {
+        "휠체어 이용가능 좌석": true
+      },
+      {
+        "휠체어 이용 가능 출입구": false
+      },
+      {
+        "휠체어 이용가능 주차장": false
+      },
+      {
+        "휠체어 이용가능 화장실": false
+      },
+      {
+        "히어링 루프 보조 시스템": false
+      }
+    ],
+    "상품/서비스": [
+      {
+        "맥주": true
+      },
+      {
+        "심야 시간대 음식": true
+      },
+      {
+        "와인": true
+      },
+      {
+        "전용 식당": true
+      },
+      {
+        "주류 제공": true
+      },
+      {
+        "칵테일": true
+      }
+    ],
+    "식사 옵션": [
+      {
+        "점심식사": true
+      },
+      {
+        "저녁식사": true
+      },
+      {
+        "좌석": true
+      },
+      {
+        "테이블 주문 서비스": true
+      }
+    ],
+    "편의 시설": [
+      {
+        "화장실": true
+      },
+      {
+        "Wi-Fi": true
+      },
+      {
+        "무료 Wi-Fi": true
+      }
+    ],
+    "분위기": [
+      {
+        "유행하는 스타일": true
+      },
+      {
+        "캐주얼": true
+      }
+    ],
+    "주요 방문자": [
+      {
+        "단체석": true
+      },
+      {
+        "대학생": true
+      },
+      {
+        "유아동반/가족모임에 적합": true
+      },
+      {
+        "트랜스젠더 안전 구역": true
+      },
+      {
+        "LGBTQ+ 친화적": true
+      }
+    ],
+    "계획": [
+      {
+        "예약 가능": true
+      }
+    ],
+    "결제": [
+      {
+        "신용카드": true
+      },
+      {
+        "체크카드": true
+      },
+      {
+        "NFC 모바일 결제": true
+      },
+      {
+        "신용카드": true
+      }
+    ],
+    "아동": [
+      {
+        "어린이에게 적합함": true
+      },
+      {
+        "어린이용 높은 의자": true
+      }
+    ],
+    "주차": [
+      {
+        "유료 노상 주차": true
+      },
+      {
+        "유료 주차장": true
+      },
+      {
+        "주차 공간을 찾기 어려움": true
+      }
+    ],
+    "반려동물": [
+      {
+        "반려견 동반 가능": true
+      },
+      {
+        "반려견 동반 가능": true
+      },
+      {
+        "야외에서 반려견 허용": true
+      }
+    ]
+  },
+  "gasPrices": [],
+  "url": "https://www.google.com/maps/search/?api=1&query=%EC%9C%A1%EB%AA%BD%20%ED%99%8D%EB%8C%80%EB%B3%B8%EC%A0%90&query_place_id=ChIJZ0HZItuYfDUR_abSmRXxgA8",
+  "searchPageUrl": "https://www.google.com/maps/search/Korean%20food%20near%20Hongdae,%20Seoul/@37.67378831800816,127.0425915330295,13z?hl=ko",
+  "searchString": "Korean food near Hongdae, Seoul",
+  "language": "ko",
+  "rank": 3,
+  "isAdvertisement": false,
+  "imageUrl": "https://lh3.googleusercontent.com/p/AF1QipNdtJZUfPXSooJr1BVFJ6QY3qgGIHk0lIn1I0BW=w408-h306-k-no",
+  "kgmid": "/g/11f54731zn"
+},
+{
+  "title": "새마을식당 홍대서교점",
+  "price": "₩10,000~30,000",
+  "categoryName": "한식 고기구이 레스토랑",
+  "address": "대한민국 서울특별시 마포구 어울마당로 144",
+  "neighborhood": null,
+  "street": "어울마당로 144",
+  "city": "마포구",
+  "postalCode": "121-210",
+  "state": "서울특별시",
+  "countryCode": "KR",
+  "phone": "+82 2-332-0120",
+  "phoneUnformatted": "+8223320120",
+  "claimThisBusiness": false,
+  "location": {
+    "lat": 37.5561608,
+    "lng": 126.9258254
+  },
+  "totalScore": 4.7,
+  "permanentlyClosed": false,
+  "temporarilyClosed": false,
+  "placeId": "ChIJy9F0pPqZfDURhOPTCrhJQz0",
+  "categories": [
+    "한식 고기구이 레스토랑"
+  ],
+  "fid": "0x357c99faa474d1cb:0x3d4349b80ad3e384",
+  "cid": "4414453114557686660",
+  "reviewsCount": 2439,
+  "imagesCount": 2170,
+  "imageCategories": [],
+  "scrapedAt": "2025-10-28T07:32:20.751Z",
+  "googleFoodUrl": null,
+  "hotelAds": [],
+  "openingHours": [
+    {
+      "day": "화요일",
+      "hours": "오전 12:00~10:00, 오전 11:00~오후 3:00, 오후 4:00~오전 12:00"
+    },
+    {
+      "day": "수요일",
+      "hours": "오전 12:00~10:00, 오전 11:00~오후 3:00, 오후 4:00~오전 12:00"
+    },
+    {
+      "day": "목요일",
+      "hours": "오전 12:00~10:00, 오전 11:00~오후 3:00, 오후 4:00~오전 12:00"
+    },
+    {
+      "day": "금요일",
+      "hours": "오전 12:00~10:00, 오전 11:00~오후 3:00, 오후 4:00~오전 12:00"
+    },
+    {
+      "day": "토요일",
+      "hours": "오전 12:00~10:00, 오전 11:00~오후 3:00, 오후 4:00~오전 12:00"
+    },
+    {
+      "day": "일요일",
+      "hours": "오전 12:00~10:00, 오전 11:00~오후 3:00, 오후 4:00~오전 12:00"
+    },
+    {
+      "day": "월요일",
+      "hours": "오전 12:00~10:00, 오전 11:00~오후 3:00, 오후 4:00~오전 12:00"
+    }
+  ],
+  "peopleAlsoSearch": [],
+  "placesTags": [],
+  "reviewsTags": [],
+  "additionalInfo": {
+    "서비스 옵션": [
+      {
+        "비대면 배달": true
+      },
+      {
+        "배달 서비스": true
+      },
+      {
+        "현장 서비스": true
+      },
+      {
+        "테이크아웃": true
+      },
+      {
+        "매장 내 식사": true
+      }
+    ],
+    "인기 있는 이유": [
+      {
+        "점심식사": true
+      },
+      {
+        "저녁식사": true
+      }
+    ],
+    "접근성": [
+      {
+        "휠체어 이용 가능 출입구": false
+      },
+      {
+        "휠체어 이용가능 좌석": false
+      },
+      {
+        "휠체어 이용가능 주차장": false
+      }
+    ],
+    "상품/서비스": [
+      {
+        "맥주": true
+      },
+      {
+        "심야 시간대 음식": true
+      },
+      {
+        "주류 제공": true
+      }
+    ],
+    "식사 옵션": [
+      {
+        "점심식사": true
+      },
+      {
+        "저녁식사": true
+      },
+      {
+        "좌석": true
+      },
+      {
+        "테이블 주문 서비스": true
+      }
+    ],
+    "편의 시설": [
+      {
+        "화장실": true
+      },
+      {
+        "Wi-Fi": true
+      },
+      {
+        "무료 Wi-Fi": true
+      }
+    ],
+    "분위기": [
+      {
+        "유행하는 스타일": true
+      },
+      {
+        "캐주얼": true
+      }
+    ],
+    "주요 방문자": [
+      {
+        "관광객": true
+      },
+      {
+        "단체석": true
+      },
+      {
+        "대학생": true
+      }
+    ],
+    "계획": [
+      {
+        "예약 가능": true
+      },
+      {
+        "일반적으로 대기 시간이 있음": true
+      }
+    ],
+    "결제": [
+      {
+        "신용카드": true
+      },
+      {
+        "체크카드": true
+      },
+      {
+        "NFC 모바일 결제": true
+      }
+    ],
+    "아동": [
+      {
+        "어린이용 높은 의자": true
+      }
+    ],
+    "주차": [
+      {
+        "무료 주차장": true
+      }
+    ]
+  },
+  "gasPrices": [],
+  "url": "https://www.google.com/maps/search/?api=1&query=%EC%83%88%EB%A7%88%EC%9D%84%EC%8B%9D%EB%8B%B9%20%ED%99%8D%EB%8C%80%EC%84%9C%EA%B5%90%EC%A0%90&query_place_id=ChIJy9F0pPqZfDURhOPTCrhJQz0",
+  "searchPageUrl": "https://www.google.com/maps/search/Korean%20food%20near%20Hongdae,%20Seoul/@37.67378831800816,127.0425915330295,13z?hl=ko",
+  "searchString": "Korean food near Hongdae, Seoul",
+  "language": "ko",
+  "rank": 4,
+  "isAdvertisement": false,
+  "imageUrl": "https://lh3.googleusercontent.com/gps-cs-s/AG0ilSx8aFrbRxe1wFU6xdmccO9A6Z_P-HsIs1zptwT3R_wUot5xVhKdS3zRUUNNovSff_klG8BEnmBudO6Ot792FSqEQJ3XQOvKDbZfjRdqwW_b4rUdqC8fOCtKcnte7Azglgb4dHBiLA=w408-h306-k-no",
+  "kgmid": "/g/11fmr3rf4v"
+},
+{
+  "title": "홍대 맛집 홍대부대찌개 | hongdae restaurant hongdae budae jjigae | 弘大 美食 弘大 部隊鍋 | 弘大グルメ店 弘大ブデチゲ",
+  "price": "₩10,000~20,000",
+  "categoryName": "한식당",
+  "address": "대한민국 서울특별시 마포구 홍익로5안길 34 1층",
+  "neighborhood": null,
+  "street": "홍익로5안길 34 1층",
+  "city": "마포구",
+  "postalCode": "04039",
+  "state": "서울특별시",
+  "countryCode": "KR",
+  "website": "https://naver.me/5wWrBTOF",
+  "phone": "+82 70-7585-4456",
+  "phoneUnformatted": "+827075854456",
+  "claimThisBusiness": false,
+  "location": {
+    "lat": 37.5533429,
+    "lng": 126.9210137
+  },
+  "totalScore": 4.9,
+  "permanentlyClosed": false,
+  "temporarilyClosed": false,
+  "placeId": "ChIJrUFMev-ZfDURVx6gZ5qT7_4",
+  "categories": [
+    "한식당",
+    "부대찌개 전문점",
+    "음식점"
+  ],
+  "fid": "0x357c99ff7a4c41ad:0xfeef939a67a01e57",
+  "cid": "18370063696440335959",
+  "reviewsCount": 625,
+  "imagesCount": 1048,
+  "imageCategories": [],
+  "scrapedAt": "2025-10-28T07:32:20.751Z",
+  "googleFoodUrl": null,
+  "hotelAds": [],
+  "openingHours": [
+    {
+      "day": "화요일",
+      "hours": "오전 11:00~오후 10:30"
+    },
+    {
+      "day": "수요일",
+      "hours": "오전 11:00~오후 10:30"
+    },
+    {
+      "day": "목요일",
+      "hours": "오전 11:00~오후 10:30"
+    },
+    {
+      "day": "금요일",
+      "hours": "오전 11:00~오전 1:30"
+    },
+    {
+      "day": "토요일",
+      "hours": "오전 7:00~오전 1:30"
+    },
+    {
+      "day": "일요일",
+      "hours": "오전 7:00~오후 10:30"
+    },
+    {
+      "day": "월요일",
+      "hours": "오전 11:00~오후 10:30"
+    }
+  ],
+  "peopleAlsoSearch": [],
+  "placesTags": [],
+  "reviewsTags": [],
+  "additionalInfo": {
+    "서비스 옵션": [
+      {
+        "테이크아웃": true
+      },
+      {
+        "매장 내 식사": true
+      },
+      {
+        "배달 서비스": false
+      }
+    ],
+    "특색": [
+      {
+        "스포츠 경기 관람": true
+      }
+    ],
+    "인기 있는 이유": [
+      {
+        "점심식사": true
+      },
+      {
+        "저녁식사": true
+      }
+    ],
+    "접근성": [
+      {
+        "휠체어 이용가능 좌석": true
+      },
+      {
+        "휠체어 이용 가능 출입구": false
+      },
+      {
+        "휠체어 이용가능 주차장": false
+      },
+      {
+        "휠체어 이용가능 화장실": false
+      },
+      {
+        "히어링 루프 보조 시스템": false
+      }
+    ],
+    "상품/서비스": [
+      {
+        "간단한 식사": true
+      },
+      {
+        "맥주": true
+      },
+      {
+        "주류 제공": true
+      }
+    ],
+    "식사 옵션": [
+      {
+        "아침식사": true
+      },
+      {
+        "점심식사": true
+      },
+      {
+        "저녁식사": true
+      },
+      {
+        "카운터 서비스": true
+      },
+      {
+        "디저트": true
+      },
+      {
+        "좌석": true
+      },
+      {
+        "테이블 주문 서비스": true
+      }
+    ],
+    "편의 시설": [
+      {
+        "바": true
+      },
+      {
+        "화장실": true
+      },
+      {
+        "Wi-Fi": true
+      },
+      {
+        "무료 Wi-Fi": true
+      }
+    ],
+    "분위기": [
+      {
+        "캐주얼": true
+      }
+    ],
+    "주요 방문자": [
+      {
+        "단체석": true
+      },
+      {
+        "유아동반/가족모임에 적합": true
+      },
+      {
+        "트랜스젠더 안전 구역": true
+      },
+      {
+        "LGBTQ+ 친화적": true
+      }
+    ],
+    "계획": [
+      {
+        "예약 가능": true
+      }
+    ],
+    "결제": [
+      {
+        "신용카드": true
+      },
+      {
+        "체크카드": true
+      },
+      {
+        "NFC 모바일 결제": true
+      },
+      {
+        "신용카드": true
+      }
+    ],
+    "아동": [
+      {
+        "어린이에게 적합함": true
+      },
+      {
+        "어린이용 높은 의자": true
+      }
+    ],
+    "주차": [
+      {
+        "유료 노상 주차": true
+      },
+      {
+        "유료 주차장": true
+      },
+      {
+        "주차 공간을 찾기 어려움": true
+      }
+    ],
+    "반려동물": [
+      {
+        "반려견 동반 가능": true
+      },
+      {
+        "반려견 동반 가능": true
+      },
+      {
+        "야외에서 반려견 허용": true
+      }
+    ]
+  },
+  "gasPrices": [],
+  "url": "https://www.google.com/maps/search/?api=1&query=%ED%99%8D%EB%8C%80%20%EB%A7%9B%EC%A7%91%20%ED%99%8D%EB%8C%80%EB%B6%80%EB%8C%80%EC%B0%8C%EA%B0%9C%20%7C%20hongdae%20restaurant%20hongdae%20budae%20jjigae%20%7C%20%E5%BC%98%E5%A4%A7%20%E7%BE%8E%E9%A3%9F%20%E5%BC%98%E5%A4%A7%20%E9%83%A8%E9%9A%8A%E9%8D%8B%20%7C%20%E5%BC%98%E5%A4%A7%E3%82%B0%E3%83%AB%E3%83%A1%E5%BA%97%20%E5%BC%98%E5%A4%A7%E3%83%96%E3%83%87%E3%83%81%E3%82%B2&query_place_id=ChIJrUFMev-ZfDURVx6gZ5qT7_4",
+  "searchPageUrl": "https://www.google.com/maps/search/Korean%20food%20near%20Hongdae,%20Seoul/@37.67378831800816,127.0425915330295,13z?hl=ko",
+  "searchString": "Korean food near Hongdae, Seoul",
+  "language": "ko",
+  "rank": 5,
+  "isAdvertisement": false,
+  "imageUrl": "https://lh3.googleusercontent.com/gps-cs-s/AG0ilSwbYpm2yXdY1q1yJuvApwnlXcKODwZMPmTWrW-2mbK0Nev7PNQDdmi5UH7w6xkbzgQyMVuuHfl9sT6RL1GIumMjAiJd4FAPZY2f-gcA2G_06X7RcjQ2Av21c4zOuuiUx_fmGjY=w408-h306-k-no",
+  "kgmid": "/g/11whlgtn9w"
+},
+{
+  "title": "홍대 고기집 돈주는남자 Hongdae Korean BBQ 弘大 美食 焼肉",
+  "price": "₩20,000~30,000",
+  "categoryName": "한식 고기구이 레스토랑",
+  "address": "대한민국 서울특별시 마포구 잔다리로6길 34-9",
+  "neighborhood": null,
+  "street": "잔다리로6길 34-9",
+  "city": "마포구",
+  "postalCode": "04042",
+  "state": "서울특별시",
+  "countryCode": "KR",
+  "website": "https://sites.google.com/view/hongdae-koreanbbq-do/%ED%99%88",
+  "phone": "+82 2-6677-0499",
+  "phoneUnformatted": "+82266770499",
+  "claimThisBusiness": false,
+  "location": {
+    "lat": 37.5519052,
+    "lng": 126.92108
+  },
+  "totalScore": 4.7,
+  "permanentlyClosed": false,
+  "temporarilyClosed": false,
+  "placeId": "ChIJeUkxxdqYfDURgXs9FF1c57Y",
+  "categories": [
+    "한식 고기구이 레스토랑",
+    "숯불구이/바베큐전문점",
+    "고기 요리 전문점",
+    "삼겹살 전문점",
+    "음식점"
+  ],
+  "fid": "0x357c98dac5314979:0xb6e75c5d143d7b81",
+  "cid": "13179604389364333441",
+  "reviewsCount": 478,
+  "imagesCount": 658,
+  "imageCategories": [],
+  "scrapedAt": "2025-10-28T07:32:20.751Z",
+  "googleFoodUrl": null,
+  "hotelAds": [],
+  "openingHours": [
+    {
+      "day": "화요일",
+      "hours": "오후 1:00~11:00"
+    },
+    {
+      "day": "수요일",
+      "hours": "오후 1:00~11:00"
+    },
+    {
+      "day": "목요일",
+      "hours": "오후 1:00~11:00"
+    },
+    {
+      "day": "금요일",
+      "hours": "오후 1:00~11:00"
+    },
+    {
+      "day": "토요일",
+      "hours": "오후 12:00~11:00"
+    },
+    {
+      "day": "일요일",
+      "hours": "오후 12:00~11:00"
+    },
+    {
+      "day": "월요일",
+      "hours": "오후 1:00~11:00"
+    }
+  ],
+  "peopleAlsoSearch": [],
+  "placesTags": [],
+  "reviewsTags": [],
+  "additionalInfo": {
+    "서비스 옵션": [
+      {
+        "현장 서비스": true
+      },
+      {
+        "매장 내 식사": true
+      },
+      {
+        "배달 서비스": false
+      },
+      {
+        "테이크아웃": false
+      }
+    ],
+    "특색": [
+      {
+        "스포츠 경기 관람": true
+      }
+    ],
+    "인기 있는 이유": [
+      {
+        "점심식사": true
+      },
+      {
+        "저녁식사": true
+      }
+    ],
+    "접근성": [
+      {
+        "휠체어 이용가능 좌석": true
+      },
+      {
+        "휠체어 이용 가능 출입구": false
+      },
+      {
+        "휠체어 이용가능 주차장": false
+      },
+      {
+        "휠체어 이용가능 화장실": false
+      },
+      {
+        "히어링 루프 보조 시스템": false
+      }
+    ],
+    "상품/서비스": [
+      {
+        "스몰 플레이트 메뉴": true
+      },
+      {
+        "유기농 요리": true
+      },
+      {
+        "주류 제공": true
+      }
+    ],
+    "식사 옵션": [
+      {
+        "점심식사": true
+      },
+      {
+        "저녁식사": true
+      },
+      {
+        "카운터 서비스": true
+      },
+      {
+        "좌석": true
+      },
+      {
+        "테이블 주문 서비스": true
+      }
+    ],
+    "편의 시설": [
+      {
+        "성중립 화장실": true
+      },
+      {
+        "화장실": true
+      },
+      {
+        "Wi-Fi": true
+      },
+      {
+        "무료 Wi-Fi": true
+      }
+    ],
+    "분위기": [
+      {
+        "유행하는 스타일": true
+      },
+      {
+        "캐주얼": true
+      }
+    ],
+    "주요 방문자": [
+      {
+        "관광객": true
+      },
+      {
+        "단체석": true
+      },
+      {
+        "대학생": true
+      },
+      {
+        "유아동반/가족모임에 적합": true
+      },
+      {
+        "트랜스젠더 안전 구역": true
+      },
+      {
+        "LGBTQ+ 친화적": true
+      }
+    ],
+    "계획": [
+      {
+        "예약 가능": true
+      }
+    ],
+    "결제": [
+      {
+        "개인수표": true
+      },
+      {
+        "신용카드": true
+      },
+      {
+        "체크카드": true
+      },
+      {
+        "NFC 모바일 결제": true
+      },
+      {
+        "신용카드": true
+      }
+    ],
+    "아동": [
+      {
+        "어린이에게 적합함": true
+      }
+    ],
+    "주차": [
+      {
+        "무료 노상 주차": true
+      }
+    ],
+    "반려동물": [
+      {
+        "야외에서 반려견 허용": true
+      }
+    ]
+  },
+  "gasPrices": [],
+  "url": "https://www.google.com/maps/search/?api=1&query=%ED%99%8D%EB%8C%80%20%EA%B3%A0%EA%B8%B0%EC%A7%91%20%EB%8F%88%EC%A3%BC%EB%8A%94%EB%82%A8%EC%9E%90%20Hongdae%20Korean%20BBQ%20%E5%BC%98%E5%A4%A7%20%E7%BE%8E%E9%A3%9F%20%E7%84%BC%E8%82%89&query_place_id=ChIJeUkxxdqYfDURgXs9FF1c57Y",
+  "searchPageUrl": "https://www.google.com/maps/search/Korean%20food%20near%20Hongdae,%20Seoul/@37.67378831800816,127.0425915330295,13z?hl=ko",
+  "searchString": "Korean food near Hongdae, Seoul",
+  "language": "ko",
+  "rank": 6,
+  "isAdvertisement": false,
+  "imageUrl": "https://lh3.googleusercontent.com/gps-cs-s/AG0ilSy9Diuxcfg0coRqp5U2ApZ9VYZq46dp3CS7-b8c4Px2eVKmTum_YJyW8TQTFOFxyU81S6HwaisK7waYt7_YPmEavJ_IBFjzbQUBVIcrYsIei0IWlKufqV5wTcfTohkvXu2mHPg_=w408-h306-k-no",
+  "kgmid": "/g/11b90kwk8d"
+},
+{
+  "title": "홍대 고기집 깃뜰 | Hongdae Korean BBQ git teul | サムギョプサル | 美食 | 烤肉",
+  "price": "₩20,000~40,000",
+  "categoryName": "한식 고기구이 레스토랑",
+  "address": "대한민국 서울특별시 마포구 서교동 잔다리로3안길 27 1,2층",
+  "neighborhood": null,
+  "street": "서교동 잔다리로3안길 27 1,2층",
+  "city": "마포구",
+  "postalCode": "04043",
+  "state": "서울특별시",
+  "countryCode": "KR",
+  "website": "https://naver.me/GfCEZgFY",
+  "phone": "+82 70-8777-6900",
+  "phoneUnformatted": "+827087776900",
+  "claimThisBusiness": false,
+  "location": {
+    "lat": 37.5503953,
+    "lng": 126.9198003
+  },
+  "totalScore": 5,
+  "permanentlyClosed": false,
+  "temporarilyClosed": false,
+  "placeId": "ChIJJ2fhXx6ZfDURAS3i9i8Wvho",
+  "categories": [
+    "한식 고기구이 레스토랑",
+    "고기 요리 전문점",
+    "음식점"
+  ],
+  "fid": "0x357c991e5fe16727:0x1abe162ff6e22d01",
+  "cid": "1927002085822442753",
+  "reviewsCount": 3811,
+  "imagesCount": 6017,
+  "imageCategories": [],
+  "scrapedAt": "2025-10-28T07:32:20.751Z",
+  "googleFoodUrl": null,
+  "hotelAds": [],
+  "openingHours": [
+    {
+      "day": "화요일",
+      "hours": "오후 12:00~3:00, 오후 4:00~10:40"
+    },
+    {
+      "day": "수요일",
+      "hours": "오후 12:00~3:00, 오후 4:00~10:40"
+    },
+    {
+      "day": "목요일",
+      "hours": "오후 12:00~3:00, 오후 4:00~10:40"
+    },
+    {
+      "day": "금요일",
+      "hours": "오후 12:00~3:00, 오후 4:00~10:40"
+    },
+    {
+      "day": "토요일",
+      "hours": "오후 12:00~3:00, 오후 4:00~10:40"
+    },
+    {
+      "day": "일요일",
+      "hours": "오후 12:00~3:00, 오후 4:00~10:40"
+    },
+    {
+      "day": "월요일",
+      "hours": "오후 12:00~3:00, 오후 4:00~10:40"
+    }
+  ],
+  "additionalOpeningHours": {
+    "주방": [
+      {
+        "day": "화요일",
+        "hours": "오후 12:00~2:50"
+      },
+      {
+        "day": "수요일",
+        "hours": "오후 12:00~2:50"
+      },
+      {
+        "day": "목요일",
+        "hours": "오후 12:00~2:50"
+      },
+      {
+        "day": "금요일",
+        "hours": "오후 12:00~2:50"
+      },
+      {
+        "day": "토요일",
+        "hours": "오후 12:00~2:50"
+      },
+      {
+        "day": "일요일",
+        "hours": "오후 12:00~2:50"
+      },
+      {
+        "day": "월요일",
+        "hours": "오후 12:00~2:50"
+      }
+    ]
+  },
+  "peopleAlsoSearch": [],
+  "placesTags": [],
+  "reviewsTags": [],
+  "additionalInfo": {
+    "서비스 옵션": [
+      {
+        "현장 서비스": true
+      },
+      {
+        "매장 내 식사": true
+      },
+      {
+        "배달 서비스": false
+      },
+      {
+        "테이크아웃": false
+      }
+    ],
+    "인기 있는 이유": [
+      {
+        "점심식사": true
+      },
+      {
+        "저녁식사": true
+      }
+    ],
+    "접근성": [
+      {
+        "휠체어 이용 가능 출입구": true
+      },
+      {
+        "휠체어 이용가능 좌석": false
+      },
+      {
+        "휠체어 이용가능 주차장": false
+      },
+      {
+        "휠체어 이용가능 화장실": false
+      },
+      {
+        "히어링 루프 보조 시스템": false
+      }
+    ],
+    "상품/서비스": [
+      {
+        "맥주": true
+      },
+      {
+        "유기농 요리": true
+      },
+      {
+        "전용 식당": true
+      },
+      {
+        "점자 메뉴": true
+      },
+      {
+        "주류 제공": true
+      },
+      {
+        "칵테일": true
+      }
+    ],
+    "식사 옵션": [
+      {
+        "점심식사": true
+      },
+      {
+        "저녁식사": true
+      },
+      {
+        "좌석": true
+      },
+      {
+        "테이블 주문 서비스": true
+      }
+    ],
+    "편의 시설": [
+      {
+        "화장실": true
+      },
+      {
+        "Wi-Fi": true
+      },
+      {
+        "무료 Wi-Fi": true
+      }
+    ],
+    "분위기": [
+      {
+        "유행하는 스타일": true
+      },
+      {
+        "캐주얼": true
+      }
+    ],
+    "주요 방문자": [
+      {
+        "관광객": true
+      },
+      {
+        "단체석": true
+      },
+      {
+        "대학생": true
+      },
+      {
+        "유아동반/가족모임에 적합": true
+      },
+      {
+        "트랜스젠더 안전 구역": true
+      },
+      {
+        "LGBTQ+ 친화적": true
+      }
+    ],
+    "계획": [
+      {
+        "예약 가능": true
+      }
+    ],
+    "결제": [
+      {
+        "신용카드": true
+      },
+      {
+        "체크카드": true
+      },
+      {
+        "NFC 모바일 결제": true
+      },
+      {
+        "신용카드": true
+      }
+    ],
+    "아동": [
+      {
+        "어린이용 높은 의자": true
+      }
+    ],
+    "주차": [
+      {
+        "유료 주차장": true
+      },
+      {
+        "주차 공간을 찾기 어려움": true
+      }
+    ]
+  },
+  "gasPrices": [],
+  "url": "https://www.google.com/maps/search/?api=1&query=%ED%99%8D%EB%8C%80%20%EA%B3%A0%EA%B8%B0%EC%A7%91%20%EA%B9%83%EB%9C%B0%20%7C%20Hongdae%20Korean%20BBQ%20git%20teul%20%7C%20%E3%82%B5%E3%83%A0%E3%82%AE%E3%83%A7%E3%83%97%E3%82%B5%E3%83%AB%20%7C%20%E7%BE%8E%E9%A3%9F%20%7C%20%E7%83%A4%E8%82%89&query_place_id=ChIJJ2fhXx6ZfDURAS3i9i8Wvho",
+  "searchPageUrl": "https://www.google.com/maps/search/Korean%20food%20near%20Hongdae,%20Seoul/@37.67378831800816,127.0425915330295,13z?hl=ko",
+  "searchString": "Korean food near Hongdae, Seoul",
+  "language": "ko",
+  "rank": 7,
+  "isAdvertisement": false,
+  "imageUrl": "https://lh3.googleusercontent.com/gps-cs-s/AG0ilSygXXdyy-eF0Uv0JcOG6o8INR2yZPSxwnHo9OK0pY9xDLASR7oNmPjgl0wrAqMiQEWK1HRurw8kWwLTvPr-KnkrcIHGZkamWzNW6XNSPy5XvyyCL9jSbcchkj7Dk0PiNPiK-ouV1LZKjqEx=w408-h306-k-no",
+  "kgmid": "/g/11w1qhr8yg"
+},
+{
+  "title": "Eid Halal korean BBQ Hongdae",
+  "price": null,
+  "categoryName": "숯불구이/바베큐전문점",
+  "address": "대한민국 서울특별시 마포구 서교동 358-50 KR 서울특별시 마포구 와우산로 21길 36-8 1층",
+  "neighborhood": null,
+  "street": "서교동 358-50 KR 서울특별시 마포구 와우산로 21길 36-8 1층",
+  "city": "마포구",
+  "postalCode": "04040",
+  "state": "서울특별시",
+  "countryCode": "KR",
+  "website": "https://www.instagram.com/eid.halal.korea/",
+  "phone": "+82 10-5599-9946",
+  "phoneUnformatted": "+821055999946",
+  "claimThisBusiness": false,
+  "location": {
+    "lat": 37.5527132,
+    "lng": 126.9220373
+  },
+  "totalScore": 4.3,
+  "permanentlyClosed": false,
+  "temporarilyClosed": false,
+  "placeId": "ChIJjUkObgqZfDURsSqMlmmw2og",
+  "categories": [
+    "숯불구이/바베큐전문점"
+  ],
+  "fid": "0x357c990a6e0e498d:0x88dab069968c2ab1",
+  "cid": "9861388301624945329",
+  "reviewsCount": 120,
+  "imagesCount": 114,
+  "imageCategories": [],
+  "scrapedAt": "2025-10-28T07:32:20.752Z",
+  "googleFoodUrl": null,
+  "hotelAds": [],
+  "openingHours": [
+    {
+      "day": "화요일",
+      "hours": "오후 12:00~10:00"
+    },
+    {
+      "day": "수요일",
+      "hours": "오후 12:00~10:00"
+    },
+    {
+      "day": "목요일",
+      "hours": "오후 12:00~10:00"
+    },
+    {
+      "day": "금요일",
+      "hours": "오후 12:00~10:00"
+    },
+    {
+      "day": "토요일",
+      "hours": "오후 12:00~10:00"
+    },
+    {
+      "day": "일요일",
+      "hours": "오후 12:00~10:00"
+    },
+    {
+      "day": "월요일",
+      "hours": "오후 12:00~10:00"
+    }
+  ],
+  "peopleAlsoSearch": [],
+  "placesTags": [],
+  "reviewsTags": [],
+  "additionalInfo": {
+    "서비스 옵션": [
+      {
+        "야외 좌석": true
+      },
+      {
+        "배달 서비스": true
+      },
+      {
+        "현장 서비스": true
+      },
+      {
+        "테이크아웃": true
+      },
+      {
+        "매장 내 식사": true
+      }
+    ],
+    "접근성": [
+      {
+        "휠체어 이용 가능 출입구": true
+      },
+      {
+        "휠체어 이용가능 좌석": true
+      }
+    ],
+    "상품/서비스": [
+      {
+        "전용 식당": true
+      },
+      {
+        "채식 메뉴": true
+      },
+      {
+        "할랄 음식": true
+      }
+    ],
+    "식사 옵션": [
+      {
+        "좌석": true
+      }
+    ],
+    "편의 시설": [
+      {
+        "화장실": true
+      },
+      {
+        "Wi-Fi": true
+      },
+      {
+        "무료 Wi-Fi": true
+      }
+    ],
+    "주요 방문자": [
+      {
+        "유아동반/가족모임에 적합": true
+      }
+    ],
+    "계획": [
+      {
+        "예약 가능": true
+      }
+    ],
+    "결제": [
+      {
+        "개인수표": true
+      },
+      {
+        "신용카드": true
+      },
+      {
+        "체크카드": true
+      },
+      {
+        "NFC 모바일 결제": true
+      },
+      {
+        "신용카드": true
+      }
+    ],
+    "아동": [
+      {
+        "어린이에게 적합함": true
+      },
+      {
+        "어린이용 높은 의자": true
+      }
+    ]
+  },
+  "gasPrices": [],
+  "url": "https://www.google.com/maps/search/?api=1&query=Eid%20Halal%20korean%20BBQ%20Hongdae&query_place_id=ChIJjUkObgqZfDURsSqMlmmw2og",
+  "searchPageUrl": "https://www.google.com/maps/search/Korean%20food%20near%20Hongdae,%20Seoul/@37.67378831800816,127.0425915330295,13z?hl=ko",
+  "searchString": "Korean food near Hongdae, Seoul",
+  "language": "ko",
+  "rank": 8,
+  "isAdvertisement": false,
+  "imageUrl": "https://lh3.googleusercontent.com/gps-cs-s/AG0ilSwgI6ZTQn6h13GAQIwicaZRQZOqxL6DcXrTos-dUOvS7JNC6CkOCs88wG9jiyz3mZu6VM9A4m4PDvVC5m2O56FDsmfPRTMm7mmGf2D4iQtm3KZTVmLNx3sZlBOEsrVUwGaLVR_uv5b8VBeZ=w408-h306-k-no",
+  "kgmid": "/g/11xn3wl4ws"
+},
+{
+  "title": "홍대 고기집 제주특별집 | Hongdae Korean BBQ Restaurant Jeju Special House | 弘大 美食 济州猪特别家 | 済州豚特別店 ホンデ",
+  "price": "₩20,000~30,000",
+  "categoryName": "한식 고기구이 레스토랑",
+  "address": "대한민국 서울특별시 마포구 잔다리로6길 36",
+  "neighborhood": null,
+  "street": "잔다리로6길 36",
+  "city": "마포구",
+  "postalCode": "04042",
+  "state": "서울특별시",
+  "countryCode": "KR",
+  "website": "https://naver.me/GLSShAOf",
+  "phone": "+82 2-336-3888",
+  "phoneUnformatted": "+8223363888",
+  "claimThisBusiness": false,
+  "location": {
+    "lat": 37.5522321,
+    "lng": 126.9211814
+  },
+  "totalScore": 4.9,
+  "permanentlyClosed": false,
+  "temporarilyClosed": false,
+  "placeId": "ChIJ0d4lVpmZfDURhml_A2RFJY8",
+  "categories": [
+    "한식 고기구이 레스토랑",
+    "고기 요리 전문점",
+    "음식점"
+  ],
+  "fid": "0x357c99995625ded1:0x8f254564037f6986",
+  "cid": "10314726817419716998",
+  "reviewsCount": 702,
+  "imagesCount": 715,
+  "imageCategories": [],
+  "scrapedAt": "2025-10-28T07:32:20.752Z",
+  "googleFoodUrl": null,
+  "hotelAds": [],
+  "openingHours": [
+    {
+      "day": "화요일",
+      "hours": "오후 3:00~오전 3:00"
+    },
+    {
+      "day": "수요일",
+      "hours": "오후 3:00~오전 3:00"
+    },
+    {
+      "day": "목요일",
+      "hours": "오후 3:00~오전 3:00"
+    },
+    {
+      "day": "금요일",
+      "hours": "오후 3:00~오전 3:00"
+    },
+    {
+      "day": "토요일",
+      "hours": "오후 12:00~오전 3:00"
+    },
+    {
+      "day": "일요일",
+      "hours": "오후 12:00~오전 3:00"
+    },
+    {
+      "day": "월요일",
+      "hours": "오후 3:00~오전 3:00"
+    }
+  ],
+  "additionalOpeningHours": {
+    "주방": [
+      {
+        "day": "화요일",
+        "hours": "오후 3:00~오전 2:30"
+      },
+      {
+        "day": "수요일",
+        "hours": "오후 3:00~오전 2:30"
+      },
+      {
+        "day": "목요일",
+        "hours": "오후 3:00~오전 2:30"
+      },
+      {
+        "day": "금요일",
+        "hours": "오후 3:00~오전 2:30"
+      },
+      {
+        "day": "토요일",
+        "hours": "오후 12:00~오전 2:30"
+      },
+      {
+        "day": "일요일",
+        "hours": "오후 12:00~오전 2:30"
+      },
+      {
+        "day": "월요일",
+        "hours": "오후 3:00~오전 2:30"
+      }
+    ]
+  },
+  "peopleAlsoSearch": [],
+  "placesTags": [],
+  "reviewsTags": [],
+  "additionalInfo": {
+    "비즈니스 소유자 제공 정보": [
+      {
+        "확인된 속성: 여성이 소유하거나 운영함": true
+      }
+    ],
+    "서비스 옵션": [
+      {
+        "현장 서비스": true
+      },
+      {
+        "매장 내 식사": true
+      },
+      {
+        "배달 서비스": false
+      },
+      {
+        "테이크아웃": false
+      }
+    ],
+    "인기 있는 이유": [
+      {
+        "저녁식사": true
+      }
+    ],
+    "접근성": [
+      {
+        "휠체어 이용 가능 출입구": true
+      },
+      {
+        "휠체어 이용가능 좌석": true
+      },
+      {
+        "휠체어 이용가능 주차장": false
+      },
+      {
+        "휠체어 이용가능 화장실": false
+      },
+      {
+        "히어링 루프 보조 시스템": false
+      }
+    ],
+    "상품/서비스": [
+      {
+        "맥주": true
+      },
+      {
+        "스몰 플레이트 메뉴": true
+      },
+      {
+        "심야 시간대 음식": true
+      },
+      {
+        "양주": true
+      },
+      {
+        "와인": true
+      },
+      {
+        "유기농 요리": true
+      },
+      {
+        "전용 식당": true
+      },
+      {
+        "주류 제공": true
+      },
+      {
+        "채식 메뉴": true
+      }
+    ],
+    "식사 옵션": [
+      {
+        "저녁식사": true
+      },
+      {
+        "좌석": true
+      },
+      {
+        "테이블 주문 서비스": true
+      }
+    ],
+    "편의 시설": [
+      {
+        "바": true
+      },
+      {
+        "화장실": true
+      },
+      {
+        "Wi-Fi": true
+      },
+      {
+        "무료 Wi-Fi": true
+      }
+    ],
+    "분위기": [
+      {
+        "캐주얼": true
+      }
+    ],
+    "주요 방문자": [
+      {
+        "관광객": true
+      },
+      {
+        "단체석": true
+      },
+      {
+        "유아동반/가족모임에 적합": true
+      },
+      {
+        "트랜스젠더 안전 구역": true
+      },
+      {
+        "LGBTQ+ 친화적": true
+      }
+    ],
+    "계획": [
+      {
+        "예약 가능": true
+      }
+    ],
+    "결제": [
+      {
+        "신용카드": true
+      },
+      {
+        "체크카드": true
+      },
+      {
+        "NFC 모바일 결제": true
+      },
+      {
+        "신용카드": true
+      }
+    ],
+    "아동": [
+      {
+        "어린이 메뉴": true
+      },
+      {
+        "어린이에게 적합함": true
+      }
+    ],
+    "반려동물": [
+      {
+        "야외에서 반려견 허용": true
+      }
+    ]
+  },
+  "gasPrices": [],
+  "url": "https://www.google.com/maps/search/?api=1&query=%ED%99%8D%EB%8C%80%20%EA%B3%A0%EA%B8%B0%EC%A7%91%20%EC%A0%9C%EC%A3%BC%ED%8A%B9%EB%B3%84%EC%A7%91%20%7C%20Hongdae%20Korean%20BBQ%20Restaurant%20Jeju%20Special%20House%20%7C%20%E5%BC%98%E5%A4%A7%20%E7%BE%8E%E9%A3%9F%20%E6%B5%8E%E5%B7%9E%E7%8C%AA%E7%89%B9%E5%88%AB%E5%AE%B6%20%7C%20%E6%B8%88%E5%B7%9E%E8%B1%9A%E7%89%B9%E5%88%A5%E5%BA%97%20%E3%83%9B%E3%83%B3%E3%83%87&query_place_id=ChIJ0d4lVpmZfDURhml_A2RFJY8",
+  "searchPageUrl": "https://www.google.com/maps/search/Korean%20food%20near%20Hongdae,%20Seoul/@37.67378831800816,127.0425915330295,13z?hl=ko",
+  "searchString": "Korean food near Hongdae, Seoul",
+  "language": "ko",
+  "rank": 9,
+  "isAdvertisement": false,
+  "imageUrl": "https://lh3.googleusercontent.com/gps-cs-s/AG0ilSzlX_0DEH_TpMIhYjI-VhPkrBgF4JFRT2TOYbUsPwfg3YrbpkpJieTr0dfgvYDE_1Eec-4W7_RyngoUEad6c5Lo8VTkI0vVJOYMyqXync_YDWdePR0oR088HVUZqFSKwTozbUzSRw=w408-h306-k-no",
+  "kgmid": "/g/11vl2p0cpw"
+},
+{
+  "title": "홍대 태초갈비 | Hongdae taecho galbi beef korean bbq | ホンデ テチョカルビ 焼肉グルメ | 弘大太初排骨 烤肉美食餐廳",
+  "price": null,
+  "categoryName": "한식 고기구이 레스토랑",
+  "address": "대한민국 서울특별시 마포구 어울마당로 122 2층",
+  "neighborhood": null,
+  "street": "어울마당로 122 2층",
+  "city": "마포구",
+  "postalCode": "04055",
+  "state": "서울특별시",
+  "countryCode": "KR",
+  "phone": "+82 10-2733-4590",
+  "phoneUnformatted": "+821027334590",
+  "claimThisBusiness": false,
+  "location": {
+    "lat": 37.5553468,
+    "lng": 126.9238496
+  },
+  "totalScore": 5,
+  "permanentlyClosed": false,
+  "temporarilyClosed": false,
+  "placeId": "ChIJbyskvqqZfDURiFtkOtoL4eE",
+  "categories": [
+    "한식 고기구이 레스토랑"
+  ],
+  "fid": "0x357c99aabe242b6f:0xe1e10bda3a645b88",
+  "cid": "16276303560204114824",
+  "reviewsCount": 2627,
+  "imagesCount": 4350,
+  "imageCategories": [],
+  "scrapedAt": "2025-10-28T07:32:20.752Z",
+  "googleFoodUrl": null,
+  "hotelAds": [],
+  "openingHours": [
+    {
+      "day": "화요일",
+      "hours": "오후 12:00~11:30"
+    },
+    {
+      "day": "수요일",
+      "hours": "오후 12:00~11:30"
+    },
+    {
+      "day": "목요일",
+      "hours": "오후 12:00~11:30"
+    },
+    {
+      "day": "금요일",
+      "hours": "오후 12:00~11:30"
+    },
+    {
+      "day": "토요일",
+      "hours": "오후 12:00~11:30"
+    },
+    {
+      "day": "일요일",
+      "hours": "오후 12:00~11:30"
+    },
+    {
+      "day": "월요일",
+      "hours": "오후 12:00~11:30"
+    }
+  ],
+  "peopleAlsoSearch": [],
+  "placesTags": [],
+  "reviewsTags": [],
+  "additionalInfo": {
+    "서비스 옵션": [
+      {
+        "매장 내 식사": true
+      },
+      {
+        "배달 서비스": false
+      }
+    ],
+    "인기 있는 이유": [
+      {
+        "점심식사": true
+      },
+      {
+        "저녁식사": true
+      }
+    ],
+    "상품/서비스": [
+      {
+        "맥주": true
+      },
+      {
+        "주류 제공": true
+      }
+    ],
+    "식사 옵션": [
+      {
+        "점심식사": true
+      },
+      {
+        "저녁식사": true
+      },
+      {
+        "디저트": true
+      },
+      {
+        "좌석": true
+      },
+      {
+        "테이블 주문 서비스": true
+      }
+    ],
+    "편의 시설": [
+      {
+        "화장실": true
+      }
+    ],
+    "분위기": [
+      {
+        "캐주얼": true
+      }
+    ],
+    "주요 방문자": [
+      {
+        "관광객": true
+      },
+      {
+        "단체석": true
+      },
+      {
+        "유아동반/가족모임에 적합": true
+      }
+    ],
+    "계획": [
+      {
+        "예약 가능": true
+      }
+    ],
+    "결제": [
+      {
+        "신용카드": true
+      },
+      {
+        "체크카드": true
+      },
+      {
+        "NFC 모바일 결제": true
+      }
+    ]
+  },
+  "gasPrices": [],
+  "url": "https://www.google.com/maps/search/?api=1&query=%ED%99%8D%EB%8C%80%20%ED%83%9C%EC%B4%88%EA%B0%88%EB%B9%84%20%7C%20Hongdae%20taecho%20galbi%20beef%20korean%20bbq%20%7C%20%E3%83%9B%E3%83%B3%E3%83%87%20%E3%83%86%E3%83%81%E3%83%A7%E3%82%AB%E3%83%AB%E3%83%93%20%E7%84%BC%E8%82%89%E3%82%B0%E3%83%AB%E3%83%A1%20%7C%20%E5%BC%98%E5%A4%A7%E5%A4%AA%E5%88%9D%E6%8E%92%E9%AA%A8%20%E7%83%A4%E8%82%89%E7%BE%8E%E9%A3%9F%E9%A4%90%E5%BB%B3&query_place_id=ChIJbyskvqqZfDURiFtkOtoL4eE",
+  "searchPageUrl": "https://www.google.com/maps/search/Korean%20food%20near%20Hongdae,%20Seoul/@37.67378831800816,127.0425915330295,13z?hl=ko",
+  "searchString": "Korean food near Hongdae, Seoul",
+  "language": "ko",
+  "rank": 10,
+  "isAdvertisement": false,
+  "imageUrl": "https://lh3.googleusercontent.com/gps-cs-s/AG0ilSyrtiV7mF3nNQFnOYooIPLYJbyDz6WiqX5IOL8x0lx-RLRYRfMWGbl7ltaDbTsOn3St9s4q5BIBLcL-qADN22MyanSjbwzRdkmqp0_NcsaD2PnnFvSdolAyP4Eb6Wed2uOPcPxeDfUnQU0=w408-h306-k-no",
+  "kgmid": "/g/11wp4jjz1r"
+},
+{
+  "title": "비밥 비빔밥 한식당, 홍대",
+  "price": "₩1~10,000",
+  "categoryName": "음식점",
+  "address": "대한민국 서울특별시 마포구 홍익로 3-3",
+  "neighborhood": null,
+  "street": "홍익로 3-3",
+  "city": "마포구",
+  "postalCode": "04055",
+  "state": "서울특별시",
+  "countryCode": "KR",
+  "website": "https://bebab.kr/",
+  "phone": "+82 2-333-6333",
+  "phoneUnformatted": "+8223336333",
+  "claimThisBusiness": false,
+  "location": {
+    "lat": 37.552888,
+    "lng": 126.923735
+  },
+  "totalScore": 4.9,
+  "permanentlyClosed": false,
+  "temporarilyClosed": false,
+  "placeId": "ChIJabVo68OZfDUReP7-Ok07hyk",
+  "categories": [
+    "음식점",
+    "한식당",
+    "테이크아웃 전문 레스토랑"
+  ],
+  "fid": "0x357c99c3eb68b569:0x29873b4d3afefe78",
+  "cid": "2992425680299294328",
+  "reviewsCount": 324,
+  "imagesCount": 303,
+  "imageCategories": [],
+  "scrapedAt": "2025-10-28T07:32:20.752Z",
+  "googleFoodUrl": null,
+  "hotelAds": [],
+  "openingHours": [
+    {
+      "day": "화요일",
+      "hours": "오전 11:00~오후 8:00"
+    },
+    {
+      "day": "수요일",
+      "hours": "오전 11:00~오후 8:00"
+    },
+    {
+      "day": "목요일",
+      "hours": "오전 11:00~오후 8:00"
+    },
+    {
+      "day": "금요일",
+      "hours": "오전 11:00~오후 8:00"
+    },
+    {
+      "day": "토요일",
+      "hours": "오전 11:00~오후 8:00"
+    },
+    {
+      "day": "일요일",
+      "hours": "오전 11:00~오후 8:00"
+    },
+    {
+      "day": "월요일",
+      "hours": "휴무일"
+    }
+  ],
+  "peopleAlsoSearch": [],
+  "placesTags": [],
+  "reviewsTags": [],
+  "additionalInfo": {
+    "서비스 옵션": [
+      {
+        "비대면 배달": true
+      },
+      {
+        "배달 서비스": true
+      },
+      {
+        "테이크아웃": true
+      },
+      {
+        "매장 내 식사": true
+      }
+    ],
+    "인기 있는 이유": [
+      {
+        "점심식사": true
+      },
+      {
+        "저녁식사": true
+      },
+      {
+        "1인 식사": true
+      }
+    ],
+    "접근성": [
+      {
+        "휠체어 이용가능 주차장": false
+      }
+    ],
+    "상품/서비스": [
+      {
+        "간단한 식사": true
+      },
+      {
+        "맥주": true
+      },
+      {
+        "비건 메뉴": true
+      },
+      {
+        "스몰 플레이트 메뉴": true
+      },
+      {
+        "주류 제공": true
+      },
+      {
+        "채식 메뉴": true
+      },
+      {
+        "커피": true
+      }
+    ],
+    "식사 옵션": [
+      {
+        "점심식사": true
+      },
+      {
+        "저녁식사": true
+      }
+    ],
+    "편의 시설": [
+      {
+        "화장실": true
+      }
+    ],
+    "분위기": [
+      {
+        "유행하는 스타일": true
+      },
+      {
+        "캐주얼": true
+      }
+    ],
+    "주요 방문자": [
+      {
+        "관광객": true
+      }
+    ],
+    "결제": [
+      {
+        "신용카드": true
+      },
+      {
+        "체크카드": true
+      },
+      {
+        "NFC 모바일 결제": true
+      },
+      {
+        "신용카드": true
+      }
+    ]
+  },
+  "gasPrices": [],
+  "url": "https://www.google.com/maps/search/?api=1&query=%EB%B9%84%EB%B0%A5%20%EB%B9%84%EB%B9%94%EB%B0%A5%20%ED%95%9C%EC%8B%9D%EB%8B%B9%2C%20%ED%99%8D%EB%8C%80&query_place_id=ChIJabVo68OZfDUReP7-Ok07hyk",
+  "searchPageUrl": "https://www.google.com/maps/search/Korean%20food%20near%20Hongdae,%20Seoul/@37.67378831800816,127.0425915330295,13z?hl=ko",
+  "searchString": "Korean food near Hongdae, Seoul",
+  "language": "ko",
+  "rank": 11,
+  "isAdvertisement": false,
+  "imageUrl": "https://lh3.googleusercontent.com/p/AF1QipOmh44_w2H8CR-DOyL2F8Ufr-QjuT_PIOmo6_-C=w408-h408-k-no",
+  "kgmid": "/g/11y1fr31j2"
+},
+{
+  "title": "엉터리생고기 무한리필 홍대점 | Hongdae Korean BBQ Restaurant UNGTEORI | All you can eat | BUFFET | kbbq |ホンデ サムギョプサル | 弘大五花肉 | AYCE |",
+  "price": "₩10,000~20,000",
+  "categoryName": "한식 고기구이 레스토랑",
+  "address": "대한민국 서울특별시 마포구 어울마당로 118",
+  "neighborhood": null,
+  "street": "어울마당로 118",
+  "city": "마포구",
+  "postalCode": "04055",
+  "state": "서울특별시",
+  "countryCode": "KR",
+  "website": "http://www.ungteori.com/",
+  "phone": "+82 2-324-9588",
+  "phoneUnformatted": "+8223249588",
+  "claimThisBusiness": false,
+  "location": {
+    "lat": 37.5550467,
+    "lng": 126.9235304
+  },
+  "totalScore": 4.9,
+  "permanentlyClosed": false,
+  "temporarilyClosed": false,
+  "placeId": "ChIJjaq6VsOYfDUROre7YhOkKbA",
+  "categories": [
+    "한식 고기구이 레스토랑",
+    "숯불구이/바베큐전문점",
+    "바베큐장",
+    "한국식 소고기 전문 음식점",
+    "한식당",
+    "고기뷔페",
+    "삼겹살 전문점",
+    "음식점"
+  ],
+  "fid": "0x357c98c356baaa8d:0xb029a41362bbb73a",
+  "cid": "12693857427888256826",
+  "reviewsCount": 4706,
+  "imagesCount": 2903,
+  "imageCategories": [],
+  "scrapedAt": "2025-10-28T07:32:20.753Z",
+  "googleFoodUrl": null,
+  "hotelAds": [],
+  "openingHours": [
+    {
+      "day": "화요일",
+      "hours": "오전 11:00~오후 11:00"
+    },
+    {
+      "day": "수요일",
+      "hours": "오전 11:00~오후 11:00"
+    },
+    {
+      "day": "목요일",
+      "hours": "오전 11:00~오후 11:00"
+    },
+    {
+      "day": "금요일",
+      "hours": "오전 11:00~오후 11:00"
+    },
+    {
+      "day": "토요일",
+      "hours": "오전 11:00~오후 11:00"
+    },
+    {
+      "day": "일요일",
+      "hours": "오전 11:00~오후 11:00"
+    },
+    {
+      "day": "월요일",
+      "hours": "오전 11:00~오후 11:00"
+    }
+  ],
+  "additionalOpeningHours": {
+    "주방": [
+      {
+        "day": "화요일",
+        "hours": "오전 11:00~오후 10:00"
+      },
+      {
+        "day": "수요일",
+        "hours": "오전 11:00~오후 10:00"
+      },
+      {
+        "day": "목요일",
+        "hours": "오전 11:00~오후 10:00"
+      },
+      {
+        "day": "금요일",
+        "hours": "오전 11:00~오후 10:00"
+      },
+      {
+        "day": "토요일",
+        "hours": "오전 11:00~오후 10:00"
+      },
+      {
+        "day": "일요일",
+        "hours": "오전 11:00~오후 10:00"
+      },
+      {
+        "day": "월요일",
+        "hours": "오전 11:00~오후 10:00"
+      }
+    ]
+  },
+  "peopleAlsoSearch": [],
+  "placesTags": [],
+  "reviewsTags": [],
+  "additionalInfo": {
+    "비즈니스 소유자 제공 정보": [
+      {
+        "확인된 속성: 여성이 소유하거나 운영함": true
+      }
+    ],
+    "서비스 옵션": [
+      {
+        "매장 내 식사": true
+      },
+      {
+        "배달 서비스": false
+      },
+      {
+        "테이크아웃": false
+      }
+    ],
+    "인기 있는 이유": [
+      {
+        "점심식사": true
+      },
+      {
+        "저녁식사": true
+      }
+    ],
+    "접근성": [
+      {
+        "휠체어 이용 가능 출입구": false
+      },
+      {
+        "휠체어 이용가능 좌석": false
+      },
+      {
+        "휠체어 이용가능 주차장": false
+      }
+    ],
+    "상품/서비스": [
+      {
+        "맥주": true
+      },
+      {
+        "뷔페 식당": true
+      },
+      {
+        "샐러드 바": true
+      },
+      {
+        "주류 제공": true
+      }
+    ],
+    "식사 옵션": [
+      {
+        "점심식사": true
+      },
+      {
+        "저녁식사": true
+      },
+      {
+        "좌석": true
+      },
+      {
+        "테이블 주문 서비스": true
+      }
+    ],
+    "편의 시설": [
+      {
+        "화장실": true
+      }
+    ],
+    "분위기": [
+      {
+        "유행하는 스타일": true
+      },
+      {
+        "캐주얼": true
+      }
+    ],
+    "주요 방문자": [
+      {
+        "관광객": true
+      },
+      {
+        "단체석": true
+      },
+      {
+        "대학생": true
+      },
+      {
+        "유아동반/가족모임에 적합": true
+      }
+    ],
+    "계획": [
+      {
+        "일반적으로 대기 시간이 있음": true
+      }
+    ],
+    "결제": [
+      {
+        "신용카드": true
+      },
+      {
+        "체크카드": true
+      },
+      {
+        "NFC 모바일 결제": true
+      }
+    ],
+    "주차": [
+      {
+        "무료 주차장": true
+      },
+      {
+        "주차 공간을 찾기 어려움": true
+      }
+    ]
+  },
+  "gasPrices": [],
+  "url": "https://www.google.com/maps/search/?api=1&query=%EC%97%89%ED%84%B0%EB%A6%AC%EC%83%9D%EA%B3%A0%EA%B8%B0%20%EB%AC%B4%ED%95%9C%EB%A6%AC%ED%95%84%20%ED%99%8D%EB%8C%80%EC%A0%90%20%7C%20Hongdae%20Korean%20BBQ%20Restaurant%20UNGTEORI%20%7C%20All%20you%20can%20eat%20%7C%20BUFFET%20%7C%20kbbq%20%7C%E3%83%9B%E3%83%B3%E3%83%87%20%E3%82%B5%E3%83%A0%E3%82%AE%E3%83%A7%E3%83%97%E3%82%B5%E3%83%AB%20%7C%20%E5%BC%98%E5%A4%A7%E4%BA%94%E8%8A%B1%E8%82%89%20%7C%20AYCE%20%7C&query_place_id=ChIJjaq6VsOYfDUROre7YhOkKbA",
+  "searchPageUrl": "https://www.google.com/maps/search/Korean%20food%20near%20Hongdae,%20Seoul/@37.67378831800816,127.0425915330295,13z?hl=ko",
+  "searchString": "Korean food near Hongdae, Seoul",
+  "language": "ko",
+  "rank": 12,
+  "isAdvertisement": false,
+  "imageUrl": "https://lh3.googleusercontent.com/gps-cs-s/AG0ilSyGekC1ZqqCaHrobi4_H6YVEr4vLeIjSmS3wglCf-98Wak8SbtwMW4zmoIBHZd8gOomsJoI5SAlS2nvQqIz_Tq578rin78gFIwsoxb6HTt2PprqK1S3Yryai_-BqdsGxpFpsYT0FA=w408-h306-k-no",
+  "kgmid": "/g/11c6031fj6"
+},
+{
+  "title": "육지 홍대",
+  "price": null,
+  "categoryName": "한식 고기구이 레스토랑",
+  "address": "대한민국 서울특별시 독막로3길 34",
+  "neighborhood": null,
+  "street": "독막로3길 34",
+  "city": null,
+  "postalCode": "04047",
+  "state": "서울특별시",
+  "countryCode": "KR",
+  "phone": "+82 2-2088-3905",
+  "phoneUnformatted": "+82220883905",
+  "claimThisBusiness": false,
+  "location": {
+    "lat": 37.5496875,
+    "lng": 126.9174558
+  },
+  "totalScore": 4.9,
+  "permanentlyClosed": false,
+  "temporarilyClosed": false,
+  "placeId": "ChIJFcMUhCaZfDURB2O4cNXyD4g",
+  "categories": [
+    "한식 고기구이 레스토랑",
+    "음식점"
+  ],
+  "fid": "0x357c99268414c315:0x880ff2d570b86307",
+  "cid": "9804321912341947143",
+  "reviewsCount": 3184,
+  "imagesCount": 2865,
+  "imageCategories": [],
+  "scrapedAt": "2025-10-28T07:32:20.753Z",
+  "googleFoodUrl": null,
+  "hotelAds": [],
+  "openingHours": [
+    {
+      "day": "화요일",
+      "hours": "오전 11:30~오후 11:00"
+    },
+    {
+      "day": "수요일",
+      "hours": "오전 11:30~오후 11:00"
+    },
+    {
+      "day": "목요일",
+      "hours": "오전 11:30~오후 11:00"
+    },
+    {
+      "day": "금요일",
+      "hours": "오전 11:30~오전 12:00"
+    },
+    {
+      "day": "토요일",
+      "hours": "오전 11:30~오전 12:00"
+    },
+    {
+      "day": "일요일",
+      "hours": "오전 11:30~오후 11:00"
+    },
+    {
+      "day": "월요일",
+      "hours": "오전 11:30~오후 11:00"
+    }
+  ],
+  "peopleAlsoSearch": [],
+  "placesTags": [],
+  "reviewsTags": [],
+  "additionalInfo": {
+    "서비스 옵션": [
+      {
+        "매장 내 식사": true
+      },
+      {
+        "배달 서비스": false
+      },
+      {
+        "테이크아웃": false
+      }
+    ],
+    "인기 있는 이유": [
+      {
+        "점심식사": true
+      },
+      {
+        "저녁식사": true
+      }
+    ],
+    "접근성": [
+      {
+        "휠체어 이용 가능 출입구": false
+      },
+      {
+        "휠체어 이용가능 좌석": false
+      },
+      {
+        "휠체어 이용가능 주차장": false
+      },
+      {
+        "휠체어 이용가능 화장실": false
+      },
+      {
+        "히어링 루프 보조 시스템": false
+      }
+    ],
+    "상품/서비스": [
+      {
+        "맥주": true
+      },
+      {
+        "스몰 플레이트 메뉴": true
+      },
+      {
+        "심야 시간대 음식": true
+      },
+      {
+        "전용 식당": true
+      },
+      {
+        "주류 제공": true
+      }
+    ],
+    "식사 옵션": [
+      {
+        "브런치": true
+      },
+      {
+        "점심식사": true
+      },
+      {
+        "저녁식사": true
+      },
+      {
+        "카운터 서비스": true
+      },
+      {
+        "좌석": true
+      },
+      {
+        "테이블 주문 서비스": true
+      }
+    ],
+    "편의 시설": [
+      {
+        "성중립 화장실": true
+      },
+      {
+        "화장실": true
+      },
+      {
+        "Wi-Fi": true
+      },
+      {
+        "무료 Wi-Fi": true
+      }
+    ],
+    "분위기": [
+      {
+        "유행하는 스타일": true
+      },
+      {
+        "캐주얼": true
+      }
+    ],
+    "주요 방문자": [
+      {
+        "관광객": true
+      },
+      {
+        "단체석": true
+      },
+      {
+        "대학생": true
+      }
+    ],
+    "결제": [
+      {
+        "개인수표": true
+      },
+      {
+        "신용카드": true
+      },
+      {
+        "체크카드": true
+      },
+      {
+        "신용카드": true
+      }
+    ],
+    "주차": [
+      {
+        "주차 공간을 찾기 어려움": true
+      }
+    ],
+    "반려동물": [
+      {
+        "야외에서 반려견 허용": true
+      }
+    ]
+  },
+  "gasPrices": [],
+  "url": "https://www.google.com/maps/search/?api=1&query=%EC%9C%A1%EC%A7%80%20%ED%99%8D%EB%8C%80&query_place_id=ChIJFcMUhCaZfDURB2O4cNXyD4g",
+  "searchPageUrl": "https://www.google.com/maps/search/Korean%20food%20near%20Hongdae,%20Seoul/@37.67378831800816,127.0425915330295,13z?hl=ko",
+  "searchString": "Korean food near Hongdae, Seoul",
+  "language": "ko",
+  "rank": 13,
+  "isAdvertisement": false,
+  "imageUrl": "https://lh3.googleusercontent.com/gps-cs-s/AG0ilSzCDDEjAH6_87eNfpkclwDcTqEsqd0cHwNK7QXYLTz01VE7QwERL6JIdxdG3lR03_iwN0pEo03HqdUGy-nFf-Exf7VAUaE6G4p4iWio2KpVIl3YAnglTIFPT7xB3F-dHEQbsq3ya5T1xJ_4=w408-h306-k-no",
+  "kgmid": "/g/11q2xwmbmk"
+},
+{
+  "title": "신미경 홍대닭갈비",
+  "price": "₩10,000~20,000",
+  "categoryName": "닭갈비전문점",
+  "address": "대한민국 서울특별시 마포구 와우산로21길 31-10",
+  "neighborhood": null,
+  "street": "와우산로21길 31-10",
+  "city": "마포구",
+  "postalCode": "04041",
+  "state": "서울특별시",
+  "countryCode": "KR",
+  "website": "https://hongdaedak.com/",
+  "phone": "+82 2-2245-5222",
+  "phoneUnformatted": "+82222455222",
+  "claimThisBusiness": false,
+  "location": {
+    "lat": 37.5521114,
+    "lng": 126.9218974
+  },
+  "totalScore": 4.5,
+  "permanentlyClosed": false,
+  "temporarilyClosed": false,
+  "placeId": "ChIJhW7NM9uYfDURXImO-sniaD0",
+  "categories": [
+    "닭갈비전문점"
+  ],
+  "fid": "0x357c98db33cd6e85:0x3d68e2c9fa8e895c",
+  "cid": "4425035991011461468",
+  "reviewsCount": 1464,
+  "imagesCount": 2246,
+  "imageCategories": [],
+  "scrapedAt": "2025-10-28T07:32:20.753Z",
+  "googleFoodUrl": null,
+  "hotelAds": [],
+  "openingHours": [
+    {
+      "day": "화요일",
+      "hours": "오전 11:00~오후 10:40"
+    },
+    {
+      "day": "수요일",
+      "hours": "오전 11:00~오후 10:40"
+    },
+    {
+      "day": "목요일",
+      "hours": "오전 11:00~오후 10:40"
+    },
+    {
+      "day": "금요일",
+      "hours": "오전 11:00~오후 10:40"
+    },
+    {
+      "day": "토요일",
+      "hours": "오전 11:00~오후 10:40"
+    },
+    {
+      "day": "일요일",
+      "hours": "오전 11:00~오후 10:40"
+    },
+    {
+      "day": "월요일",
+      "hours": "오전 11:00~오후 10:40"
+    }
+  ],
+  "peopleAlsoSearch": [],
+  "placesTags": [],
+  "reviewsTags": [],
+  "additionalInfo": {
+    "서비스 옵션": [
+      {
+        "야외 좌석": true
+      },
+      {
+        "배달 서비스": true
+      },
+      {
+        "테이크아웃": true
+      },
+      {
+        "매장 내 식사": true
+      }
+    ],
+    "인기 있는 이유": [
+      {
+        "점심식사": true
+      },
+      {
+        "저녁식사": true
+      }
+    ],
+    "접근성": [
+      {
+        "휠체어 이용 가능 출입구": false
+      },
+      {
+        "휠체어 이용가능 좌석": false
+      },
+      {
+        "휠체어 이용가능 주차장": false
+      }
+    ],
+    "상품/서비스": [
+      {
+        "맥주": true
+      },
+      {
+        "심야 시간대 음식": true
+      },
+      {
+        "주류 제공": true
+      }
+    ],
+    "식사 옵션": [
+      {
+        "아침식사": true
+      },
+      {
+        "브런치": true
+      },
+      {
+        "점심식사": true
+      },
+      {
+        "저녁식사": true
+      },
+      {
+        "카운터 서비스": true
+      },
+      {
+        "좌석": true
+      },
+      {
+        "테이블 주문 서비스": true
+      }
+    ],
+    "편의 시설": [
+      {
+        "화장실": true
+      },
+      {
+        "Wi-Fi": true
+      },
+      {
+        "무료 Wi-Fi": true
+      }
+    ],
+    "분위기": [
+      {
+        "유행하는 스타일": true
+      },
+      {
+        "캐주얼": true
+      }
+    ],
+    "주요 방문자": [
+      {
+        "관광객": true
+      },
+      {
+        "단체석": true
+      },
+      {
+        "대학생": true
+      },
+      {
+        "유아동반/가족모임에 적합": true
+      }
+    ],
+    "계획": [
+      {
+        "예약 가능": true
+      }
+    ],
+    "결제": [
+      {
+        "신용카드": true
+      },
+      {
+        "체크카드": true
+      },
+      {
+        "NFC 모바일 결제": true
+      },
+      {
+        "신용카드": true
+      }
+    ]
+  },
+  "gasPrices": [],
+  "url": "https://www.google.com/maps/search/?api=1&query=%EC%8B%A0%EB%AF%B8%EA%B2%BD%20%ED%99%8D%EB%8C%80%EB%8B%AD%EA%B0%88%EB%B9%84&query_place_id=ChIJhW7NM9uYfDURXImO-sniaD0",
+  "searchPageUrl": "https://www.google.com/maps/search/Korean%20food%20near%20Hongdae,%20Seoul/@37.67378831800816,127.0425915330295,13z?hl=ko",
+  "searchString": "Korean food near Hongdae, Seoul",
+  "language": "ko",
+  "rank": 14,
+  "isAdvertisement": false,
+  "imageUrl": "https://lh3.googleusercontent.com/gps-cs-s/AG0ilSzryn-8fSYa4GXIBbO6RRKW09IYFkzHyk8urBwABbG7esUEwbP9AZA0rbbl2aE4PaeUr1Nx88O7pFuCOH6Mj7Jd4vrJwl8ZkIUuqlSJLSFu5OnoG3RHp7AFsnQ1CLNUpTjyXoTTkg=w408-h306-k-no",
+  "kgmid": "/g/11cm07jgpn"
+},
+{
+  "title": "향미",
+  "price": "₩1~10,000",
+  "categoryName": "한식당",
+  "address": "대한민국 서울특별시 마포구 홍익로 3-24",
+  "neighborhood": null,
+  "street": "홍익로 3-24",
+  "city": "마포구",
+  "postalCode": "04040",
+  "state": "서울특별시",
+  "countryCode": "KR",
+  "phone": "+82 2-3141-3195",
+  "phoneUnformatted": "+82231413195",
+  "claimThisBusiness": true,
+  "location": {
+    "lat": 37.5528966,
+    "lng": 126.9233641
+  },
+  "totalScore": 4.6,
+  "permanentlyClosed": false,
+  "temporarilyClosed": false,
+  "placeId": "ChIJeXMwlcSYfDURDu2j5HiVT9Y",
+  "categories": [
+    "한식당"
+  ],
+  "fid": "0x357c98c495307379:0xd64f9578e4a3ed0e",
+  "cid": "15442725993741282574",
+  "reviewsCount": 94,
+  "imagesCount": 92,
+  "imageCategories": [],
+  "scrapedAt": "2025-10-28T07:32:20.753Z",
+  "googleFoodUrl": null,
+  "hotelAds": [],
+  "openingHours": [
+    {
+      "day": "화요일",
+      "hours": "오전 10:00~오후 10:00"
+    },
+    {
+      "day": "수요일",
+      "hours": "오전 10:00~오후 10:00"
+    },
+    {
+      "day": "목요일",
+      "hours": "오전 10:00~오후 10:00"
+    },
+    {
+      "day": "금요일",
+      "hours": "오전 10:00~오후 10:00"
+    },
+    {
+      "day": "토요일",
+      "hours": "오전 10:00~오후 10:00"
+    },
+    {
+      "day": "일요일",
+      "hours": "휴무일"
+    },
+    {
+      "day": "월요일",
+      "hours": "오전 10:00~오후 10:00"
+    }
+  ],
+  "peopleAlsoSearch": [],
+  "placesTags": [],
+  "reviewsTags": [],
+  "additionalInfo": {
+    "서비스 옵션": [
+      {
+        "매장 내 식사": true
+      }
+    ],
+    "인기 있는 이유": [
+      {
+        "점심식사": true
+      },
+      {
+        "저녁식사": true
+      },
+      {
+        "1인 식사": true
+      }
+    ],
+    "접근성": [
+      {
+        "휠체어 이용가능 주차장": false
+      }
+    ],
+    "상품/서비스": [
+      {
+        "간단한 식사": true
+      },
+      {
+        "맥주": true
+      },
+      {
+        "주류 제공": true
+      }
+    ],
+    "식사 옵션": [
+      {
+        "아침식사": true
+      },
+      {
+        "점심식사": true
+      },
+      {
+        "저녁식사": true
+      },
+      {
+        "테이블 주문 서비스": true
+      }
+    ],
+    "편의 시설": [
+      {
+        "화장실": true
+      }
+    ],
+    "분위기": [
+      {
+        "캐주얼": true
+      }
+    ],
+    "주요 방문자": [
+      {
+        "단체석": true
+      }
+    ],
+    "결제": [
+      {
+        "신용카드": true
+      },
+      {
+        "체크카드": true
+      },
+      {
+        "NFC 모바일 결제": true
+      }
+    ]
+  },
+  "gasPrices": [],
+  "url": "https://www.google.com/maps/search/?api=1&query=%ED%96%A5%EB%AF%B8&query_place_id=ChIJeXMwlcSYfDURDu2j5HiVT9Y",
+  "searchPageUrl": "https://www.google.com/maps/search/Korean%20food%20near%20Hongdae,%20Seoul/@37.67378831800816,127.0425915330295,13z?hl=ko",
+  "searchString": "Korean food near Hongdae, Seoul",
+  "language": "ko",
+  "rank": 15,
+  "isAdvertisement": false,
+  "imageUrl": "https://lh3.googleusercontent.com/gps-cs-s/AG0ilSwz1Y4wy0rqEl2veILyu_nwg71WFudpvRigMZZnofyHoW1eELybK2wJNRFLy8E0FrDUXDEpl_v2Bt8azJ2SEJenKi6fu4nXdosBjFcrzRcJVdAQgwDP2tOXHstf3ep5PBJqSx7B=w507-h240-k-no",
+  "kgmid": "/g/1tj55qb0"
+},
+{
+  "title": "홍익숯불갈비",
+  "price": "₩10,000~30,000",
+  "categoryName": "한식 고기구이 레스토랑",
+  "address": "대한민국 서울특별시 마포구 서교동 331-1",
+  "neighborhood": null,
+  "street": "서교동 331-1",
+  "city": "마포구",
+  "postalCode": "04053",
+  "state": "서울특별시",
+  "countryCode": "KR",
+  "website": "http://hongiik.cityfood.co.kr/",
+  "phone": "+82 2-332-8806",
+  "phoneUnformatted": "+8223328806",
+  "claimThisBusiness": false,
+  "location": {
+    "lat": 37.5562533,
+    "lng": 126.9262318
+  },
+  "totalScore": 4.1,
+  "permanentlyClosed": false,
+  "temporarilyClosed": false,
+  "placeId": "ChIJFXiiPsKYfDUReoyERavMPSU",
+  "categories": [
+    "한식 고기구이 레스토랑",
+    "고기 요리 전문점",
+    "음식점"
+  ],
+  "fid": "0x357c98c23ea27815:0x253dccab45848c7a",
+  "cid": "2683525988960472186",
+  "reviewsCount": 392,
+  "imagesCount": 533,
+  "imageCategories": [],
+  "scrapedAt": "2025-10-28T07:32:20.753Z",
+  "googleFoodUrl": null,
+  "hotelAds": [],
+  "openingHours": [
+    {
+      "day": "화요일",
+      "hours": "오후 3:30~오전 4:00"
+    },
+    {
+      "day": "수요일",
+      "hours": "오후 3:30~오전 4:00"
+    },
+    {
+      "day": "목요일",
+      "hours": "오후 3:30~오전 4:00"
+    },
+    {
+      "day": "금요일",
+      "hours": "오후 3:30~오전 4:00"
+    },
+    {
+      "day": "토요일",
+      "hours": "오후 3:30~오전 4:00"
+    },
+    {
+      "day": "일요일",
+      "hours": "오후 3:30~오전 4:00"
+    },
+    {
+      "day": "월요일",
+      "hours": "오후 3:30~오전 4:00"
+    }
+  ],
+  "peopleAlsoSearch": [],
+  "placesTags": [],
+  "reviewsTags": [],
+  "additionalInfo": {
+    "서비스 옵션": [
+      {
+        "현장 서비스": true
+      },
+      {
+        "매장 내 식사": true
+      },
+      {
+        "배달 서비스": false
+      },
+      {
+        "테이크아웃": false
+      }
+    ],
+    "인기 있는 이유": [
+      {
+        "저녁식사": true
+      }
+    ],
+    "접근성": [
+      {
+        "휠체어 이용 가능 출입구": false
+      },
+      {
+        "휠체어 이용가능 좌석": false
+      },
+      {
+        "휠체어 이용가능 주차장": false
+      },
+      {
+        "휠체어 이용가능 화장실": false
+      },
+      {
+        "히어링 루프 보조 시스템": false
+      }
+    ],
+    "상품/서비스": [
+      {
+        "맥주": true
+      },
+      {
+        "심야 시간대 음식": true
+      },
+      {
+        "유기농 요리": true
+      },
+      {
+        "전용 식당": true
+      },
+      {
+        "주류 제공": true
+      }
+    ],
+    "식사 옵션": [
+      {
+        "저녁식사": true
+      },
+      {
+        "좌석": true
+      },
+      {
+        "테이블 주문 서비스": true
+      }
+    ],
+    "편의 시설": [
+      {
+        "화장실": true
+      },
+      {
+        "Wi-Fi": true
+      },
+      {
+        "무료 Wi-Fi": true
+      }
+    ],
+    "분위기": [
+      {
+        "캐주얼": true
+      }
+    ],
+    "주요 방문자": [
+      {
+        "관광객": true
+      },
+      {
+        "단체석": true
+      },
+      {
+        "대학생": true
+      },
+      {
+        "유아동반/가족모임에 적합": true
+      },
+      {
+        "트랜스젠더 안전 구역": true
+      },
+      {
+        "LGBTQ+ 친화적": true
+      }
+    ],
+    "계획": [
+      {
+        "예약 가능": true
+      }
+    ],
+    "결제": [
+      {
+        "신용카드": true
+      },
+      {
+        "체크카드": true
+      },
+      {
+        "NFC 모바일 결제": true
+      },
+      {
+        "신용카드": true
+      }
+    ],
+    "주차": [
+      {
+        "유료 노상 주차": true
+      },
+      {
+        "유료 주차장": true
+      }
+    ]
+  },
+  "gasPrices": [],
+  "url": "https://www.google.com/maps/search/?api=1&query=%ED%99%8D%EC%9D%B5%EC%88%AF%EB%B6%88%EA%B0%88%EB%B9%84&query_place_id=ChIJFXiiPsKYfDUReoyERavMPSU",
+  "searchPageUrl": "https://www.google.com/maps/search/Korean%20food%20near%20Hongdae,%20Seoul/@37.67378831800816,127.0425915330295,13z?hl=ko",
+  "searchString": "Korean food near Hongdae, Seoul",
+  "language": "ko",
+  "rank": 16,
+  "isAdvertisement": false,
+  "imageUrl": "https://lh3.googleusercontent.com/gps-cs-s/AG0ilSzS8rvagvqH6zfmAQPD_-YnPu9QEJi8xB2vc-9gbSMWXM1WEUALPvWSneusHm7s0Emoyf5Rz5TPcYcby_sIq-_7Eq77NAquacKLH2_w-uPbAhP5xh5w0cT9xIPYq0oboRE2YA=w408-h306-k-no",
+  "kgmid": "/g/1vzg058y"
+},
+{
+  "title": "혼고집",
+  "price": "₩10,000~20,000",
+  "categoryName": "한식당",
+  "address": "대한민국 서울특별시 마포구 동교로30길 1",
+  "neighborhood": null,
+  "street": "동교로30길 1",
+  "city": "마포구",
+  "postalCode": "121-200",
+  "state": "서울특별시",
+  "countryCode": "KR",
+  "claimThisBusiness": true,
+  "location": {
+    "lat": 37.5606648,
+    "lng": 126.9245179
+  },
+  "totalScore": 4.8,
+  "permanentlyClosed": false,
+  "temporarilyClosed": false,
+  "placeId": "ChIJmfex3F2ZfDURn3fLkYrWxdo",
+  "categories": [
+    "한식당"
+  ],
+  "fid": "0x357c995ddcb1f799:0xdac5d68a91cb779f",
+  "cid": "15764241961320150943",
+  "reviewsCount": 381,
+  "imagesCount": 609,
+  "imageCategories": [],
+  "scrapedAt": "2025-10-28T07:32:20.753Z",
+  "googleFoodUrl": null,
+  "hotelAds": [],
+  "openingHours": [
+    {
+      "day": "화요일",
+      "hours": "오전 11:30~오후 10:00"
+    },
+    {
+      "day": "수요일",
+      "hours": "오전 11:30~오후 10:00"
+    },
+    {
+      "day": "목요일",
+      "hours": "오전 11:30~오후 10:00"
+    },
+    {
+      "day": "금요일",
+      "hours": "오전 11:30~오후 10:00"
+    },
+    {
+      "day": "토요일",
+      "hours": "오전 11:30~오후 10:00"
+    },
+    {
+      "day": "일요일",
+      "hours": "오전 11:30~오후 10:00"
+    },
+    {
+      "day": "월요일",
+      "hours": "오전 11:30~오후 10:00"
+    }
+  ],
+  "peopleAlsoSearch": [],
+  "placesTags": [],
+  "reviewsTags": [],
+  "additionalInfo": {
+    "서비스 옵션": [
+      {
+        "매장 내 식사": true
+      },
+      {
+        "배달 서비스": false
+      }
+    ],
+    "인기 있는 이유": [
+      {
+        "점심식사": true
+      },
+      {
+        "저녁식사": true
+      },
+      {
+        "1인 식사": true
+      }
+    ],
+    "접근성": [
+      {
+        "휠체어 이용 가능 출입구": false
+      },
+      {
+        "휠체어 이용가능 주차장": false
+      }
+    ],
+    "상품/서비스": [
+      {
+        "간단한 식사": true
+      },
+      {
+        "맥주": true
+      },
+      {
+        "심야 시간대 음식": true
+      },
+      {
+        "주류 제공": true
+      }
+    ],
+    "식사 옵션": [
+      {
+        "점심식사": true
+      },
+      {
+        "저녁식사": true
+      },
+      {
+        "테이블 주문 서비스": true
+      }
+    ],
+    "편의 시설": [
+      {
+        "화장실": true
+      }
+    ],
+    "분위기": [
+      {
+        "유행하는 스타일": true
+      },
+      {
+        "캐주얼": true
+      }
+    ],
+    "주요 방문자": [
+      {
+        "관광객": true
+      },
+      {
+        "단체석": true
+      },
+      {
+        "대학생": true
+      }
+    ],
+    "결제": [
+      {
+        "신용카드": true
+      },
+      {
+        "체크카드": true
+      },
+      {
+        "NFC 모바일 결제": true
+      }
+    ],
+    "주차": [
+      {
+        "주차 공간을 찾기 어려움": true
+      }
+    ]
+  },
+  "gasPrices": [],
+  "url": "https://www.google.com/maps/search/?api=1&query=%ED%98%BC%EA%B3%A0%EC%A7%91&query_place_id=ChIJmfex3F2ZfDURn3fLkYrWxdo",
+  "searchPageUrl": "https://www.google.com/maps/search/Korean%20food%20near%20Hongdae,%20Seoul/@37.67378831800816,127.0425915330295,13z?hl=ko",
+  "searchString": "Korean food near Hongdae, Seoul",
+  "language": "ko",
+  "rank": 17,
+  "isAdvertisement": false,
+  "imageUrl": "https://lh3.googleusercontent.com/gps-cs-s/AG0ilSyqJST_wGhs1KGoq3n4TGen9qxOsTn-4B-0_5GEpn0klSv9mx9o1Y70TCp-v5jXXGTJJpy-ZVgouYU--LDQgaJejN5HIdcKF0ikBc5GqFU2NZkH1tBkVuUaFn_VmM4UK-dwCO0=w426-h240-k-no",
+  "kgmid": "/g/11jskn93bg"
+},
+{
+  "title": "두리반",
+  "price": "₩10,000~20,000",
+  "categoryName": "한식당",
+  "address": "대한민국 서울특별시 마포구 홍익로5길 45",
+  "neighborhood": null,
+  "street": "홍익로5길 45",
+  "city": "마포구",
+  "postalCode": "04039",
+  "state": "서울특별시",
+  "countryCode": "KR",
+  "website": "https://www.diningcode.com/profile.php?rid=5mu31ciDVfcx",
+  "phone": "+82 2-333-4113",
+  "phoneUnformatted": "+8223334113",
+  "claimThisBusiness": true,
+  "location": {
+    "lat": 37.5531374,
+    "lng": 126.9201749
+  },
+  "totalScore": 4.6,
+  "permanentlyClosed": false,
+  "temporarilyClosed": false,
+  "placeId": "ChIJzQFP3-mYfDURYmUgxvxQMuM",
+  "categories": [
+    "한식당"
+  ],
+  "fid": "0x357c98e9df4f01cd:0xe33250fcc6206562",
+  "cid": "16371236642031166818",
+  "reviewsCount": 258,
+  "imagesCount": 307,
+  "imageCategories": [],
+  "scrapedAt": "2025-10-28T07:32:20.754Z",
+  "googleFoodUrl": null,
+  "hotelAds": [],
+  "openingHours": [
+    {
+      "day": "화요일",
+      "hours": "오전 11:00~오후 10:00"
+    },
+    {
+      "day": "수요일",
+      "hours": "오전 11:00~오후 10:00"
+    },
+    {
+      "day": "목요일",
+      "hours": "오전 11:00~오후 10:00"
+    },
+    {
+      "day": "금요일",
+      "hours": "오전 11:00~오후 10:00"
+    },
+    {
+      "day": "토요일",
+      "hours": "오전 11:00~오후 10:00"
+    },
+    {
+      "day": "일요일",
+      "hours": "휴무일"
+    },
+    {
+      "day": "월요일",
+      "hours": "오전 11:00~오후 10:00"
+    }
+  ],
+  "peopleAlsoSearch": [],
+  "placesTags": [],
+  "reviewsTags": [],
+  "additionalInfo": {
+    "서비스 옵션": [
+      {
+        "매장 내 식사": true
+      }
+    ],
+    "인기 있는 이유": [
+      {
+        "점심식사": true
+      },
+      {
+        "저녁식사": true
+      },
+      {
+        "1인 식사": true
+      }
+    ],
+    "상품/서비스": [
+      {
+        "간단한 식사": true
+      },
+      {
+        "맥주": true
+      },
+      {
+        "주류 제공": true
+      }
+    ],
+    "식사 옵션": [
+      {
+        "점심식사": true
+      },
+      {
+        "저녁식사": true
+      },
+      {
+        "테이블 주문 서비스": true
+      }
+    ],
+    "편의 시설": [
+      {
+        "화장실": true
+      }
+    ],
+    "분위기": [
+      {
+        "캐주얼": true
+      }
+    ],
+    "주요 방문자": [
+      {
+        "단체석": true
+      },
+      {
+        "대학생": true
+      }
+    ],
+    "계획": [
+      {
+        "예약 가능": true
+      }
+    ],
+    "결제": [
+      {
+        "신용카드": true
+      },
+      {
+        "체크카드": true
+      },
+      {
+        "NFC 모바일 결제": true
+      }
+    ]
+  },
+  "gasPrices": [],
+  "url": "https://www.google.com/maps/search/?api=1&query=%EB%91%90%EB%A6%AC%EB%B0%98&query_place_id=ChIJzQFP3-mYfDURYmUgxvxQMuM",
+  "searchPageUrl": "https://www.google.com/maps/search/Korean%20food%20near%20Hongdae,%20Seoul/@37.67378831800816,127.0425915330295,13z?hl=ko",
+  "searchString": "Korean food near Hongdae, Seoul",
+  "language": "ko",
+  "rank": 18,
+  "isAdvertisement": false,
+  "imageUrl": "https://lh3.googleusercontent.com/gps-cs-s/AG0ilSwJ2HSnjOzB3DkGBEk7JczipNjNkcpjfT1ElXYLGX_2XNIhluFnqoYf2pAt0IxnolkrovA-5DVkprDuCTDprrnBtof7L0hHYZ7jvvxmXwuHtRVnunbhi_Y7a1EgW2YX6c1u7g1MUg=w408-h306-k-no",
+  "kgmid": "/g/1tj_35c5"
+},
+{
+  "title": "콩불",
+  "price": "₩10,000~20,000",
+  "categoryName": "한식당",
+  "address": "대한민국 서울특별시 마포구 어울마당로 118-1",
+  "neighborhood": null,
+  "street": "어울마당로 118-1",
+  "city": "마포구",
+  "postalCode": "04055",
+  "state": "서울특별시",
+  "countryCode": "KR",
+  "website": "https://map.naver.com/p/entry/place/37373400?lng=126.9234029&lat=37.555089&placePath=%2Fhome&entry=plt&searchType=place&c=15.00,0,0,0,dh",
+  "phone": "+82 2-322-3545",
+  "phoneUnformatted": "+8223223545",
+  "claimThisBusiness": false,
+  "location": {
+    "lat": 37.5549976,
+    "lng": 126.9233319
+  },
+  "totalScore": 4.3,
+  "permanentlyClosed": false,
+  "temporarilyClosed": false,
+  "placeId": "ChIJm3YTa8OYfDURQ8s2wsELSPE",
+  "categories": [
+    "한식당",
+    "불고기 전문점"
+  ],
+  "fid": "0x357c98c36b13769b:0xf1480bc1c236cb43",
+  "cid": "17386159288278764355",
+  "reviewsCount": 835,
+  "imagesCount": 986,
+  "imageCategories": [],
+  "scrapedAt": "2025-10-28T07:32:20.754Z",
+  "googleFoodUrl": null,
+  "hotelAds": [],
+  "openingHours": [
+    {
+      "day": "화요일",
+      "hours": "24시간 영업"
+    },
+    {
+      "day": "수요일",
+      "hours": "24시간 영업"
+    },
+    {
+      "day": "목요일",
+      "hours": "24시간 영업"
+    },
+    {
+      "day": "금요일",
+      "hours": "24시간 영업"
+    },
+    {
+      "day": "토요일",
+      "hours": "24시간 영업"
+    },
+    {
+      "day": "일요일",
+      "hours": "24시간 영업"
+    },
+    {
+      "day": "월요일",
+      "hours": "24시간 영업"
+    }
+  ],
+  "peopleAlsoSearch": [],
+  "placesTags": [],
+  "reviewsTags": [],
+  "additionalInfo": {
+    "서비스 옵션": [
+      {
+        "매장 내 식사": true
+      }
+    ],
+    "인기 있는 이유": [
+      {
+        "점심식사": true
+      },
+      {
+        "저녁식사": true
+      }
+    ],
+    "접근성": [
+      {
+        "휠체어 이용 가능 출입구": false
+      },
+      {
+        "휠체어 이용가능 좌석": false
+      },
+      {
+        "휠체어 이용가능 주차장": false
+      }
+    ],
+    "상품/서비스": [
+      {
+        "간단한 식사": true
+      },
+      {
+        "맥주": true
+      },
+      {
+        "주류 제공": true
+      }
+    ],
+    "식사 옵션": [
+      {
+        "점심식사": true
+      },
+      {
+        "저녁식사": true
+      },
+      {
+        "테이블 주문 서비스": true
+      }
+    ],
+    "편의 시설": [
+      {
+        "화장실": true
+      },
+      {
+        "Wi-Fi": true
+      },
+      {
+        "무료 Wi-Fi": true
+      }
+    ],
+    "분위기": [
+      {
+        "유행하는 스타일": true
+      },
+      {
+        "캐주얼": true
+      }
+    ],
+    "주요 방문자": [
+      {
+        "관광객": true
+      },
+      {
+        "단체석": true
+      },
+      {
+        "대학생": true
+      },
+      {
+        "유아동반/가족모임에 적합": true
+      },
+      {
+        "트랜스젠더 안전 구역": true
+      },
+      {
+        "LGBTQ+ 친화적": true
+      }
+    ],
+    "결제": [
+      {
+        "신용카드": true
+      },
+      {
+        "체크카드": true
+      },
+      {
+        "NFC 모바일 결제": true
+      }
+    ]
+  },
+  "gasPrices": [],
+  "url": "https://www.google.com/maps/search/?api=1&query=%EC%BD%A9%EB%B6%88&query_place_id=ChIJm3YTa8OYfDURQ8s2wsELSPE",
+  "searchPageUrl": "https://www.google.com/maps/search/Korean%20food%20near%20Hongdae,%20Seoul/@37.67378831800816,127.0425915330295,13z?hl=ko",
+  "searchString": "Korean food near Hongdae, Seoul",
+  "language": "ko",
+  "rank": 19,
+  "isAdvertisement": false,
+  "imageUrl": "https://lh3.googleusercontent.com/gps-cs-s/AG0ilSwma90MInLZzPPHVHlBpr262ziFMSlHVqOF21olQ_K3QZtiWJK4JRbMZp-omFvSrwE3ufIcIm1nK6xbMB1VUe29SAtSGsepDTmdoOc-Amo_kyIf95IyFZNS3ynz8A-mA4cRnm7Lkw=w426-h240-k-no",
+  "kgmid": "/g/1tlw6_py"
+},
+{
+  "title": "도적 홍대 본점",
+  "price": "₩20,000~30,000",
+  "categoryName": "삼겹살 전문점",
+  "address": "대한민국 서울특별시 마포구 어울마당로5길 3",
+  "neighborhood": null,
+  "street": "어울마당로5길 3",
+  "city": "마포구",
+  "postalCode": "04048",
+  "state": "서울특별시",
+  "countryCode": "KR",
+  "website": "https://naver.me/Fuz5Awb2",
+  "phone": "+82 2-322-6746",
+  "phoneUnformatted": "+8223226746",
+  "claimThisBusiness": false,
+  "location": {
+    "lat": 37.5488108,
+    "lng": 126.9201838
+  },
+  "totalScore": 4.7,
+  "permanentlyClosed": false,
+  "temporarilyClosed": false,
+  "placeId": "ChIJCQtPT9CYfDURV2CydG71Hmw",
+  "categories": [
+    "삼겹살 전문점"
+  ],
+  "fid": "0x357c98d04f4f0b09:0x6c1ef56e74b26057",
+  "cid": "7790934260150591575",
+  "reviewsCount": 493,
+  "imagesCount": 717,
+  "imageCategories": [],
+  "scrapedAt": "2025-10-28T07:32:20.754Z",
+  "googleFoodUrl": null,
+  "hotelAds": [],
+  "openingHours": [
+    {
+      "day": "화요일",
+      "hours": "오후 4:00~오전 12:30"
+    },
+    {
+      "day": "수요일",
+      "hours": "오후 4:00~오전 12:30"
+    },
+    {
+      "day": "목요일",
+      "hours": "오후 4:00~오전 12:30"
+    },
+    {
+      "day": "금요일",
+      "hours": "오후 4:00~오전 12:30"
+    },
+    {
+      "day": "토요일",
+      "hours": "오후 4:00~오전 12:30"
+    },
+    {
+      "day": "일요일",
+      "hours": "오후 4:00~오전 12:30"
+    },
+    {
+      "day": "월요일",
+      "hours": "오후 4:00~오전 12:30"
+    }
+  ],
+  "peopleAlsoSearch": [],
+  "placesTags": [],
+  "reviewsTags": [],
+  "additionalInfo": {
+    "서비스 옵션": [
+      {
+        "매장 내 식사": true
+      },
+      {
+        "배달 서비스": false
+      },
+      {
+        "테이크아웃": false
+      }
+    ],
+    "인기 있는 이유": [
+      {
+        "점심식사": true
+      },
+      {
+        "저녁식사": true
+      }
+    ],
+    "접근성": [
+      {
+        "휠체어 이용 가능 출입구": true
+      },
+      {
+        "휠체어 이용가능 좌석": true
+      },
+      {
+        "휠체어 이용가능 주차장": true
+      }
+    ],
+    "상품/서비스": [
+      {
+        "맥주": true
+      },
+      {
+        "심야 시간대 음식": true
+      },
+      {
+        "주류 제공": true
+      }
+    ],
+    "식사 옵션": [
+      {
+        "점심식사": true
+      },
+      {
+        "저녁식사": true
+      },
+      {
+        "테이블 주문 서비스": true
+      }
+    ],
+    "편의 시설": [
+      {
+        "바": true
+      },
+      {
+        "화장실": true
+      }
+    ],
+    "분위기": [
+      {
+        "유행하는 스타일": true
+      },
+      {
+        "캐주얼": true
+      }
+    ],
+    "주요 방문자": [
+      {
+        "관광객": true
+      },
+      {
+        "단체석": true
+      },
+      {
+        "대학생": true
+      }
+    ],
+    "계획": [
+      {
+        "예약 가능": true
+      },
+      {
+        "일반적으로 대기 시간이 있음": true
+      }
+    ],
+    "결제": [
+      {
+        "신용카드": true
+      },
+      {
+        "체크카드": true
+      },
+      {
+        "NFC 모바일 결제": true
+      }
+    ],
+    "주차": [
+      {
+        "무료 주차장": true
+      },
+      {
+        "주차 공간이 많음": true
+      }
+    ]
+  },
+  "gasPrices": [],
+  "url": "https://www.google.com/maps/search/?api=1&query=%EB%8F%84%EC%A0%81%20%ED%99%8D%EB%8C%80%20%EB%B3%B8%EC%A0%90&query_place_id=ChIJCQtPT9CYfDURV2CydG71Hmw",
+  "searchPageUrl": "https://www.google.com/maps/search/Korean%20food%20near%20Hongdae,%20Seoul/@37.67378831800816,127.0425915330295,13z?hl=ko",
+  "searchString": "Korean food near Hongdae, Seoul",
+  "language": "ko",
+  "rank": 20,
+  "isAdvertisement": false,
+  "imageUrl": "https://lh3.googleusercontent.com/gps-cs-s/AG0ilSwLyqpgiEdIC8pelQs_EFyMl6VA-FQ49GZYU0qYiCcMAcK2R9mFbNlRZDKy7HFTPxSYNOXsVkGYvhMYfCVewtPaWuuX0SXx7FUazDXFaABr9UPO7mQ5LxzXTIWQyUIqnYBGau7xg9gGrBuY=w408-h385-k-no",
+  "kgmid": "/g/1tk_gn2h"
+}]
