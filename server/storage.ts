@@ -243,6 +243,11 @@ export interface IStorage {
     pendingCustomerInquiries: CustomerInquiry[];
     pendingPartnershipInquiries: PartnershipInquiry[];
   }>;
+  
+  // External Data Collection Statistics
+  getRestaurantCount(): Promise<number>;
+  getReviewCount(): Promise<number>;
+  getMenuCount(): Promise<number>;
 }
 
 export class DbStorage implements IStorage {
@@ -1335,6 +1340,28 @@ export class DbStorage implements IStorage {
       pendingCustomerInquiries,
       pendingPartnershipInquiries,
     };
+  }
+  
+  // External Data Collection Statistics
+  async getRestaurantCount(): Promise<number> {
+    const result = await db
+      .select({ count: sql<number>`cast(count(*) as int)` })
+      .from(restaurants);
+    return result[0]?.count || 0;
+  }
+  
+  async getReviewCount(): Promise<number> {
+    const result = await db
+      .select({ count: sql<number>`cast(count(*) as int)` })
+      .from(reviews);
+    return result[0]?.count || 0;
+  }
+  
+  async getMenuCount(): Promise<number> {
+    const result = await db
+      .select({ count: sql<number>`cast(count(*) as int)` })
+      .from(menus);
+    return result[0]?.count || 0;
   }
 }
 
