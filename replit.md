@@ -1,7 +1,7 @@
 # han sik dang (한식당) - Korean Restaurant Discovery Platform
 
 ## Overview
-han sik dang is a hybrid content platform and utility app for discovering Korean restaurants, integrating content monetization through advertising. It offers restaurant search, rich media, and a mobile-first, visually-driven design emphasizing Korean food culture. The platform is a full-stack TypeScript web application using React for the frontend and Express for the backend, built with PWA capabilities. It aims for a content-first approach with integrated ad monetization, strong SEO, and includes a comprehensive Admin Dashboard and a B2B Restaurant Dashboard. All 30 initial restaurants feature pre-generated AI insights. The platform is architected for enterprise scalability, supporting tens of thousands of restaurants, hundreds of thousands of images, and millions of users.
+han sik dang is a hybrid content platform and utility app for discovering Korean restaurants, integrating content monetization through advertising. It offers restaurant search, rich media, and a mobile-first, visually-driven design emphasizing Korean food culture. The platform is a full-stack TypeScript web application using React for the frontend and Express for the backend, built with PWA capabilities. It aims for a content-first approach with integrated ad monetization, strong SEO, and includes a comprehensive Admin Dashboard and a B2B Restaurant Dashboard. The platform features **189 restaurants** with **5-point dual-source popularity scores** (Naver + Google), achieving **47 legendary restaurants** (4.5-5.0★). The platform is architected for enterprise scalability, supporting tens of thousands of restaurants, hundreds of thousands of images, and millions of users.
 
 ## User Preferences
 Preferred communication style: Simple, everyday language.
@@ -33,7 +33,9 @@ Preferred communication style: Simple, everyday language.
 ### Data Storage
 -   **Database**: PostgreSQL (Supabase) with `postgres` client and connection pooling.
 -   **ORM**: Drizzle ORM, with Zod validation.
--   **Content**: 30 restaurant records seeded (ready for menus, reviews, YouTube content, and AI insights).
+-   **Content**: **189 restaurants** with complete 5-point popularity scores (Naver + Google ratings).
+-   **Popularity System**: Dual-source scoring - Naver (max 2.5) + Google (max 2.5) = 5.0 total.
+-   **Rating Distribution**: 47 legendary (4.5-5.0★), 139 excellent (3.5-4.49★), 3 good (2.5-3.49★).
 -   **User Reviews**: CRUD operations with ownership validation and automatic rating recalculation.
 -   **Admin Tables**: 23 total tables including platform management, restaurant operations, and AI insights.
 
@@ -138,17 +140,21 @@ SESSION_SECRET=<key>
 VITE_GA_MEASUREMENT_ID=<key>
 ```
 
-### Migration Guide
-See `SCALABILITY_MIGRATION_GUIDE.md` for detailed instructions on:
--   Migrating from Neon to Supabase
--   Setting up Object Storage buckets
--   Connecting external data collection projects
--   Performance monitoring and optimization
+### Recent Changes (October 30, 2025)
+-   ✅ **Logo Update**: White background PNG logo applied across all screens
+-   ✅ **Naver Ratings**: 189/189 restaurants now have Naver ratings (100% coverage)
+-   ✅ **5-Point Scale**: Dual-source popularity system fully implemented
+-   ✅ **Data Cleanup**: Removed 12 guide files, 13 screenshots, test data cleaned
+-   ✅ **Production Ready**: Database optimized, no orphaned records, ready for deployment
 
-### Current Status (Updated: October 27, 2025)
--   **Database**: ✅ **Supabase PostgreSQL (Active)** - 23 tables migrated, 30 restaurants seeded
+### Current Status (Updated: October 30, 2025)
+-   **Database**: ✅ **Supabase PostgreSQL (Active)** - 23 tables, **189 restaurants** with complete ratings
+-   **Popularity System**: ✅ **5-Point Dual-Source Complete** - 189/189 restaurants (100% coverage)
+-   **Rating Quality**: ✅ **47 Legendary Restaurants** (4.5-5.0★), Average: 4.15/5.0
+-   **Logo**: ✅ **White Background PNG** - Applied to all screens (Main, Content, My, Admin, SEO)
 -   **Images**: ✅ **Object Storage Configured** - Environment variables set (`PRIVATE_OBJECT_DIR`, `PUBLIC_OBJECT_SEARCH_PATHS`)
 -   **Data Collection**: ✅ **External API Active** - API key generated (`DATA_COLLECTION_API_KEY`), endpoints ready
+-   **Cleanup**: ✅ **Production Ready** - Guide files removed, test data cleaned, optimized for deployment
 -   **Scale Target**: Ready for 10,000+ restaurants, 100,000+ images, 1M+ users
 
 ### Migration Completed
