@@ -422,7 +422,27 @@ ${insights && insights.firstTimerTips ? `첫 방문 팁: ${insights.firstTimerTi
       if (!restaurant) {
         return res.status(404).json({ error: "Restaurant not found" });
       }
-      res.json(restaurant);
+      
+      // Get menus for this restaurant
+      const menus = await storage.getMenusByRestaurant(req.params.id);
+      
+      // Generate map URLs
+      const naverMapUrl = restaurant.naverPlaceId 
+        ? `https://map.naver.com/p/entry/place/${restaurant.naverPlaceId}`
+        : `https://map.naver.com/p/search/${encodeURIComponent(restaurant.address)}`;
+      
+      const googleMapUrl = restaurant.googlePlaceId
+        ? `https://www.google.com/maps/place/?q=place_id:${restaurant.googlePlaceId}`
+        : restaurant.latitude && restaurant.longitude
+        ? `https://www.google.com/maps/search/?api=1&query=${restaurant.latitude},${restaurant.longitude}`
+        : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(restaurant.address)}`;
+      
+      res.json({
+        ...restaurant,
+        menus,
+        naverMapUrl,
+        googleMapUrl
+      });
     } catch (error) {
       logger.error("Get restaurant error", { error, path: "/api/restaurants/:id", restaurantId: req.params.id });
       res.status(500).json({ error: ErrorMessages.INTERNAL_ERROR });
