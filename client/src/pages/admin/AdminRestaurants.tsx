@@ -748,6 +748,56 @@ export default function AdminRestaurants() {
                 </div>
               </div>
 
+              {/* Ratings & Reviews */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold">평점 정보 (네이버)</h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="naverRating"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>네이버 평점 (0-5)</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            step="0.1"
+                            min="0"
+                            max="5"
+                            {...field}
+                            value={field.value || ""}
+                            onChange={(e) => field.onChange(e.target.value ? parseFloat(e.target.value) : null)}
+                            placeholder="4.5"
+                            data-testid="input-naver-rating"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="naverReviewCount"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>네이버 리뷰 수</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            {...field}
+                            value={field.value || ""}
+                            onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : null)}
+                            placeholder="1234"
+                            data-testid="input-naver-review-count"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </div>
+
               {/* Options */}
               <div className="space-y-4">
                 <h3 className="text-lg font-semibold">옵션</h3>
