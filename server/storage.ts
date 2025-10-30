@@ -2,7 +2,7 @@ import { neon } from "@neondatabase/serverless";
 import { drizzle as drizzleNeon } from "drizzle-orm/neon-http";
 import postgres from "postgres";
 import { drizzle as drizzlePostgres } from "drizzle-orm/postgres-js";
-import { eq, desc, sql, and, or, ilike } from "drizzle-orm";
+import { eq, desc, sql, and, or, ilike, lte, gte } from "drizzle-orm";
 import {
   type User,
   type UpsertUser,
@@ -485,8 +485,8 @@ export class DbStorage implements IStorage {
       .where(
         and(
           eq(eventBanners.isActive, 1),
-          sql`${eventBanners.startDate} <= ${now}`,
-          sql`${eventBanners.endDate} >= ${now}`
+          lte(eventBanners.startDate, now),
+          gte(eventBanners.endDate, now)
         )
       )
       .orderBy(eventBanners.displayOrder);
@@ -675,7 +675,12 @@ export class DbStorage implements IStorage {
       .select()
       .from(promotions)
       .where(
-        sql`${promotions.restaurantId} = ${restaurantId} AND ${promotions.isActive} = 1 AND ${promotions.startDate} <= ${now} AND ${promotions.endDate} >= ${now}`
+        and(
+          eq(promotions.restaurantId, restaurantId),
+          eq(promotions.isActive, 1),
+          lte(promotions.startDate, now),
+          gte(promotions.endDate, now)
+        )
       )
       .orderBy(desc(promotions.createdAt));
   }
