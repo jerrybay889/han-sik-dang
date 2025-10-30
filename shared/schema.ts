@@ -55,6 +55,10 @@ export const restaurants = pgTable("restaurants", {
   imageUrl: text("image_url").notNull(),
   openHours: text("open_hours").notNull(),
   phone: text("phone"),
+  naverPlaceId: text("naver_place_id"),
+  googlePlaceId: text("google_place_id"),
+  naverMapUrl: text("naver_map_url"),
+  googleMapUrl: text("google_map_url"),
   isVegan: integer("is_vegan").notNull().default(0),
   isHalal: integer("is_halal").notNull().default(0),
   isFeatured: integer("is_featured").notNull().default(0),
@@ -73,6 +77,7 @@ export const restaurants = pgTable("restaurants", {
   index("idx_restaurants_rating").on(table.rating),
   index("idx_restaurants_is_featured").on(table.isFeatured),
   index("idx_restaurants_visitors_1m").on(table.visitors1m),
+  index("idx_restaurants_naver_place_id").on(table.naverPlaceId),
 ]);
 
 export const insertRestaurantSchema = createInsertSchema(restaurants).omit({
