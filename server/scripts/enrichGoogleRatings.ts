@@ -2,9 +2,23 @@
  * 기존 190개 레스토랑에 구글 평점/리뷰수 추가 스크립트
  */
 
-import { db } from '../db';
+import { drizzle as drizzleNeon } from 'drizzle-orm/neon-http';
+import { drizzle as drizzlePostgres } from 'drizzle-orm/postgres-js';
+import { neon } from '@neondatabase/serverless';
+import postgres from 'postgres';
 import { restaurants } from '@shared/schema';
 import { eq, isNull, or } from 'drizzle-orm';
+
+const DATABASE_URL = process.env.DATABASE_URL!;
+const USE_SUPABASE = process.env.USE_SUPABASE === "true";
+
+const db = USE_SUPABASE
+  ? drizzlePostgres(postgres(DATABASE_URL, {
+      max: 10,
+      idle_timeout: 20,
+      connect_timeout: 10,
+    }))
+  : drizzleNeon(neon(DATABASE_URL));
 import { GooglePlacesApiService } from '../services/googlePlacesApi';
 import { calculatePopularityScore, getPopularityTier } from '../utils/popularityCalculator';
 
