@@ -796,28 +796,32 @@ export default function RestaurantDetailPage() {
                       {restaurant.address}
                     </p>
                     <div className="flex items-center gap-2 flex-wrap">
-                      <a
-                        href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(restaurant.address)}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        data-testid="button-google-maps"
-                      >
-                        <Badge variant="outline" className="hover-elevate active-elevate-2 cursor-pointer text-xs gap-1">
-                          <Navigation className="w-3 h-3" />
-                          {language === "en" ? "Google Maps" : "구글 지도"}
-                        </Badge>
-                      </a>
-                      <a
-                        href={`https://map.naver.com/v5/search/${encodeURIComponent(restaurant.address)}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        data-testid="button-naver-maps"
-                      >
-                        <Badge variant="outline" className="hover-elevate active-elevate-2 cursor-pointer text-xs gap-1">
-                          <Navigation className="w-3 h-3" />
-                          {language === "en" ? "Naver Map" : "네이버 지도"}
-                        </Badge>
-                      </a>
+                      {(restaurant as any).googleMapUrl && (
+                        <a
+                          href={(restaurant as any).googleMapUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          data-testid="button-google-maps"
+                        >
+                          <Badge variant="outline" className="hover-elevate active-elevate-2 cursor-pointer text-xs gap-1">
+                            <Navigation className="w-3 h-3" />
+                            {language === "en" ? "Google Maps" : "구글 지도"}
+                          </Badge>
+                        </a>
+                      )}
+                      {(restaurant as any).naverMapUrl && (
+                        <a
+                          href={(restaurant as any).naverMapUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          data-testid="button-naver-maps"
+                        >
+                          <Badge variant="outline" className="hover-elevate active-elevate-2 cursor-pointer text-xs gap-1">
+                            <Navigation className="w-3 h-3" />
+                            {language === "en" ? "Naver Map" : "네이버 지도"}
+                          </Badge>
+                        </a>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -846,22 +850,6 @@ export default function RestaurantDetailPage() {
               </div>
             </Card>
 
-            {/* Map Section */}
-            {restaurant.latitude && restaurant.longitude && (
-              <div className="mb-6">
-                <NaverMap
-                  latitude={restaurant.latitude}
-                  longitude={restaurant.longitude}
-                  restaurantName={restaurantName}
-                  address={restaurant.address}
-                  zoom={16}
-                  naverPlaceId={(restaurant as any).naverPlaceId}
-                  googlePlaceId={(restaurant as any).googlePlaceId}
-                  naverMapUrl={(restaurant as any).naverMapUrl}
-                  googleMapUrl={(restaurant as any).googleMapUrl}
-                />
-              </div>
-            )}
 
             {/* Promotions Section */}
             {promotions.length > 0 && (
