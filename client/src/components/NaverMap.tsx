@@ -11,6 +11,10 @@ interface NaverMapProps {
   address: string;
   zoom?: number;
   className?: string;
+  naverPlaceId?: string | null;
+  googlePlaceId?: string | null;
+  naverMapUrl?: string;
+  googleMapUrl?: string;
 }
 
 declare global {
@@ -26,6 +30,10 @@ export function NaverMap({
   address,
   zoom = 16,
   className = "",
+  naverPlaceId,
+  googlePlaceId,
+  naverMapUrl,
+  googleMapUrl,
 }: NaverMapProps) {
   const { language } = useLanguage();
   const mapRef = useRef<HTMLDivElement>(null);
@@ -138,7 +146,9 @@ export function NaverMap({
 
   // Open in Naver Maps app or web
   const openInNaverMaps = () => {
-    const url = `https://map.naver.com/v5/search/${encodeURIComponent(restaurantName)}?c=${longitude},${latitude},16,0,0,0,dh`;
+    const url = naverMapUrl || naverPlaceId 
+      ? `https://map.naver.com/p/entry/place/${naverPlaceId}`
+      : `https://map.naver.com/v5/search/${encodeURIComponent(restaurantName)}?c=${longitude},${latitude},16,0,0,0,dh`;
     window.open(url, '_blank');
   };
 

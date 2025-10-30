@@ -845,6 +845,10 @@ export default function RestaurantDetailPage() {
                   restaurantName={restaurantName}
                   address={restaurant.address}
                   zoom={16}
+                  naverPlaceId={(restaurant as any).naverPlaceId}
+                  googlePlaceId={(restaurant as any).googlePlaceId}
+                  naverMapUrl={(restaurant as any).naverMapUrl}
+                  googleMapUrl={(restaurant as any).googleMapUrl}
                 />
               </div>
             )}
