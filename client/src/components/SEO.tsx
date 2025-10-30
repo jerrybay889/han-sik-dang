@@ -15,7 +15,7 @@ export function SEO({
   title,
   description,
   keywords = [],
-  image = "/attached_assets/logo-hansikdang.png",
+  image = "/attached_assets/흰색배경png메인_1761805151469.png",
   url,
   type = "website",
   structuredData,

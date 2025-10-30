@@ -204,7 +204,7 @@ export default function MainScreen() {
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
               <img
-                src="/attached_assets/logo-hansikdang.png"
+                src="/attached_assets/흰색배경png메인_1761805151469.png"
                 alt="한식당"
                 className="h-9"
               />

@@ -4,7 +4,7 @@ export const createOrganizationSchema = (baseUrl: string) => ({
   name: "한식당 (Hansikdang)",
   alternateName: "Hansikdang",
   url: baseUrl,
-  logo: `${baseUrl}/attached_assets/logo-hansikdang.png`,
+  logo: `${baseUrl}/attached_assets/흰색배경png메인_1761805151469.png`,
   description: "AI-powered Korean restaurant discovery platform for tourists visiting Korea",
   address: {
     "@type": "PostalAddress",
@@ -119,7 +119,7 @@ export const createArticleSchema = (article: {
     name: "Hansikdang",
     logo: {
       "@type": "ImageObject",
-      url: "/attached_assets/logo-hansikdang.png",
+      url: "/attached_assets/흰색배경png메인_1761805151469.png",
     },
   },
 });
