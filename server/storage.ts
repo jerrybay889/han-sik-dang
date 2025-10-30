@@ -93,6 +93,15 @@ export interface IStorage {
   searchRestaurants(query: string): Promise<Restaurant[]>;
   createRestaurant(restaurant: InsertRestaurant): Promise<Restaurant>;
   updateRestaurantRating(id: string): Promise<void>;
+  updateRestaurantRatings(id: string, data: {
+    googlePlaceId?: string | null;
+    googleRating?: number | null;
+    googleReviewCount?: number | null;
+    naverPlaceId?: string | null;
+    naverRating?: number | null;
+    naverReviewCount?: number | null;
+    popularityScore?: number | null;
+  }): Promise<void>;
   
   getReviewsByRestaurant(restaurantId: string): Promise<Review[]>;
   createReview(review: InsertReview): Promise<Review>;
@@ -347,6 +356,28 @@ export class DbStorage implements IStorage {
       .set({ 
         rating: Math.round(avgRating * 10) / 10,
         reviewCount: restaurantReviews.length 
+      })
+      .where(eq(restaurants.id, id));
+  }
+
+  async updateRestaurantRatings(id: string, data: {
+    googlePlaceId?: string | null;
+    googleRating?: number | null;
+    googleReviewCount?: number | null;
+    naverPlaceId?: string | null;
+    naverRating?: number | null;
+    naverReviewCount?: number | null;
+    popularityScore?: number | null;
+  }): Promise<void> {
+    await db.update(restaurants)
+      .set({
+        googlePlaceId: data.googlePlaceId,
+        googleRating: data.googleRating,
+        googleReviewCount: data.googleReviewCount,
+        naverPlaceId: data.naverPlaceId,
+        naverRating: data.naverRating,
+        naverReviewCount: data.naverReviewCount,
+        popularityScore: data.popularityScore,
       })
       .where(eq(restaurants.id, id));
   }

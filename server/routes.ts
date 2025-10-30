@@ -2749,3 +2749,103 @@ function generateSampleExternalReviews(restaurantId: string, restaurantName: str
     imageUrls: [],
   }));
 }
+
+// ====================================================================
+// DATA HUB SYNC API - Data Hub에서 메인 시스템으로 데이터 동기화
+// ====================================================================
+
+app.post('/api/sync/restaurants', async (req: any, res) => {
+  try {
+    const apiKey = req.headers['x-api-key'];
+    
+    if (apiKey !== process.env.DATA_COLLECTION_API_KEY) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const restaurants = req.body.restaurants as any[];
+    
+    if (!Array.isArray(restaurants)) {
+      return res.status(400).json({ error: 'Invalid request: restaurants must be an array' });
+    }
+
+    const results = {
+      success: [] as string[],
+      updated: [] as string[],
+      failed: [] as Array<{ name: string; error: string }>,
+    };
+
+    for (const restaurant of restaurants) {
+      try {
+        // 기존 레스토랑 조회 (이름+주소로 매칭)
+        const existing = await storage.searchRestaurants(restaurant.name);
+        const match = existing.find(r => r.address === restaurant.address);
+
+        if (match) {
+          // 업데이트: Google/Naver 평점 및 인기지수
+          await storage.updateRestaurantRatings(match.id, {
+            googlePlaceId: restaurant.google_place_id,
+            googleRating: restaurant.google_rating,
+            googleReviewCount: restaurant.google_review_count,
+            naverPlaceId: restaurant.naver_place_id,
+            naverRating: restaurant.naver_rating,
+            naverReviewCount: restaurant.naver_review_count,
+            popularityScore: restaurant.popularity_score,
+          });
+          
+          results.updated.push(restaurant.name);
+        } else {
+          // 신규 생성
+          const newRestaurant = await storage.createRestaurant({
+            name: restaurant.name,
+            nameEn: restaurant.name_en || restaurant.name,
+            category: restaurant.category || '한식',
+            cuisine: restaurant.cuisine || '한식',
+            district: restaurant.district,
+            address: restaurant.address,
+            latitude: restaurant.latitude,
+            longitude: restaurant.longitude,
+            description: restaurant.description || '',
+            descriptionEn: restaurant.description_en || '',
+            priceRange: restaurant.price_range || 2,
+            imageUrl: restaurant.image_url || '/placeholder-restaurant.jpg',
+            openHours: restaurant.open_hours || '매일 11:00-22:00',
+            phone: restaurant.phone,
+            naverPlaceId: restaurant.naver_place_id,
+            googlePlaceId: restaurant.google_place_id,
+            naverRating: restaurant.naver_rating,
+            naverReviewCount: restaurant.naver_review_count,
+            googleRating: restaurant.google_rating,
+            googleReviewCount: restaurant.google_review_count,
+            popularityScore: restaurant.popularity_score,
+            isFeatured: 0,
+            isVegan: 0,
+            isHalal: 0,
+            city: restaurant.city,
+            districtDetail: restaurant.district_detail,
+          });
+          
+          results.success.push(restaurant.name);
+        }
+      } catch (error: any) {
+        results.failed.push({
+          name: restaurant.name,
+          error: error.message,
+        });
+      }
+    }
+
+    res.json({
+      message: 'Sync completed',
+      results,
+      summary: {
+        total: restaurants.length,
+        success: results.success.length,
+        updated: results.updated.length,
+        failed: results.failed.length,
+      },
+    });
+  } catch (error: any) {
+    logger.error('Sync restaurants error', { error }, req.path);
+    res.status(500).json({ error: ErrorMessages.INTERNAL_ERROR });
+  }
+});
