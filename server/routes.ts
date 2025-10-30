@@ -384,7 +384,8 @@ ${insights && insights.firstTimerTips ? `첫 방문 팁: ${insights.firstTimerTi
 
   app.get("/api/restaurants", async (req, res) => {
     try {
-      const restaurants = await storage.getAllRestaurants();
+      const sortBy = req.query.sortBy as string;
+      const restaurants = await storage.getAllRestaurants(sortBy);
       res.json(restaurants);
     } catch (error) {
       logger.error("Get restaurants error", { error, path: "/api/restaurants" });

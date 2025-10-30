@@ -13,6 +13,7 @@ import { OptimizedImage } from "@/components/OptimizedImage";
 import { SEO } from "@/components/SEO";
 import { AdSense } from "@/components/AdSense";
 import { NaverMap } from "@/components/NaverMap";
+import { PopularityCard } from "@/components/PopularityCard";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/hooks/useAuth";
 import { isUnauthorizedError } from "@/lib/authUtils";
@@ -773,6 +774,15 @@ export default function RestaurantDetailPage() {
                 {restaurantDescription}
               </p>
             </Card>
+
+            {/* Popularity Index */}
+            <PopularityCard
+              naverRating={(restaurant as any).naverRating}
+              naverReviewCount={(restaurant as any).naverReviewCount}
+              googleRating={(restaurant as any).googleRating}
+              googleReviewCount={(restaurant as any).googleReviewCount}
+              popularityScore={(restaurant as any).popularityScore}
+            />
 
             {/* Contact Info */}
             <Card className="p-4 mb-6">

@@ -85,7 +85,7 @@ export interface IStorage {
   getUser(id: string): Promise<User | undefined>;
   upsertUser(user: UpsertUser): Promise<User>;
   
-  getAllRestaurants(): Promise<Restaurant[]>;
+  getAllRestaurants(sortBy?: string): Promise<Restaurant[]>;
   getRestaurant(id: string): Promise<Restaurant | undefined>;
   getRestaurantsByDistrict(district: string): Promise<Restaurant[]>;
   getRestaurantsByCategory(category: string): Promise<Restaurant[]>;
@@ -272,8 +272,27 @@ export class DbStorage implements IStorage {
     return result[0];
   }
 
-  async getAllRestaurants(): Promise<Restaurant[]> {
-    return await db.select().from(restaurants).orderBy(desc(restaurants.rating));
+  async getAllRestaurants(sortBy?: string): Promise<Restaurant[]> {
+    let orderByClause;
+    
+    switch (sortBy) {
+      case 'popularity':
+        orderByClause = desc(restaurants.popularityScore);
+        break;
+      case 'rating':
+        orderByClause = desc(restaurants.rating);
+        break;
+      case 'reviews':
+        orderByClause = desc(restaurants.reviewCount);
+        break;
+      case 'visitors':
+        orderByClause = desc(restaurants.visitors1m);
+        break;
+      default:
+        orderByClause = desc(restaurants.rating);
+    }
+    
+    return await db.select().from(restaurants).orderBy(orderByClause);
   }
 
   async getRestaurant(id: string): Promise<Restaurant | undefined> {
