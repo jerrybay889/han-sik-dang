@@ -31,7 +31,7 @@ export default function MainScreen() {
   const [nearbyFilter, setNearbyFilter] = useState(false);
   const [priceFilter, setPriceFilter] = useState<number | null>(null);
   const [cuisineFilter, setCuisineFilter] = useState<string | null>(null);
-  const [sortBy, setSortBy] = useState<"rating" | "reviews" | "distance">("rating");
+  const [sortBy, setSortBy] = useState<"rating" | "reviews" | "distance" | "popularity">("rating");
 
   const { data: restaurants, isLoading } = useQuery<Restaurant[]>({
     queryKey: ["/api/restaurants"],
@@ -120,7 +120,11 @@ export default function MainScreen() {
 
     // Sort restaurants
     const sorted = [...filtered].sort((a, b) => {
-      if (sortBy === "rating") {
+      if (sortBy === "popularity") {
+        const scoreA = (a as any).popularityScore || 0;
+        const scoreB = (b as any).popularityScore || 0;
+        return scoreB - scoreA;
+      } else if (sortBy === "rating") {
         return b.rating - a.rating;
       } else if (sortBy === "reviews") {
         return b.reviewCount - a.reviewCount;
@@ -280,6 +284,7 @@ export default function MainScreen() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
+                    <SelectItem value="popularity">{language === "en" ? "Popularity" : "인기지수"}</SelectItem>
                     <SelectItem value="rating">{t("filters.rating")}</SelectItem>
                     <SelectItem value="reviews">{t("filters.reviews")}</SelectItem>
                     {userLocation && <SelectItem value="distance">{t("filters.distance")}</SelectItem>}
@@ -364,6 +369,7 @@ export default function MainScreen() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
+                      <SelectItem value="popularity">{language === "en" ? "Popularity" : "인기지수"}</SelectItem>
                       <SelectItem value="rating">{t("filters.rating")}</SelectItem>
                       <SelectItem value="reviews">{t("filters.reviews")}</SelectItem>
                       {userLocation && <SelectItem value="distance">{t("filters.distance")}</SelectItem>}
