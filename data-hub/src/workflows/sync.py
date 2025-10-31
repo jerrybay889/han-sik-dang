@@ -58,9 +58,9 @@ class SyncWorkflow:
                 async with httpx.AsyncClient() as client:
                     response = await client.post(
                         f"{self.api_url}/api/external/restaurants",
-                        json=payload,
+                        json={"restaurants": payload},
                         headers={
-                            "Authorization": f"Bearer {self.api_key}",
+                            "x-api-key": self.api_key,
                             "Content-Type": "application/json"
                         },
                         timeout=60.0
