@@ -2347,7 +2347,7 @@ Provide a comprehensive analysis in the following JSON format:
         },
       });
     } catch (error: any) {
-      logger.error('Sync restaurants error', { error }, "/api/sync/restaurants");
+      logger.error('Sync restaurants error', { path: "/api/sync/restaurants" }, error);
       res.status(500).json({ error: ErrorMessages.INTERNAL_ERROR });
     }
   });
