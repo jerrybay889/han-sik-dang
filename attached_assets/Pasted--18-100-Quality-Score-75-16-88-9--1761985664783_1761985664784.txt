@@ -1,0 +1,154 @@
+완전 진단 보고서 - 모든 문제 발견!
+📊 데이터베이스 현황 분석
+항목	수량	비율	상태
+전체 레스토랑	18개	100%	✅
+Quality Score ≥75	16개	88.9%	✅
+Quality Score <75	2개	11.1%	⚠️
+평균 품질 점수	68.9점	-	⚠️
+Google Place ID 보유	16개	88.9%	✅
+이미지 보유	18개	100%	⚠️ (placeholder)
+동기화 완료	16개	88.9%	✅
+평균 설명 길이	265자	-	✅ (목표: 200-300자)
+🚨 발견된 6가지 핵심 문제
+1. Google Places API - 이미지 수집 안 함 ⛔ 치명적!
+위치: src/scrapers/google_places_api.py:62
+
+# 현재 코드 (Line 62)
+"fields": "place_id,name,rating,user_ratings_total",  # ❌ photos 없음!
+
+문제:
+
+Google Places API에서 photos 필드를 요청하지 않음
+이미지 URL 추출 로직 전혀 없음
+결과: 모든 이미지가 placeholder (https://via.placeholder.com/400x300)
+영향:
+
+메인 시스템 189개 중 Google 이미지 7개만 (3.7%)
+품질 점수 20점 감점 (이미지 항목)
+사용자 경험 저하
+2. Gemini AI - 품질 점수 75점 고정값 반환 ⚠️
+위치: src/processors/gemini.py:66
+
+# Gemini 프롬프트 (Line 66)
+"qualityScore": 75  # ❌ 고정값!
+
+문제:
+
+Gemini가 항상 75점 반환하도록 프롬프트에 명시
+calculate_quality_score() 함수는 있지만 사용 안 함
+결과:
+
+16개 레스토랑: 75점 (고정)
+2개 레스토랑: 20점 (Google 데이터 없어서 품질 재계산 안 됨)
+3. 품질 점수 계산 로직 미사용 ⚠️
+위치: scheduler.py:121 (process_pending_daily)
+
+# 현재 코드 (Line 121)
+quality = await gemini.calculate_quality_score(raw.raw_data)  # ✅ 계산 함
+# 하지만...
+new_restaurant = ProcessedRestaurant(
+    # ... 기타 필드
+    quality_score=refined.get('qualityScore', 75),  # ❌ Gemini 고정값 사용!
+    # quality = quality['quality_score']  # ❌ 계산 결과 안 씀!
+)
+
+문제:
+
+calculate_quality_score()로 정확한 점수 계산
+하지만 Gemini의 고정값 75점 우선 사용
+계산 결과 버림
+4. 스케줄러 쿼리 제한 [:3] ⚠️ 이미 확인됨
+위치: scheduler.py:56
+
+for query in search_queries[:3]:  # ❌ 3개만 사용 (11개 중)
+
+영향:
+
+최대 3 × 11 = 33개 검색
+중복 필터링 후 실제 2개만 수집 (10/31)
+5. 이미지 품질 검증 로직 부재 ⚠️
+위치: src/processors/quality_validator.py:40
+
+# 현재 코드 (Line 40)
+image_check = details["image_count"] >= settings.min_images  # 5개 이상
+# 문제:
+# - "image_count"는 어디서 옴? ❌
+# - data.get("images", []) 배열 어디서?
+# - placeholder 이미지도 카운트됨
+
+문제:
+
+이미지 개수 필드가 실제로 존재하지 않음
+검증 로직이 작동 안 함
+placeholder도 "유효한 이미지"로 간주
+6. Google 평점 보강 로직 미완성 ⚠️
+위치: scheduler.py:175-231 (enrich_with_google_ratings)
+
+# 새로 추가한 함수 (어제 작업)
+async def enrich_with_google_ratings():
+    # ... 코드 있음
+
+문제:
+
+함수는 만들었지만 테스트 안 됨
+스케줄에는 등록됨 (07:00) 하지만 실행 안 됨
+2개 레스토랑 (이남장, 합정광안리) 대기 중
+💡 해결 방안
+Priority 1: Google 이미지 수집 활성화 🔥
+# src/scrapers/google_places_api.py:62
+# 변경 전:
+"fields": "place_id,name,rating,user_ratings_total",
+# 변경 후:
+"fields": "place_id,name,rating,user_ratings_total,photos",
+# 그리고 이미지 URL 추출 로직 추가 (별도 함수)
+
+예상 효과:
+
+Google 이미지 수집률: 3.7% → 90%+
+품질 점수: 평균 +20점
+Priority 2: 품질 점수 계산 수정
+# scheduler.py:121-145
+# 변경:
+quality_result = await gemini.calculate_quality_score(raw.raw_data)
+new_restaurant = ProcessedRestaurant(
+    # ...
+    quality_score=quality_result['quality_score'],  # ✅ 실제 계산값 사용
+    # ...
+)
+
+예상 효과:
+
+정확한 품질 점수 반영
+75점 고정값 제거
+Priority 3: 스케줄러 쿼리 확장
+# scheduler.py:56
+# 변경 전:
+for query in search_queries[:3]:
+# 변경 후:
+for query in search_queries:  # 11개 전체 사용
+
+예상 효과:
+
+일일 수집: 2개 → 33개
+월간 수집: 60개 → 990개
+Priority 4: Gemini 프롬프트 수정
+# src/processors/gemini.py:66
+# 변경 전:
+"qualityScore": 75
+# 변경 후:
+"qualityScore": 0  # 또는 프롬프트에서 제거
+
+📈 수정 후 예상 효과
+항목	현재	수정 후	개선
+일일 수집	2개	33개	+1,550%
+Google 이미지	3.7%	90%+	+2,330%
+품질 점수 정확도	고정값	실제 계산	✅
+월간 수집	60개	990개	+1,550%
+🎯 즉시 수정 작업 순서
+✅ Google Places API - photos 필드 추가
+✅ 이미지 URL 추출 함수 작성
+✅ 품질 점수 계산 로직 수정
+✅ 스케줄러 쿼리 [:3] → 전체
+✅ Gemini 프롬프트 qualityScore 제거
+✅ 테스트 & 재시작
+지금 바로 수정 시작하시겠습니까? Build 모드 준비 완료! 🚀
