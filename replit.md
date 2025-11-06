@@ -140,22 +140,50 @@ SESSION_SECRET=<key>
 VITE_GA_MEASUREMENT_ID=<key>
 ```
 
-### Recent Changes (October 30, 2025)
--   ✅ **Logo Update**: White background PNG logo applied across all screens
--   ✅ **Naver Ratings**: 189/189 restaurants now have Naver ratings (100% coverage)
--   ✅ **5-Point Scale**: Dual-source popularity system fully implemented
--   ✅ **Data Cleanup**: Removed 12 guide files, 13 screenshots, test data cleaned
--   ✅ **Production Ready**: Database optimized, no orphaned records, ready for deployment
+### Recent Changes (November 3, 2025)
+-   ✅ **Data Hub Critical Recovery**: Fixed 6 critical bugs preventing data collection
+-   ✅ **Timezone Issue Resolved**: UTC schedule corrected (18:00 UTC = 03:00 KST)
+-   ✅ **Full Data Upgrade**: 23 restaurants upgraded with Google images (100%) and ratings (100%)
+-   ✅ **Image Collection Optimized**: Increased from 5 to 10 images per restaurant
+-   ✅ **Quality Score Fixed**: Now uses actual calculation instead of hardcoded 75 points
+-   ✅ **Query Expansion**: All 11 search queries activated (was limited to 3)
+-   ✅ **Main System LSP Error**: Fixed logger.error() parameter order
 
-### Current Status (Updated: October 30, 2025)
--   **Database**: ✅ **Supabase PostgreSQL (Active)** - 23 tables, **189 restaurants** with complete ratings
+### Data Hub Recovery Timeline (Nov 1-3, 2025)
+
+**Day 1 (11/1)**: Initial diagnosis
+-   Identified 6 critical issues: missing photos field, hardcoded quality scores, query limitation [:3], Gemini prompt errors, inactive image validation, incomplete Google rating enhancement
+-   Applied fixes and restarted scheduler
+
+**Day 2 (11/2)**: Root cause analysis
+-   Discovered timezone problem (UTC vs KST, 9-hour difference)
+-   Found that 11/2 and 11/3 collections didn't run (wrong schedule time)
+
+**Day 3 (11/3)**: Complete recovery
+-   Fixed timezone (18:00 UTC = 03:00 KST)
+-   Upgraded all 23 existing restaurants with Google data
+-   Optimized image collection (5→10 per restaurant)
+-   System ready for automated daily collection (33 restaurants/day)
+
+### Current Status (Updated: November 3, 2025)
+-   **Database**: ✅ **Supabase PostgreSQL (Active)** - 23 tables, **205 restaurants** with complete ratings
 -   **Popularity System**: ✅ **5-Point Dual-Source Complete** - 189/189 restaurants (100% coverage)
--   **Rating Quality**: ✅ **47 Legendary Restaurants** (4.5-5.0★), Average: 4.15/5.0
--   **Logo**: ✅ **White Background PNG** - Applied to all screens (Main, Content, My, Admin, SEO)
--   **Images**: ✅ **Object Storage Configured** - Environment variables set (`PRIVATE_OBJECT_DIR`, `PUBLIC_OBJECT_SEARCH_PATHS`)
--   **Data Collection**: ✅ **External API Active** - API key generated (`DATA_COLLECTION_API_KEY`), endpoints ready
--   **Cleanup**: ✅ **Production Ready** - Guide files removed, test data cleaned, optimized for deployment
+-   **Rating Quality**: ✅ **47 Legendary Restaurants** (4.5-5.0★), Average: 4.39/5.0
+-   **Data Hub**: ✅ **Fully Operational** - 23 restaurants processed, 100% Google images & ratings
+-   **Automation**: ✅ **24/7 Scheduler Active** - Next collection: 2025-11-04 03:00 KST (33 restaurants expected)
+-   **Image Collection**: ✅ **10 images/restaurant** - Upgraded from 5 to 10 for better quality
+-   **Monthly Target**: 🎯 **990 restaurants/month** - Up from 60/month (1,550% improvement)
 -   **Scale Target**: Ready for 10,000+ restaurants, 100,000+ images, 1M+ users
+
+### Data Hub Status (November 3, 2025)
+-   **Total Restaurants**: 23 (18 upgraded + 5 new from 종로)
+-   **Image Collection**: 100% (23/23 with Google Photos)
+-   **Rating Collection**: 100% (23/23 with Google ratings)
+-   **Average Rating**: 4.39/5.0 ⭐
+-   **Total Reviews**: 12,597
+-   **Quality Score**: 20-40 points (actual calculation, no longer fixed at 75)
+-   **Next Auto Collection**: 2025-11-04 03:00 KST
+-   **Expected Daily**: 33 restaurants (11 queries × ~3 restaurants each)
 
 ### Migration Completed
 -   **From**: Neon PostgreSQL (local development)
