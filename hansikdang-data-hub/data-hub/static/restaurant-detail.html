@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>레스토랑 상세 - 한식당 Data Hub</title>
+    <script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 240px;
+            height: 100vh;
+            background: linear-gradient(180deg, #2c3e50 0%, #34495e 100%);
+            color: #ecf0f1;
+            overflow-y: auto;
+        }
+        .sidebar-header { padding: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); text-align: center; }
+        .sidebar-header h2 { font-size: 18px; color: #fff; margin-bottom: 5px; }
+        .sidebar-header p { font-size: 12px; color: #bdc3c7; }
+        .menu-group { padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .menu-label { padding: 10px 20px; font-size: 11px; color: #95a5a6; text-transform: uppercase; }
+        .menu-item { display: block; padding: 12px 20px; color: #ecf0f1; text-decoration: none; transition: all 0.3s; border-left: 3px solid transparent; }
+        .menu-item:hover, .menu-item.active { background: rgba(255,255,255,0.1); border-left-color: #667eea; }
+        
+        /* Main Content */
+        .main-content { margin-left: 240px; padding: 30px; }
+        .card { background: white; border-radius: 16px; padding: 30px; box-shadow: 0 10px 40px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        
+        /* Header */
+        .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 30px; }
+        .back-btn { padding: 10px 20px; background: #ecf0f1; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; }
+        .back-btn:hover { background: #d5dbdb; }
+        .status-badge { padding: 8px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; }
+        .status-pending { background: #fff3cd; color: #856404; }
+        .status-edited { background: #cfe2ff; color: #084298; }
+        .status-approved { background: #d1e7dd; color: #0f5132; }
+        .status-rejected { background: #f8d7da; color: #842029; }
+        
+        /* Section */
+        .section { margin-bottom: 30px; }
+        .section h3 { color: #2c3e50; margin-bottom: 15px; font-size: 18px; border-bottom: 2px solid #667eea; padding-bottom: 10px; }
+        
+        /* Info Grid */
+        .info-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+        .info-item { background: #f8f9fa; padding: 15px; border-radius: 8px; }
+        .info-item label { display: block; font-size: 12px; color: #666; margin-bottom: 5px; font-weight: 600; }
+        .info-item .value { font-size: 15px; color: #2c3e50; }
+        .info-item .value.empty { color: #999; font-style: italic; }
+        
+        /* Rating Card */
+        .rating-card { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 12px; }
+        .rating-card h4 { font-size: 14px; margin-bottom: 10px; opacity: 0.9; }
+        .rating-main { font-size: 36px; font-weight: 700; margin-bottom: 5px; }
+        .rating-sub { font-size: 14px; opacity: 0.8; }
+        
+        /* Image Gallery */
+        .image-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; }
+        .image-grid img { width: 100%; height: 150px; object-fit: cover; border-radius: 8px; cursor: pointer; transition: transform 0.3s; }
+        .image-grid img:hover { transform: scale(1.05); }
+        
+        /* Menu List */
+        .menu-list { background: #f8f9fa; padding: 20px; border-radius: 8px; }
+        .menu-item-detail { padding: 12px 0; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; }
+        .menu-item-detail:last-child { border-bottom: none; }
+        .menu-name { font-weight: 500; color: #2c3e50; }
+        .menu-price { color: #667eea; font-weight: 600; }
+        
+        /* Business Hours */
+        .hours-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+        .hours-item { background: #f8f9fa; padding: 12px; border-radius: 6px; display: flex; justify-content: space-between; }
+        .day-label { font-weight: 600; color: #495057; }
+        .hours-value { color: #667eea; }
+        
+        /* Facilities Tags */
+        .tag-list { display: flex; flex-wrap: wrap; gap: 10px; }
+        .tag { background: #e7f3ff; color: #0066cc; padding: 8px 16px; border-radius: 20px; font-size: 13px; font-weight: 500; }
+        
+        /* External Links */
+        .link-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
+        .external-link { display: flex; align-items: center; justify-content: center; padding: 15px; background: #f8f9fa; border-radius: 8px; text-decoration: none; color: #2c3e50; font-weight: 500; transition: all 0.3s; }
+        .external-link:hover { background: #667eea; color: white; transform: translateY(-2px); }
+        
+        /* Action Buttons */
+        .actions { display: flex; gap: 15px; padding-top: 20px; border-top: 2px solid #eee; }
+        .btn { padding: 12px 24px; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; transition: all 0.3s; }
+        .btn-primary { background: #667eea; color: white; }
+        .btn-primary:hover { background: #5568d3; }
+        .btn-success { background: #28a745; color: white; }
+        .btn-success:hover { background: #218838; }
+        .btn-danger { background: #dc3545; color: white; }
+        .btn-danger:hover { background: #c82333; }
+        
+        /* Loading */
+        .loading { text-align: center; padding: 60px; color: #666; }
+        .spinner { border: 4px solid #f3f3f3; border-top: 4px solid #667eea; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin: 0 auto 20px; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
+        /* Empty State */
+        .empty { text-align: center; padding: 40px; color: #999; }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h2>한식당 Data Hub</h2>
+                <p>Restaurant Data Collection</p>
+            </div>
+            <div class="menu-group">
+                <div class="menu-label">대시보드</div>
+                <a href="/dashboard" class="menu-item">📊 메인 대시보드</a>
+            </div>
+            <div class="menu-group">
+                <div class="menu-label">데이터 수집</div>
+                <a href="/dashboard/collection-request" class="menu-item">📝 수집 요청</a>
+                <a href="/dashboard/collection-results" class="menu-item active">📋 수집 결과</a>
+            </div>
+            <div class="menu-group">
+                <div class="menu-label">데이터 입력</div>
+                <a href="/dashboard/manual-input#url" class="menu-item">🔗 URL 입력</a>
+                <a href="/dashboard/manual-input#csv" class="menu-item">📄 CSV 업로드</a>
+                <a href="/dashboard/manual-input#direct" class="menu-item">✏️ 직접 입력</a>
+            </div>
+            <div class="menu-group">
+                <div class="menu-label">데이터 편집</div>
+                <a href="/dashboard/unified-editor" class="menu-item">🔧 통합 편집</a>
+            </div>
+            <div class="menu-group">
+                <div class="menu-label">배포 관리</div>
+                <a href="/dashboard/deployment" class="menu-item">🚀 배포 관리</a>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <div v-if="loading" class="card">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>레스토랑 정보를 불러오는 중...</p>
+                </div>
+            </div>
+
+            <template v-if="!loading && restaurant.id">
+                <!-- Header Card -->
+                <div class="card">
+                    <div class="header">
+                        <button class="back-btn" @click="goBack">← 목록으로 돌아가기</button>
+                        <h1 style="flex: 1; margin: 0 20px; font-size: 28px; color: #2c3e50;">{{ restaurant.name }}</h1>
+                        <span :class="['status-badge', 'status-' + restaurant.edit_status]">
+                            {{ getStatusLabel(restaurant.edit_status) }}
+                        </span>
+                        <button class="btn btn-primary" @click="editRestaurant" style="margin-left: 15px;">✏️ 수정</button>
+                    </div>
+                </div>
+
+                <!-- Basic Info Card -->
+                <div class="card">
+                    <div class="section">
+                        <h3>📍 기본 정보</h3>
+                        <div class="info-grid">
+                            <div class="info-item">
+                                <label>카테고리</label>
+                                <div :class="['value', !restaurant.category && 'empty']">
+                                    {{ restaurant.category || '정보 없음' }}
+                                </div>
+                            </div>
+                            <div class="info-item">
+                                <label>지역</label>
+                                <div :class="['value', !restaurant.region && 'empty']">
+                                    {{ restaurant.region || '정보 없음' }}
+                                </div>
+                            </div>
+                            <div class="info-item" style="grid-column: 1 / -1;">
+                                <label>주소</label>
+                                <div :class="['value', !restaurant.address && 'empty']">
+                                    {{ restaurant.address || '정보 없음' }}
+                                </div>
+                            </div>
+                            <div class="info-item">
+                                <label>전화번호</label>
+                                <div :class="['value', !restaurant.phone && 'empty']">
+                                    {{ restaurant.phone || '정보 없음' }}
+                                </div>
+                            </div>
+                            <div class="info-item">
+                                <label>가격대</label>
+                                <div :class="['value', !restaurant.price_range && 'empty']">
+                                    {{ restaurant.price_range || '정보 없음' }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Rating & Popularity Card -->
+                <div class="card">
+                    <div class="section">
+                        <h3>⭐ 평가 & 인기도</h3>
+                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;">
+                            <div class="rating-card">
+                                <h4>평점</h4>
+                                <div class="rating-main">{{ restaurant.rating ? restaurant.rating.toFixed(1) : '-' }}</div>
+                                <div class="rating-sub">{{ restaurant.review_count || 0 }}개 리뷰</div>
+                            </div>
+                            <div class="rating-card">
+                                <h4>인기도 점수</h4>
+                                <div class="rating-main">{{ restaurant.popularity_score ? restaurant.popularity_score.toFixed(0) : '-' }}</div>
+                                <div class="rating-sub">{{ getTierLabel(restaurant.popularity_tier) }}</div>
+                            </div>
+                            <div class="rating-card">
+                                <h4>SNS 언급</h4>
+                                <div class="rating-main">{{ (restaurant.youtube_mention_count || 0) + (restaurant.blog_mention_count || 0) }}</div>
+                                <div class="rating-sub">YouTube {{ restaurant.youtube_mention_count || 0 }} · Blog {{ restaurant.blog_mention_count || 0 }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Images Card -->
+                <div class="card" v-if="restaurant.images && restaurant.images.length > 0">
+                    <div class="section">
+                        <h3>📷 이미지 ({{ restaurant.images.length }}장)</h3>
+                        <div class="image-grid">
+                            <img v-for="(img, index) in restaurant.images" :key="index" :src="img" :alt="restaurant.name" @error="imageError">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Menu Card -->
+                <div class="card" v-if="restaurant.menu_items && restaurant.menu_items.length > 0">
+                    <div class="section">
+                        <h3>📋 메뉴 ({{ restaurant.menu_items.length}}개)</h3>
+                        <div class="menu-list">
+                            <div class="menu-item-detail" v-for="(item, index) in restaurant.menu_items" :key="index">
+                                <span class="menu-name">{{ item.name || item }}</span>
+                                <span class="menu-price" v-if="item.price">{{ formatPrice(item.price) }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Business Hours Card -->
+                <div class="card" v-if="restaurant.business_hours">
+                    <div class="section">
+                        <h3>🕐 영업시간</h3>
+                        <div class="hours-grid">
+                            <div class="hours-item" v-for="(hours, day) in restaurant.business_hours" :key="day">
+                                <span class="day-label">{{ getDayLabel(day) }}</span>
+                                <span class="hours-value">{{ formatHours(hours) }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Facilities Card -->
+                <div class="card" v-if="hasFacilities()">
+                    <div class="section">
+                        <h3>🏢 편의시설</h3>
+                        <div class="tag-list">
+                            <span class="tag" v-for="facility in getFacilitiesList()" :key="facility.key">
+                                {{ facility.icon }} {{ facility.label }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- External Links Card -->
+                <div class="card">
+                    <div class="section">
+                        <h3>🔗 바로가기</h3>
+                        <div class="link-grid">
+                            <a v-if="restaurant.google_maps_url" :href="restaurant.google_maps_url" target="_blank" class="external-link">
+                                🌐 Google Maps
+                            </a>
+                            <a v-if="restaurant.naver_map_url" :href="restaurant.naver_map_url" target="_blank" class="external-link">
+                                🟢 네이버 플레이스
+                            </a>
+                            <a v-if="restaurant.source_url" :href="restaurant.source_url" target="_blank" class="external-link">
+                                🔍 원본 소스
+                            </a>
+                        </div>
+                        <div v-if="!restaurant.google_maps_url && !restaurant.naver_map_url && !restaurant.source_url" class="empty">
+                            등록된 외부 링크가 없습니다.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Additional Info Card -->
+                <div class="card">
+                    <div class="section">
+                        <h3>ℹ️ 추가 정보</h3>
+                        <div class="info-grid">
+                            <div class="info-item">
+                                <label>데이터 소스</label>
+                                <div class="value">{{ getSourceLabel(restaurant.source) }}</div>
+                            </div>
+                            <div class="info-item">
+                                <label>수집 요청</label>
+                                <div class="value">{{ restaurant.request_name || '직접 입력' }}</div>
+                            </div>
+                            <div class="info-item">
+                                <label>생성일시</label>
+                                <div class="value">{{ formatDate(restaurant.created_at) }}</div>
+                            </div>
+                            <div class="info-item">
+                                <label>수정일시</label>
+                                <div class="value">{{ formatDate(restaurant.updated_at) }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons Card -->
+                <div class="card">
+                    <div class="actions">
+                        <button class="btn btn-primary" @click="editRestaurant">✏️ 편집하기</button>
+                        <button class="btn btn-success" @click="deployRestaurant">🚀 배포하기</button>
+                        <button class="btn btn-danger" @click="deleteRestaurant">🗑️ 삭제하기</button>
+                    </div>
+                </div>
+            </template>
+
+            <div v-if="!loading && !restaurant.id" class="card">
+                <div class="empty">
+                    <h2>레스토랑 정보를 찾을 수 없습니다</h2>
+                    <p style="margin: 20px 0;">요청하신 레스토랑이 존재하지 않거나 삭제되었습니다.</p>
+                    <button class="back-btn" @click="goBack">← 목록으로 돌아가기</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const { createApp } = Vue;
+        createApp({
+            data() {
+                return {
+                    restaurant: {},
+                    loading: true
+                };
+            },
+            mounted() {
+                const id = this.getIdFromUrl();
+                this.loadRestaurant(id);
+            },
+            methods: {
+                getIdFromUrl() {
+                    const path = window.location.pathname;
+                    return path.split('/').pop();
+                },
+                async loadRestaurant(id) {
+                    try {
+                        const response = await axios.get(`/api/data-management/collection-results/${id}`);
+                        if (response.data.success) {
+                            this.restaurant = response.data.data;
+                        }
+                    } catch (error) {
+                        console.error('레스토랑 정보 로드 실패:', error);
+                    } finally {
+                        this.loading = false;
+                    }
+                },
+                goBack() {
+                    window.location.href = '/dashboard/collection-results';
+                },
+                editRestaurant() {
+                    window.location.href = `/dashboard/unified-editor?id=${this.restaurant.id}`;
+                },
+                async deployRestaurant() {
+                    if (!confirm('이 레스토랑을 한식당 플랫폼에 배포하시겠습니까?')) return;
+                    try {
+                        await axios.post('/api/data-management/deployment/batch', {
+                            restaurant_ids: [this.restaurant.id]
+                        });
+                        alert('✅ 배포 완료!');
+                        this.loadRestaurant(this.restaurant.id);
+                    } catch (error) {
+                        alert('❌ 배포 실패: ' + (error.response?.data?.detail || error.message));
+                    }
+                },
+                async deleteRestaurant() {
+                    if (!confirm('정말로 이 레스토랑을 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.')) return;
+                    try {
+                        await axios.delete(`/api/data-management/collection-results/${this.restaurant.id}`);
+                        alert('✅ 삭제 완료!');
+                        this.goBack();
+                    } catch (error) {
+                        alert('❌ 삭제 실패: ' + (error.response?.data?.detail || error.message));
+                    }
+                },
+                getStatusLabel(status) {
+                    const labels = {
+                        'pending': '검토 대기',
+                        'edited': '편집됨',
+                        'approved': '승인됨',
+                        'rejected': '거부됨'
+                    };
+                    return labels[status] || status;
+                },
+                getTierLabel(tier) {
+                    const labels = {
+                        'top_rated': 'Top Rated',
+                        'high_quality': 'High Quality',
+                        'average': 'Average',
+                        'below_average': 'Below Average',
+                        'unrated': 'Unrated'
+                    };
+                    return labels[tier] || tier || 'N/A';
+                },
+                getSourceLabel(source) {
+                    const labels = {
+                        'naver': '네이버',
+                        'google': '구글',
+                        'kakao': '카카오',
+                        'manual': '수동 입력'
+                    };
+                    return labels[source] || source || '알 수 없음';
+                },
+                getDayLabel(day) {
+                    const labels = {
+                        'monday': '월요일',
+                        'tuesday': '화요일',
+                        'wednesday': '수요일',
+                        'thursday': '목요일',
+                        'friday': '금요일',
+                        'saturday': '토요일',
+                        'sunday': '일요일',
+                        'weekday': '평일',
+                        'weekend': '주말'
+                    };
+                    return labels[day] || day;
+                },
+                formatHours(hours) {
+                    if (!hours) return '-';
+                    if (typeof hours === 'string') return hours;
+                    if (typeof hours === 'object') {
+                        if (hours.closed) return '휴무';
+                        if (hours.open && hours.close) {
+                            return `${hours.open} - ${hours.close}`;
+                        }
+                    }
+                    return '-';
+                },
+                formatPrice(price) {
+                    if (typeof price === 'number') {
+                        return price.toLocaleString('ko-KR') + '원';
+                    }
+                    return price;
+                },
+                formatDate(dateStr) {
+                    if (!dateStr) return '-';
+                    const date = new Date(dateStr);
+                    return date.toLocaleString('ko-KR');
+                },
+                hasFacilities() {
+                    if (!this.restaurant.facilities) return false;
+                    if (typeof this.restaurant.facilities === 'object') {
+                        return Object.values(this.restaurant.facilities).some(v => v === true);
+                    }
+                    return this.restaurant.facilities.length > 0;
+                },
+                getFacilitiesList() {
+                    if (!this.restaurant.facilities) return [];
+                    if (typeof this.restaurant.facilities === 'object') {
+                        const facilityMap = {
+                            parking: { icon: '🅿️', label: '주차' },
+                            wifi: { icon: '📶', label: 'WiFi' },
+                            reservation: { icon: '📞', label: '예약' },
+                            delivery: { icon: '🛵', label: '배달' },
+                            takeout: { icon: '📦', label: '포장' },
+                            group: { icon: '👥', label: '단체석' },
+                            kids: { icon: '👶', label: '유아동반' },
+                            wheelchair: { icon: '♿', label: '휠체어' },
+                            pets: { icon: '🐕', label: '반려동물' }
+                        };
+                        return Object.entries(this.restaurant.facilities)
+                            .filter(([key, value]) => value === true)
+                            .map(([key, value]) => ({
+                                key,
+                                icon: facilityMap[key]?.icon || '✅',
+                                label: facilityMap[key]?.label || key
+                            }));
+                    }
+                    return this.restaurant.facilities.map((f, idx) => ({ key: idx, icon: '✅', label: f }));
+                },
+                imageError(event) {
+                    event.target.style.display = 'none';
+                }
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>

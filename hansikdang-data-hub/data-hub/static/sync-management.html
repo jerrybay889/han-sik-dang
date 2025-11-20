@@ -1,0 +1,940 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>한식당 Data Hub - 배치 동기화 관리</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        #app {
+            max-width: 1800px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .header .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-bottom: 15px;
+        }
+
+        .nav-links {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .nav-link {
+            color: white;
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            background: rgba(255,255,255,0.2);
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+
+        .nav-link:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .stat-card .label {
+            font-size: 0.875rem;
+            color: #6b7280;
+            margin-bottom: 8px;
+        }
+
+        .stat-card .value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1f2937;
+        }
+
+        .stat-card.success .value {
+            color: #22c55e;
+        }
+
+        .stat-card.warning .value {
+            color: #f59e0b;
+        }
+
+        .stat-card.danger .value {
+            color: #ef4444;
+        }
+
+        .section {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+
+        .section-header h2 {
+            font-size: 1.5rem;
+            color: #1f2937;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102,126,234,0.4);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background: #6b7280;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #4b5563;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        .filter-row {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .filter-group label {
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+
+        .filter-group select {
+            padding: 8px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 0.875rem;
+        }
+
+        .restaurant-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        .restaurant-table th,
+        .restaurant-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .restaurant-table th {
+            background: #f9fafb;
+            font-weight: 600;
+            color: #374151;
+            font-size: 0.875rem;
+        }
+
+        .restaurant-table tr:hover {
+            background: #f9fafb;
+        }
+
+        .restaurant-table td {
+            font-size: 0.875rem;
+            color: #4b5563;
+        }
+
+        .restaurant-table input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .badge {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .badge-success {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .badge-warning {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .badge-danger {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .badge-info {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .history-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .history-table th,
+        .history-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .history-table th {
+            background: #f9fafb;
+            font-weight: 600;
+            color: #374151;
+            font-size: 0.875rem;
+        }
+
+        .history-table td {
+            font-size: 0.875rem;
+            color: #4b5563;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6b7280;
+        }
+
+        .empty-state-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+        }
+
+        .empty-state-text {
+            font-size: 1.25rem;
+            margin-bottom: 10px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #6b7280;
+        }
+
+        .spinner {
+            border: 4px solid #f3f4f6;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .alert-success {
+            background: #d1fae5;
+            color: #065f46;
+            border-left: 4px solid #10b981;
+        }
+
+        .alert-error {
+            background: #fee2e2;
+            color: #991b1b;
+            border-left: 4px solid #ef4444;
+        }
+
+        .alert-info {
+            background: #dbeafe;
+            color: #1e40af;
+            border-left: 4px solid #3b82f6;
+        }
+
+        .selection-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            background: #f9fafb;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .selection-info strong {
+            color: #667eea;
+            font-size: 1.1rem;
+        }
+
+        .tab-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .tab-button {
+            padding: 10px 20px;
+            border: none;
+            background: #e5e7eb;
+            color: #4b5563;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .tab-button.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .tab-button:hover:not(.active) {
+            background: #d1d5db;
+        }
+
+        /* 좌측 사이드바 스타일 */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 240px;
+            height: 100vh;
+            background: linear-gradient(180deg, #2c3e50 0%, #34495e 100%);
+            color: #ecf0f1;
+            overflow-y: auto;
+            z-index: 1000;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            text-align: center;
+        }
+
+        .sidebar-header h2 {
+            margin: 0 0 5px 0;
+            font-size: 18px;
+            color: #fff;
+        }
+
+        .sidebar-header p {
+            margin: 0;
+            font-size: 12px;
+            color: #bdc3c7;
+        }
+
+        .menu-group {
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .menu-label {
+            padding: 10px 20px;
+            font-size: 11px;
+            font-weight: 600;
+            color: #95a5a6;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .menu-item {
+            display: block;
+            padding: 12px 20px;
+            color: #ecf0f1;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            border-left: 3px solid transparent;
+        }
+
+        .menu-item:hover {
+            background: rgba(255,255,255,0.1);
+            border-left-color: #3498db;
+            padding-left: 25px;
+        }
+
+        .menu-item.active {
+            background: rgba(52, 152, 219, 0.2);
+            border-left-color: #3498db;
+            font-weight: 600;
+        }
+
+        .menu-item.submenu {
+            padding-left: 40px;
+            font-size: 13px;
+        }
+
+        .menu-item.submenu:hover {
+            padding-left: 45px;
+        }
+
+        /* 메인 콘텐츠 영역 - 사이드바 공간 확보 */
+        .main-content {
+            margin-left: 260px;
+            min-height: 100vh;
+        }
+    </style>
+</head>
+<body>
+    <!-- 좌측 사이드바 메뉴 -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h2>🍚 한식당 Data Hub</h2>
+            <p>데이터 관리 시스템</p>
+        </div>
+
+        <!-- 대시보드 -->
+        <div class="menu-group">
+            <a href="/dashboard" class="menu-item">
+                📊 대시보드
+            </a>
+        </div>
+
+        <!-- 데이터 관리 -->
+        <div class="menu-group">
+            <div class="menu-label">🔍 데이터 관리</div>
+            <a href="/dashboard/data-management" class="menu-item submenu">
+                수집 설정
+            </a>
+            <a href="/dashboard/data-management?tab=results" class="menu-item submenu">
+                수집 결과
+            </a>
+            <a href="/dashboard/data-management?tab=duplicates" class="menu-item submenu">
+                중복 검사
+            </a>
+            <a href="/dashboard/data-management?tab=quality" class="menu-item submenu">
+                품질 관리
+            </a>
+        </div>
+
+        <!-- 작업 관리 -->
+        <div class="menu-group">
+            <div class="menu-label">⚙️ 작업 관리</div>
+            <a href="/dashboard/jobs" class="menu-item submenu">
+                작업 실행
+            </a>
+            <a href="/dashboard/jobs?tab=monitoring" class="menu-item submenu">
+                모니터링
+            </a>
+            <a href="/dashboard/jobs?tab=history" class="menu-item submenu">
+                작업 이력
+            </a>
+        </div>
+
+        <!-- 동기화 관리 -->
+        <div class="menu-group">
+            <div class="menu-label">📊 동기화 관리</div>
+            <a href="/dashboard/sync" class="menu-item submenu active">
+                배포 현황
+            </a>
+            <a href="/dashboard/sync?tab=history" class="menu-item submenu">
+                배포 이력
+            </a>
+        </div>
+
+        <!-- 분석 -->
+        <div class="menu-group">
+            <a href="/dashboard/analytics" class="menu-item">
+                📈 분석
+            </a>
+        </div>
+
+        <!-- 설정 -->
+        <div class="menu-group">
+            <a href="/dashboard/settings" class="menu-item">
+                ⚙️ 설정
+            </a>
+        </div>
+    </div>
+
+    <!-- 메인 콘텐츠 영역 -->
+    <div class="main-content">
+        <div id="app">
+        <div class="header">
+            <h1>🚀 배치 동기화 관리</h1>
+            <div class="subtitle">선택한 레스토랑을 한식당 플랫폼으로 동기화합니다</div>
+            <div class="nav-links">
+                <a href="/dashboard" class="nav-link">📊 메인 대시보드</a>
+                <a href="/dashboard/collection-settings" class="nav-link">⚙️ 수집 설정</a>
+                <a href="/dashboard/quality-check" class="nav-link">🔍 품질 관리</a>
+                <a href="/dashboard/sync-management" class="nav-link">🚀 동기화 관리</a>
+                <a href="/docs" class="nav-link">📖 API 문서</a>
+            </div>
+        </div>
+
+        <div v-if="alert.show" :class="'alert alert-' + alert.type">
+            {{ alert.message }}
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card success">
+                <div class="label">전체 레스토랑</div>
+                <div class="value">{{ stats.total_restaurants }}</div>
+            </div>
+            <div class="stat-card success">
+                <div class="label">동기화 완료</div>
+                <div class="value">{{ stats.synced }}</div>
+            </div>
+            <div class="stat-card warning">
+                <div class="label">동기화 대기</div>
+                <div class="value">{{ stats.pending }}</div>
+            </div>
+            <div class="stat-card">
+                <div class="label">동기화율</div>
+                <div class="value">{{ stats.sync_rate }}%</div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-header">
+                <h2>📋 레스토랑 목록</h2>
+                <div class="btn-group">
+                    <button @click="refreshData" class="btn btn-secondary">
+                        🔄 새로고침
+                    </button>
+                    <button 
+                        @click="syncSelected" 
+                        class="btn btn-primary"
+                        :disabled="selectedRestaurants.length === 0 || syncing"
+                    >
+                        {{ syncing ? '동기화 중...' : '선택 항목 동기화' }}
+                    </button>
+                </div>
+            </div>
+
+            <div class="filter-row">
+                <div class="filter-group">
+                    <label>상태:</label>
+                    <select v-model="filter.status" @change="loadRestaurants">
+                        <option value="pending">대기 중</option>
+                        <option value="synced">동기화됨</option>
+                        <option value="failed">실패</option>
+                        <option value="">전체</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>최소 품질:</label>
+                    <select v-model="filter.min_quality" @change="loadRestaurants">
+                        <option value="0">전체</option>
+                        <option value="70">70점 이상</option>
+                        <option value="80">80점 이상</option>
+                        <option value="90">90점 이상</option>
+                    </select>
+                </div>
+            </div>
+
+            <div v-if="selectedRestaurants.length > 0" class="selection-info">
+                <span><strong>{{ selectedRestaurants.length }}</strong>개 레스토랑 선택됨</span>
+                <button @click="clearSelection" class="btn btn-secondary">선택 해제</button>
+            </div>
+
+            <div v-if="loading" class="loading">
+                <div class="spinner"></div>
+                <div>레스토랑 목록 불러오는 중...</div>
+            </div>
+
+            <div v-else-if="restaurants.length === 0" class="empty-state">
+                <div class="empty-state-icon">📭</div>
+                <div class="empty-state-text">레스토랑이 없습니다</div>
+                <div>필터 조건을 변경해보세요</div>
+            </div>
+
+            <table v-else class="restaurant-table">
+                <thead>
+                    <tr>
+                        <th>
+                            <input 
+                                type="checkbox" 
+                                @change="toggleAll"
+                                :checked="allSelected"
+                            >
+                        </th>
+                        <th>이름</th>
+                        <th>지역</th>
+                        <th>주소</th>
+                        <th>전화번호</th>
+                        <th>품질 점수</th>
+                        <th>상태</th>
+                        <th>동기화 시각</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="restaurant in restaurants" :key="restaurant.id">
+                        <td>
+                            <input 
+                                type="checkbox" 
+                                :value="restaurant.id"
+                                v-model="selectedRestaurants"
+                                :disabled="restaurant.sync_status === 'synced'"
+                            >
+                        </td>
+                        <td><strong>{{ restaurant.name }}</strong></td>
+                        <td>{{ restaurant.district || '-' }}</td>
+                        <td>{{ restaurant.address || '-' }}</td>
+                        <td>{{ restaurant.phone || '-' }}</td>
+                        <td>
+                            <span :class="getQualityBadgeClass(restaurant.quality_score)">
+                                {{ restaurant.quality_score }}점
+                            </span>
+                        </td>
+                        <td>
+                            <span :class="getSyncStatusBadgeClass(restaurant.sync_status)">
+                                {{ getSyncStatusText(restaurant.sync_status) }}
+                            </span>
+                        </td>
+                        <td>{{ formatDate(restaurant.synced_at) }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="section">
+            <div class="section-header">
+                <h2>📊 동기화 이력</h2>
+                <div class="filter-group">
+                    <label>기간:</label>
+                    <select v-model="historyDays" @change="loadHistory">
+                        <option value="7">최근 7일</option>
+                        <option value="14">최근 14일</option>
+                        <option value="30">최근 30일</option>
+                    </select>
+                </div>
+            </div>
+
+            <div v-if="historyLoading" class="loading">
+                <div class="spinner"></div>
+                <div>동기화 이력 불러오는 중...</div>
+            </div>
+
+            <div v-else-if="history.length === 0" class="empty-state">
+                <div class="empty-state-icon">📊</div>
+                <div class="empty-state-text">동기화 이력이 없습니다</div>
+            </div>
+
+            <table v-else class="history-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>상태</th>
+                        <th>전송</th>
+                        <th>성공</th>
+                        <th>실패</th>
+                        <th>시작 시각</th>
+                        <th>완료 시각</th>
+                        <th>소요 시간</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="log in history" :key="log.id">
+                        <td><code>{{ log.id.substring(0, 8) }}</code></td>
+                        <td>
+                            <span :class="getLogStatusBadgeClass(log.status)">
+                                {{ log.status }}
+                            </span>
+                        </td>
+                        <td>{{ log.total_sent }}</td>
+                        <td class="text-success">{{ log.success_count }}</td>
+                        <td class="text-danger">{{ log.error_count }}</td>
+                        <td>{{ formatDateTime(log.started_at) }}</td>
+                        <td>{{ formatDateTime(log.completed_at) }}</td>
+                        <td>{{ formatDuration(log.duration) }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        const { createApp } = Vue;
+
+        createApp({
+            data() {
+                return {
+                    stats: {
+                        total_restaurants: 0,
+                        synced: 0,
+                        pending: 0,
+                        failed: 0,
+                        sync_rate: 0
+                    },
+                    restaurants: [],
+                    selectedRestaurants: [],
+                    history: [],
+                    filter: {
+                        status: 'pending',
+                        min_quality: 0
+                    },
+                    historyDays: 7,
+                    loading: false,
+                    historyLoading: false,
+                    syncing: false,
+                    alert: {
+                        show: false,
+                        type: 'info',
+                        message: ''
+                    }
+                };
+            },
+            computed: {
+                allSelected() {
+                    const syncableRestaurants = this.restaurants.filter(r => r.sync_status !== 'synced');
+                    return syncableRestaurants.length > 0 && 
+                           this.selectedRestaurants.length === syncableRestaurants.length;
+                }
+            },
+            mounted() {
+                this.loadStats();
+                this.loadRestaurants();
+                this.loadHistory();
+            },
+            methods: {
+                async loadStats() {
+                    try {
+                        const response = await fetch('/api/data-management/sync/stats/summary');
+                        const data = await response.json();
+                        if (data.status === 'success') {
+                            this.stats = data.overview;
+                        }
+                    } catch (error) {
+                        console.error('통계 불러오기 실패:', error);
+                    }
+                },
+                async loadRestaurants() {
+                    this.loading = true;
+                    try {
+                        const params = new URLSearchParams({
+                            status: this.filter.status,
+                            min_quality: this.filter.min_quality,
+                            limit: 100
+                        });
+                        const response = await fetch(`/api/data-management/sync/restaurants?${params}`);
+                        const data = await response.json();
+                        if (data.status === 'success') {
+                            this.restaurants = data.restaurants;
+                        }
+                    } catch (error) {
+                        console.error('레스토랑 목록 불러오기 실패:', error);
+                        this.showAlert('error', '레스토랑 목록을 불러올 수 없습니다');
+                    } finally {
+                        this.loading = false;
+                    }
+                },
+                async loadHistory() {
+                    this.historyLoading = true;
+                    try {
+                        const response = await fetch(`/api/data-management/sync/history?days=${this.historyDays}&limit=50`);
+                        const data = await response.json();
+                        if (data.status === 'success') {
+                            this.history = data.history;
+                        }
+                    } catch (error) {
+                        console.error('동기화 이력 불러오기 실패:', error);
+                    } finally {
+                        this.historyLoading = false;
+                    }
+                },
+                async syncSelected() {
+                    if (this.selectedRestaurants.length === 0) return;
+
+                    this.syncing = true;
+                    try {
+                        const response = await fetch('/api/data-management/sync/batch', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                restaurant_ids: this.selectedRestaurants,
+                                batch_name: `Manual Batch ${new Date().toISOString()}`
+                            })
+                        });
+
+                        const data = await response.json();
+                        if (data.status === 'success') {
+                            this.showAlert('success', data.message);
+                            this.selectedRestaurants = [];
+                            await this.refreshData();
+                        } else {
+                            this.showAlert('error', data.message || '동기화 실패');
+                        }
+                    } catch (error) {
+                        console.error('배치 동기화 실패:', error);
+                        this.showAlert('error', '배치 동기화 중 오류 발생');
+                    } finally {
+                        this.syncing = false;
+                    }
+                },
+                async refreshData() {
+                    await Promise.all([
+                        this.loadStats(),
+                        this.loadRestaurants(),
+                        this.loadHistory()
+                    ]);
+                    this.showAlert('success', '데이터가 새로고침되었습니다');
+                },
+                toggleAll(event) {
+                    if (event.target.checked) {
+                        this.selectedRestaurants = this.restaurants
+                            .filter(r => r.sync_status !== 'synced')
+                            .map(r => r.id);
+                    } else {
+                        this.selectedRestaurants = [];
+                    }
+                },
+                clearSelection() {
+                    this.selectedRestaurants = [];
+                },
+                getQualityBadgeClass(score) {
+                    if (score >= 90) return 'badge badge-success';
+                    if (score >= 70) return 'badge badge-warning';
+                    return 'badge badge-danger';
+                },
+                getSyncStatusBadgeClass(status) {
+                    const classes = {
+                        'synced': 'badge badge-success',
+                        'pending': 'badge badge-warning',
+                        'failed': 'badge badge-danger'
+                    };
+                    return classes[status] || 'badge badge-info';
+                },
+                getSyncStatusText(status) {
+                    const texts = {
+                        'synced': '완료',
+                        'pending': '대기',
+                        'failed': '실패'
+                    };
+                    return texts[status] || status;
+                },
+                getLogStatusBadgeClass(status) {
+                    const classes = {
+                        'completed': 'badge badge-success',
+                        'running': 'badge badge-info',
+                        'failed': 'badge badge-danger'
+                    };
+                    return classes[status] || 'badge badge-info';
+                },
+                formatDate(dateString) {
+                    if (!dateString) return '-';
+                    return new Date(dateString).toLocaleString('ko-KR', {
+                        year: 'numeric',
+                        month: '2-digit',
+                        day: '2-digit',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+                },
+                formatDateTime(dateString) {
+                    if (!dateString) return '-';
+                    return new Date(dateString).toLocaleString('ko-KR', {
+                        month: '2-digit',
+                        day: '2-digit',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+                },
+                formatDuration(seconds) {
+                    if (!seconds) return '-';
+                    if (seconds < 60) return `${seconds.toFixed(1)}초`;
+                    const minutes = Math.floor(seconds / 60);
+                    const remainingSeconds = Math.floor(seconds % 60);
+                    return `${minutes}분 ${remainingSeconds}초`;
+                },
+                showAlert(type, message) {
+                    this.alert = { show: true, type, message };
+                    setTimeout(() => {
+                        this.alert.show = false;
+                    }, 5000);
+                }
+            }
+        }).mount('#app');
+    </script>
+    </div> <!-- main-content -->
+</body>
+</html>

@@ -1,0 +1,1015 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>한식당 Data Hub - 운영 대시보드</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+        }
+
+        .sidebar {
+            width: 260px;
+            background: #2c3e50;
+            color: white;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            padding: 20px 0;
+            box-shadow: 2px 0 8px rgba(0,0,0,0.1);
+            z-index: 1000;
+        }
+
+        .sidebar-header {
+            padding: 0 20px 20px 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            margin-bottom: 20px;
+        }
+
+        .sidebar-header h2 {
+            font-size: 1.25rem;
+            margin: 0;
+            color: #ecf0f1;
+        }
+
+        .sidebar-header p {
+            font-size: 0.75rem;
+            color: #95a5a6;
+            margin: 5px 0 0 0;
+        }
+
+        .menu-group {
+            margin-bottom: 20px;
+            padding: 0 10px;
+        }
+
+        .menu-label {
+            font-size: 0.7rem;
+            font-weight: bold;
+            color: #95a5a6;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+            padding: 0 10px;
+        }
+
+        .menu-item {
+            display: block;
+            padding: 12px 15px;
+            color: #ecf0f1;
+            text-decoration: none;
+            border-radius: 6px;
+            margin-bottom: 4px;
+            transition: all 0.2s;
+            font-size: 0.9rem;
+        }
+
+        .menu-item:hover {
+            background: rgba(52, 152, 219, 0.2);
+            transform: translateX(4px);
+        }
+
+        .menu-item.active {
+            background: #3498db;
+            font-weight: 600;
+        }
+
+        .menu-item.submenu {
+            padding-left: 30px;
+            font-size: 0.85rem;
+        }
+
+        .main-content {
+            margin-left: 260px;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        #app {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .header .timestamp {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+
+        .btn-primary {
+            background: #22c55e;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #16a34a;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #2563eb;
+            transform: translateY(-2px);
+        }
+
+        .btn-warning {
+            background: #f59e0b;
+            color: white;
+        }
+
+        .btn-warning:hover {
+            background: #d97706;
+            transform: translateY(-2px);
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+        }
+
+        .card h2 {
+            font-size: 1.25rem;
+            margin-bottom: 15px;
+            color: #1f2937;
+            border-bottom: 2px solid #e5e7eb;
+            padding-bottom: 10px;
+        }
+
+        .health-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+            padding: 10px;
+            border-radius: 8px;
+            background: #f3f4f6;
+        }
+
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .status-healthy {
+            background: #22c55e;
+            box-shadow: 0 0 8px #22c55e;
+        }
+
+        .status-warning {
+            background: #f59e0b;
+            box-shadow: 0 0 8px #f59e0b;
+        }
+
+        .status-unhealthy {
+            background: #ef4444;
+            box-shadow: 0 0 8px #ef4444;
+        }
+
+        .status-idle {
+            background: #6b7280;
+        }
+
+        .health-info {
+            flex: 1;
+        }
+
+        .health-info strong {
+            display: block;
+            color: #1f2937;
+            margin-bottom: 2px;
+        }
+
+        .health-info small {
+            color: #6b7280;
+            font-size: 0.875rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 15px;
+            background: #f3f4f6;
+            border-radius: 8px;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #3b82f6;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+
+        .backup-info {
+            background: #f0fdf4;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #22c55e;
+        }
+
+        .backup-info.error {
+            background: #fef2f2;
+            border-left-color: #ef4444;
+        }
+
+        .backup-detail {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .backup-detail strong {
+            color: #1f2937;
+        }
+
+        .backup-detail span {
+            color: #6b7280;
+        }
+
+        .alert-item {
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border-left: 4px solid;
+        }
+
+        .alert-critical {
+            background: #fef2f2;
+            border-left-color: #ef4444;
+        }
+
+        .alert-high {
+            background: #fff7ed;
+            border-left-color: #f59e0b;
+        }
+
+        .alert-medium {
+            background: #eff6ff;
+            border-left-color: #3b82f6;
+        }
+
+        .alert-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+
+        .alert-severity {
+            font-weight: bold;
+            font-size: 0.75rem;
+            padding: 2px 8px;
+            border-radius: 4px;
+            text-transform: uppercase;
+        }
+
+        .alert-time {
+            font-size: 0.75rem;
+            color: #6b7280;
+        }
+
+        .alert-message {
+            color: #1f2937;
+            font-size: 0.875rem;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin-top: 15px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: white;
+            font-size: 1.25rem;
+        }
+
+        .error-message {
+            background: #fef2f2;
+            color: #ef4444;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .wide-card {
+            grid-column: span 2;
+        }
+
+        @media (max-width: 768px) {
+            .wide-card {
+                grid-column: span 1;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .auto-refresh {
+            text-align: center;
+            color: white;
+            font-size: 0.875rem;
+            margin-top: 10px;
+            opacity: 0.8;
+        }
+
+        .jobs-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .job-item {
+            background: #f9fafb;
+            border-radius: 8px;
+            padding: 15px;
+            border: 1px solid #e5e7eb;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .job-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+        }
+
+        .job-icon {
+            font-size: 1.2rem;
+        }
+
+        .job-status {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            font-size: 0.75rem;
+        }
+
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: 600;
+            text-align: center;
+            font-size: 0.7rem;
+        }
+
+        .status-badge.status-completed,
+        .status-badge.status-success {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .status-badge.status-running {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .status-badge.status-failed,
+        .status-badge.status-error {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .status-badge.status-never_run {
+            background: #f3f4f6;
+            color: #6b7280;
+        }
+
+        .job-result {
+            color: #6b7280;
+            font-size: 0.7rem;
+            word-break: break-all;
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 0.75rem;
+        }
+
+        .btn-job {
+            background: #8b5cf6;
+            color: white;
+        }
+
+        .btn-job:hover:not(:disabled) {
+            background: #7c3aed;
+        }
+
+        .btn-job:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <!-- 좌측 사이드바 메뉴 -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h2>🍚 한식당 Data Hub</h2>
+            <p>데이터 관리 시스템</p>
+        </div>
+
+        <!-- 대시보드 -->
+        <div class="menu-group">
+            <a href="/dashboard" class="menu-item active">
+                📊 대시보드
+            </a>
+        </div>
+
+        <!-- 데이터 수집 -->
+        <div class="menu-group">
+            <div class="menu-label">🔍 데이터 수집</div>
+            <a href="/dashboard/collection-request" class="menu-item submenu">
+                수집 요청
+            </a>
+            <a href="/dashboard/collection-results" class="menu-item submenu">
+                수집 결과
+            </a>
+        </div>
+
+        <!-- 데이터 입력 -->
+        <div class="menu-group">
+            <div class="menu-label">✏️ 데이터 입력</div>
+            <a href="/dashboard/manual-input#url" class="menu-item submenu">
+                URL 입력
+            </a>
+            <a href="/dashboard/manual-input#csv" class="menu-item submenu">
+                CSV 업로드
+            </a>
+            <a href="/dashboard/manual-input#direct" class="menu-item submenu">
+                직접 입력
+            </a>
+        </div>
+
+        <!-- 데이터 편집 -->
+        <div class="menu-group">
+            <div class="menu-label">🔧 데이터 편집</div>
+            <a href="/dashboard/unified-editor" class="menu-item submenu">
+                통합 편집
+            </a>
+        </div>
+
+        <!-- 배포 관리 -->
+        <div class="menu-group">
+            <a href="/dashboard/deployment" class="menu-item">
+                🚀 배포 관리
+            </a>
+        </div>
+    </div>
+
+    <!-- 메인 콘텐츠 영역 -->
+    <div class="main-content">
+        <div id="app">
+        <div class="header">
+            <h1>🍚 한식당 Data Hub - 운영 대시보드</h1>
+            <div class="timestamp">{{ lastUpdated }}</div>
+        </div>
+
+        <div class="controls">
+            <button class="btn btn-primary" @click="manualBackup" :disabled="loading">
+                💾 수동 백업 실행
+            </button>
+            <button class="btn btn-secondary" @click="refreshData" :disabled="loading">
+                🔄 새로고침
+            </button>
+            <button class="btn btn-warning" @click="toggleAutoRefresh">
+                {{ autoRefresh ? '⏸️ 자동갱신 중지' : '▶️ 자동갱신 시작' }}
+            </button>
+        </div>
+
+        <div class="auto-refresh" v-if="autoRefresh">
+            ⏱️ 자동 갱신: {{ countdown }}초 후 업데이트
+        </div>
+
+        <div v-if="loading && !data" class="loading">
+            데이터 로딩 중...
+        </div>
+
+        <div v-else-if="error" class="error-message">
+            {{ error }}
+        </div>
+
+        <div v-else-if="data" class="dashboard-grid">
+            <!-- 시스템 헬스 체크 -->
+            <div class="card">
+                <h2>🏥 시스템 헬스 체크</h2>
+                <div class="health-status">
+                    <div class="status-indicator" :class="getStatusClass(data.system_health.database.status)"></div>
+                    <div class="health-info">
+                        <strong>Database</strong>
+                        <small>{{ data.system_health.database.message }}</small>
+                    </div>
+                </div>
+                <div class="health-status">
+                    <div class="status-indicator" :class="getStatusClass(data.system_health.api.status)"></div>
+                    <div class="health-info">
+                        <strong>API Server</strong>
+                        <small>{{ data.system_health.api.message }}</small>
+                    </div>
+                </div>
+                <div class="health-status">
+                    <div class="status-indicator" :class="getStatusClass(data.system_health.scheduler.status)"></div>
+                    <div class="health-info">
+                        <strong>Scheduler</strong>
+                        <small>{{ data.system_health.scheduler.message }}</small>
+                    </div>
+                </div>
+                <div class="health-status">
+                    <div class="status-indicator" :class="getStatusClass(data.system_health.drive_backup.status)"></div>
+                    <div class="health-info">
+                        <strong>Drive Backup</strong>
+                        <small>{{ data.system_health.drive_backup.message }}</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 어제 수집 통계 -->
+            <div class="card">
+                <h2>📊 어제 수집 통계 ({{ data.yesterday_stats.date }})</h2>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-value">{{ data.yesterday_stats.new_collected }}</div>
+                        <div class="stat-label">신규 수집</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">{{ data.yesterday_stats.duplicates_removed }}</div>
+                        <div class="stat-label">중복 제거</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">{{ data.yesterday_stats.final_processed }}</div>
+                        <div class="stat-label">최종 처리</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">{{ data.yesterday_stats.completeness_rate }}%</div>
+                        <div class="stat-label">완전성</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 백업 상태 -->
+            <div class="card">
+                <h2>💾 백업 상태</h2>
+                <div class="backup-info" :class="{ 'error': data.backup_status.status !== 'success' }">
+                    <div class="backup-detail">
+                        <strong>상태:</strong>
+                        <span>{{ getBackupStatusText(data.backup_status.status) }}</span>
+                    </div>
+                    <div class="backup-detail">
+                        <strong>백업 날짜:</strong>
+                        <span>{{ data.backup_status.backup_date || 'N/A' }}</span>
+                    </div>
+                    <div class="backup-detail">
+                        <strong>파일명:</strong>
+                        <span>{{ data.backup_status.file_name || 'N/A' }}</span>
+                    </div>
+                    <div class="backup-detail">
+                        <strong>크기:</strong>
+                        <span>{{ data.backup_status.file_size_mb || 0 }} MB</span>
+                    </div>
+                    <div class="backup-detail">
+                        <strong>레코드 수:</strong>
+                        <span>{{ data.backup_status.total_records || 0 }}개</span>
+                    </div>
+                    <div class="backup-detail">
+                        <strong>완료 시간:</strong>
+                        <span>{{ data.backup_status.completed_at || 'N/A' }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 작업 실행 제어 센터 -->
+            <div class="card wide-card">
+                <h2>⚙️ 작업 실행 제어 센터</h2>
+                <div class="jobs-grid">
+                    <div v-for="job in jobsList" :key="job.id" class="job-item">
+                        <div class="job-header">
+                            <span class="job-icon">{{ job.icon }}</span>
+                            <strong>{{ job.name }}</strong>
+                        </div>
+                        <div class="job-status" v-if="jobsStatus && jobsStatus[job.id]">
+                            <div class="status-badge" :class="getJobStatusClass(jobsStatus[job.id].status)">
+                                {{ getJobStatusText(jobsStatus[job.id].status) }}
+                            </div>
+                            <small class="job-result">{{ jobsStatus[job.id].result || '-' }}</small>
+                        </div>
+                        <button class="btn btn-sm btn-job" @click="runJob(job.id)" :disabled="loading">
+                            ▶️ 실행
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 최근 알림 -->
+            <div class="card">
+                <h2>🚨 최근 알림 (상위 3건)</h2>
+                <div v-if="data.recent_alerts.length === 0" style="text-align: center; color: #6b7280; padding: 20px;">
+                    알림이 없습니다 ✅
+                </div>
+                <div v-else>
+                    <div v-for="alert in data.recent_alerts" :key="alert.id" 
+                         class="alert-item" :class="`alert-${alert.severity}`">
+                        <div class="alert-header">
+                            <span class="alert-severity">{{ alert.severity }}</span>
+                            <span class="alert-time">{{ alert.triggered_at }}</span>
+                        </div>
+                        <div class="alert-message">
+                            <strong>{{ alert.component }}:</strong> {{ alert.message }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 7일 추이 그래프 -->
+            <div class="card wide-card">
+                <h2>📈 7일 수집 추이</h2>
+                <div class="chart-container">
+                    <canvas id="trendChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const { createApp } = Vue;
+
+        createApp({
+            data() {
+                return {
+                    data: null,
+                    loading: false,
+                    error: null,
+                    autoRefresh: true,
+                    refreshInterval: null,
+                    countdown: 300,
+                    countdownInterval: null,
+                    chart: null,
+                    lastUpdated: '',
+                    jobsStatus: null,
+                    jobsList: [
+                        { id: 'targeting', name: 'Smart Targeting', icon: '🎯' },
+                        { id: 'scraping', name: 'Naver 스크래핑', icon: '🕷️' },
+                        { id: 'deduplication', name: '중복 제거', icon: '🔍' },
+                        { id: 'gemini', name: 'Gemini AI 정제', icon: '✨' },
+                        { id: 'places', name: 'Google Places', icon: '📍' },
+                        { id: 'sync', name: '플랫폼 동기화', icon: '🔄' },
+                        { id: 'backup', name: 'Drive 백업', icon: '💾' }
+                    ]
+                }
+            },
+            mounted() {
+                this.refreshData();
+                this.fetchJobsStatus();
+                if (this.autoRefresh) {
+                    this.startAutoRefresh();
+                }
+            },
+            beforeUnmount() {
+                this.stopAutoRefresh();
+                if (this.chart) {
+                    this.chart.destroy();
+                }
+            },
+            methods: {
+                async refreshData() {
+                    this.loading = true;
+                    this.error = null;
+
+                    try {
+                        const response = await fetch('/api/dashboard/stats');
+                        if (!response.ok) {
+                            throw new Error(`HTTP ${response.status}`);
+                        }
+                        this.data = await response.json();
+                        this.lastUpdated = new Date().toLocaleString('ko-KR');
+                        
+                        this.$nextTick(() => {
+                            this.updateChart();
+                        });
+                    } catch (err) {
+                        this.error = `데이터 로딩 실패: ${err.message}`;
+                    } finally {
+                        this.loading = false;
+                    }
+                },
+
+                async manualBackup() {
+                    if (this.loading) return;
+                    
+                    this.loading = true;
+                    try {
+                        const response = await fetch('/api/governance/backup/manual', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ backup_type: 'manual' })
+                        });
+                        
+                        if (!response.ok) {
+                            throw new Error(`백업 실패: HTTP ${response.status}`);
+                        }
+                        
+                        alert('✅ 백업이 성공적으로 완료되었습니다!');
+                        this.refreshData();
+                    } catch (err) {
+                        alert(`❌ 백업 실패: ${err.message}`);
+                    } finally {
+                        this.loading = false;
+                    }
+                },
+
+                async fetchJobsStatus() {
+                    try {
+                        const response = await fetch('/api/jobs/status');
+                        if (!response.ok) {
+                            throw new Error(`HTTP ${response.status}`);
+                        }
+                        const data = await response.json();
+                        this.jobsStatus = data.jobs;
+                    } catch (err) {
+                        console.error('작업 상태 조회 실패:', err);
+                    }
+                },
+
+                async runJob(jobId) {
+                    if (this.loading) return;
+                    
+                    const jobNames = {
+                        'targeting': 'Smart Targeting',
+                        'scraping': 'Naver 스크래핑',
+                        'deduplication': '중복 제거',
+                        'gemini': 'Gemini AI 정제',
+                        'places': 'Google Places 보강',
+                        'sync': '플랫폼 동기화',
+                        'backup': 'Drive 백업'
+                    };
+                    
+                    const jobName = jobNames[jobId];
+                    
+                    if (!confirm(`${jobName} 작업을 실행하시겠습니까?`)) {
+                        return;
+                    }
+                    
+                    this.loading = true;
+                    try {
+                        const response = await fetch(`/api/jobs/${jobId}/run`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' }
+                        });
+                        
+                        if (!response.ok) {
+                            throw new Error(`HTTP ${response.status}`);
+                        }
+                        
+                        const data = await response.json();
+                        alert(`✅ ${data.message}`);
+                        
+                        // 3초 후 상태 업데이트
+                        setTimeout(() => {
+                            this.fetchJobsStatus();
+                            this.refreshData();
+                        }, 3000);
+                    } catch (err) {
+                        alert(`❌ 작업 실행 실패: ${err.message}`);
+                    } finally {
+                        this.loading = false;
+                    }
+                },
+
+                toggleAutoRefresh() {
+                    this.autoRefresh = !this.autoRefresh;
+                    if (this.autoRefresh) {
+                        this.startAutoRefresh();
+                    } else {
+                        this.stopAutoRefresh();
+                    }
+                },
+
+                startAutoRefresh() {
+                    this.countdown = 300; // 5분 = 300초
+                    
+                    this.refreshInterval = setInterval(() => {
+                        this.refreshData();
+                        this.countdown = 300;
+                    }, 300000); // 5분마다
+
+                    this.countdownInterval = setInterval(() => {
+                        if (this.countdown > 0) {
+                            this.countdown--;
+                        }
+                    }, 1000); // 1초마다 카운트다운
+                },
+
+                stopAutoRefresh() {
+                    if (this.refreshInterval) {
+                        clearInterval(this.refreshInterval);
+                        this.refreshInterval = null;
+                    }
+                    if (this.countdownInterval) {
+                        clearInterval(this.countdownInterval);
+                        this.countdownInterval = null;
+                    }
+                },
+
+                updateChart() {
+                    if (!this.data || !this.data.weekly_trend) return;
+
+                    const ctx = document.getElementById('trendChart');
+                    if (!ctx) return;
+
+                    if (this.chart) {
+                        this.chart.destroy();
+                    }
+
+                    this.chart = new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: this.data.weekly_trend.dates,
+                            datasets: [
+                                {
+                                    label: '신규 수집',
+                                    data: this.data.weekly_trend.new_collected,
+                                    borderColor: '#3b82f6',
+                                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                                    fill: true,
+                                    tension: 0.4
+                                },
+                                {
+                                    label: '최종 처리',
+                                    data: this.data.weekly_trend.final_processed,
+                                    borderColor: '#22c55e',
+                                    backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                                    fill: true,
+                                    tension: 0.4
+                                },
+                                {
+                                    label: '품질 점수',
+                                    data: this.data.weekly_trend.quality_scores,
+                                    borderColor: '#f59e0b',
+                                    backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                                    fill: true,
+                                    tension: 0.4,
+                                    yAxisID: 'y1'
+                                }
+                            ]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            interaction: {
+                                mode: 'index',
+                                intersect: false
+                            },
+                            plugins: {
+                                legend: {
+                                    position: 'top'
+                                }
+                            },
+                            scales: {
+                                y: {
+                                    type: 'linear',
+                                    display: true,
+                                    position: 'left',
+                                    title: {
+                                        display: true,
+                                        text: '레스토랑 수'
+                                    }
+                                },
+                                y1: {
+                                    type: 'linear',
+                                    display: true,
+                                    position: 'right',
+                                    title: {
+                                        display: true,
+                                        text: '품질 점수'
+                                    },
+                                    grid: {
+                                        drawOnChartArea: false
+                                    }
+                                }
+                            }
+                        }
+                    });
+                },
+
+                getStatusClass(status) {
+                    const statusMap = {
+                        'healthy': 'status-healthy',
+                        'warning': 'status-warning',
+                        'unhealthy': 'status-unhealthy',
+                        'idle': 'status-idle'
+                    };
+                    return statusMap[status] || 'status-idle';
+                },
+
+                getBackupStatusText(status) {
+                    const statusMap = {
+                        'success': '✅ 성공',
+                        'failed': '❌ 실패',
+                        'no_backup': '⚠️ 백업 없음'
+                    };
+                    return statusMap[status] || status;
+                },
+
+                getJobStatusClass(status) {
+                    const statusMap = {
+                        'completed': 'status-completed',
+                        'success': 'status-success',
+                        'running': 'status-running',
+                        'failed': 'status-failed',
+                        'error': 'status-error',
+                        'never_run': 'status-never_run'
+                    };
+                    return statusMap[status] || 'status-never_run';
+                },
+
+                getJobStatusText(status) {
+                    const statusMap = {
+                        'completed': '✅ 완료',
+                        'success': '✅ 성공',
+                        'running': '⏳ 실행중',
+                        'failed': '❌ 실패',
+                        'error': '❌ 오류',
+                        'never_run': '⏸️ 대기',
+                        'not_tracked': 'ℹ️ 미추적'
+                    };
+                    return statusMap[status] || '알 수 없음';
+                }
+            }
+        }).mount('#app');
+    </script>
+    </div> <!-- main-content -->
+</body>
+</html>

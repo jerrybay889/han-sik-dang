@@ -1,0 +1,1080 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>한식당 Data Hub - 수집 설정 관리</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        #app {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .header .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-bottom: 15px;
+        }
+
+        .nav-links {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .nav-link {
+            color: white;
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            background: rgba(255,255,255,0.2);
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+
+        .nav-link:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+        }
+
+        .controls {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .controls-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .controls-header h2 {
+            font-size: 1.25rem;
+            color: #1f2937;
+        }
+
+        .filters {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .filter-group label {
+            font-weight: 600;
+            font-size: 0.875rem;
+            color: #374151;
+        }
+
+        .filter-group input,
+        .filter-group select {
+            padding: 8px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 0.875rem;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2563eb;
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background: #22c55e;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #16a34a;
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+
+        .btn-secondary {
+            background: #6b7280;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #4b5563;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .table-container {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            overflow-x: auto;
+        }
+
+        .table-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .table-header h2 {
+            font-size: 1.25rem;
+            color: #1f2937;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: #f3f4f6;
+        }
+
+        th {
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            color: #374151;
+            border-bottom: 2px solid #e5e7eb;
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #e5e7eb;
+            color: #1f2937;
+        }
+
+        tbody tr:hover {
+            background: #f9fafb;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .status-active {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .status-paused {
+            background: #fed7aa;
+            color: #92400e;
+        }
+
+        .status-pending {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .status-rejected {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .tag {
+            display: inline-block;
+            background: #e0e7ff;
+            color: #3730a3;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            margin-right: 4px;
+            margin-bottom: 2px;
+        }
+
+        .tags-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+        }
+
+        .actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-icon {
+            padding: 6px 12px;
+            font-size: 0.75rem;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            max-width: 700px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-header h2 {
+            font-size: 1.5rem;
+            color: #1f2937;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #6b7280;
+        }
+
+        .close-btn:hover {
+            color: #1f2937;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #374151;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 0.875rem;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .region-item, .keyword-item {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+            align-items: center;
+        }
+
+        .region-item input, .keyword-item input {
+            flex: 1;
+        }
+
+        .btn-remove {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.75rem;
+        }
+
+        .btn-remove:hover {
+            background: #dc2626;
+        }
+
+        .btn-add {
+            background: #10b981;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        .btn-add:hover {
+            background: #059669;
+        }
+
+        .cost-preview {
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 20px;
+        }
+
+        .cost-preview h3 {
+            color: #166534;
+            margin-bottom: 10px;
+            font-size: 1rem;
+        }
+
+        .cost-preview .amount {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #15803d;
+        }
+
+        .cost-details {
+            margin-top: 10px;
+            font-size: 0.875rem;
+            color: #166534;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #6b7280;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6b7280;
+        }
+
+        .empty-state h3 {
+            font-size: 1.25rem;
+            margin-bottom: 10px;
+        }
+
+        .stats-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .stat-card .label {
+            font-size: 0.875rem;
+            color: #6b7280;
+            margin-bottom: 5px;
+        }
+
+        .stat-card .value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1f2937;
+        }
+
+        .error-message {
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #991b1b;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+        }
+
+        .success-message {
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            color: #166534;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+        }
+
+        /* 좌측 사이드바 스타일 */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 240px;
+            height: 100vh;
+            background: linear-gradient(180deg, #2c3e50 0%, #34495e 100%);
+            color: #ecf0f1;
+            overflow-y: auto;
+            z-index: 1000;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            text-align: center;
+        }
+
+        .sidebar-header h2 {
+            margin: 0 0 5px 0;
+            font-size: 18px;
+            color: #fff;
+        }
+
+        .sidebar-header p {
+            margin: 0;
+            font-size: 12px;
+            color: #bdc3c7;
+        }
+
+        .menu-group {
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .menu-label {
+            padding: 10px 20px;
+            font-size: 11px;
+            font-weight: 600;
+            color: #95a5a6;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .menu-item {
+            display: block;
+            padding: 12px 20px;
+            color: #ecf0f1;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            border-left: 3px solid transparent;
+        }
+
+        .menu-item:hover {
+            background: rgba(255,255,255,0.1);
+            border-left-color: #3498db;
+            padding-left: 25px;
+        }
+
+        .menu-item.active {
+            background: rgba(52, 152, 219, 0.2);
+            border-left-color: #3498db;
+            font-weight: 600;
+        }
+
+        .menu-item.submenu {
+            padding-left: 40px;
+            font-size: 13px;
+        }
+
+        .menu-item.submenu:hover {
+            padding-left: 45px;
+        }
+
+        /* 메인 콘텐츠 영역 - 사이드바 공간 확보 */
+        .main-content {
+            margin-left: 260px;
+            min-height: 100vh;
+        }
+    </style>
+</head>
+<body>
+    <!-- 좌측 사이드바 메뉴 -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h2>🍚 한식당 Data Hub</h2>
+            <p>데이터 관리 시스템</p>
+        </div>
+
+        <!-- 대시보드 -->
+        <div class="menu-group">
+            <a href="/dashboard" class="menu-item">
+                📊 대시보드
+            </a>
+        </div>
+
+        <!-- 데이터 관리 -->
+        <div class="menu-group">
+            <div class="menu-label">🔍 데이터 관리</div>
+            <a href="/dashboard/data-management" class="menu-item submenu">
+                수집 설정
+            </a>
+            <a href="/dashboard/data-management?tab=results" class="menu-item submenu">
+                수집 결과
+            </a>
+            <a href="/dashboard/data-management?tab=duplicates" class="menu-item submenu">
+                중복 검사
+            </a>
+            <a href="/dashboard/data-management?tab=quality" class="menu-item submenu">
+                품질 관리
+            </a>
+        </div>
+
+        <!-- 작업 관리 -->
+        <div class="menu-group">
+            <div class="menu-label">⚙️ 작업 관리</div>
+            <a href="/dashboard/jobs" class="menu-item submenu">
+                작업 실행
+            </a>
+            <a href="/dashboard/jobs?tab=monitoring" class="menu-item submenu">
+                모니터링
+            </a>
+            <a href="/dashboard/jobs?tab=history" class="menu-item submenu">
+                작업 이력
+            </a>
+        </div>
+
+        <!-- 동기화 관리 -->
+        <div class="menu-group">
+            <div class="menu-label">📊 동기화 관리</div>
+            <a href="/dashboard/sync" class="menu-item submenu">
+                배포 현황
+            </a>
+            <a href="/dashboard/sync?tab=history" class="menu-item submenu">
+                배포 이력
+            </a>
+        </div>
+
+        <!-- 분석 -->
+        <div class="menu-group">
+            <a href="/dashboard/analytics" class="menu-item">
+                📈 분석
+            </a>
+        </div>
+
+        <!-- 설정 -->
+        <div class="menu-group">
+            <a href="/dashboard/settings" class="menu-item">
+                ⚙️ 설정
+            </a>
+        </div>
+    </div>
+
+    <!-- 메인 콘텐츠 영역 -->
+    <div class="main-content">
+        <div id="app">
+        <div class="header">
+            <h1>🍽️ 한식당 Data Hub</h1>
+            <div class="subtitle">수집 설정 관리 - Stage A MVP</div>
+            <div class="nav-links">
+                <a href="/dashboard" class="nav-link">📊 대시보드</a>
+                <a href="/dashboard/collection-settings" class="nav-link">⚙️ 수집 설정</a>
+                <a href="/docs" class="nav-link">📖 API 문서</a>
+            </div>
+        </div>
+
+        <div class="stats-summary">
+            <div class="stat-card">
+                <div class="label">총 설정 수</div>
+                <div class="value">{{ configs.length }}</div>
+            </div>
+            <div class="stat-card">
+                <div class="label">활성 설정</div>
+                <div class="value">{{ activeCount }}</div>
+            </div>
+            <div class="stat-card">
+                <div class="label">월간 총 비용</div>
+                <div class="value">${{ totalMonthlyCost.toFixed(2) }}</div>
+            </div>
+            <div class="stat-card">
+                <div class="label">총 키워드</div>
+                <div class="value">{{ totalKeywords }}</div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <div class="controls-header">
+                <h2>필터</h2>
+                <button @click="openCreateModal" class="btn btn-primary">
+                    ➕ 새 설정 추가
+                </button>
+            </div>
+            <div class="filters">
+                <div class="filter-group">
+                    <label>상태</label>
+                    <select v-model="filter.status">
+                        <option value="">전체</option>
+                        <option value="active">활성</option>
+                        <option value="paused">일시정지</option>
+                        <option value="pending">대기중</option>
+                        <option value="rejected">거절됨</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>소스</label>
+                    <select v-model="filter.source">
+                        <option value="">전체</option>
+                        <option value="naver">네이버</option>
+                        <option value="google">구글</option>
+                        <option value="both">네이버+구글</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>검색</label>
+                    <input type="text" v-model="filter.search" placeholder="설정명 검색...">
+                </div>
+            </div>
+        </div>
+
+        <div v-if="error" class="error-message">
+            {{ error }}
+        </div>
+
+        <div v-if="successMessage" class="success-message">
+            {{ successMessage }}
+        </div>
+
+        <div class="table-container">
+            <div class="table-header">
+                <h2>수집 설정 목록 ({{ filteredConfigs.length }})</h2>
+                <button @click="loadConfigs" class="btn btn-secondary">
+                    🔄 새로고침
+                </button>
+            </div>
+
+            <div v-if="loading" class="loading">
+                로딩 중...
+            </div>
+
+            <div v-else-if="filteredConfigs.length === 0" class="empty-state">
+                <h3>설정이 없습니다</h3>
+                <p>새 설정을 추가하여 시작하세요</p>
+            </div>
+
+            <table v-else>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>설정명</th>
+                        <th>지역</th>
+                        <th>키워드</th>
+                        <th>소스</th>
+                        <th>월간 비용</th>
+                        <th>상태</th>
+                        <th>작업</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="config in filteredConfigs" :key="config.id">
+                        <td>{{ config.id }}</td>
+                        <td><strong>{{ config.name }}</strong></td>
+                        <td>
+                            <div class="tags-container">
+                                <span class="tag" v-for="(region, idx) in config.regions" :key="idx">
+                                    {{ formatRegion(region) }}
+                                </span>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="tags-container">
+                                <span class="tag" v-for="(keyword, idx) in config.keywords" :key="idx">
+                                    {{ keyword }}
+                                </span>
+                            </div>
+                        </td>
+                        <td>{{ formatSource(config.source) }}</td>
+                        <td><strong>${{ config.monthly_cost.toFixed(2) }}</strong></td>
+                        <td>
+                            <span :class="'status-badge status-' + config.status">
+                                {{ formatStatus(config.status) }}
+                            </span>
+                        </td>
+                        <td>
+                            <div class="actions">
+                                <button @click="openEditModal(config)" class="btn btn-icon btn-primary">
+                                    ✏️ 수정
+                                </button>
+                                <button @click="deleteConfig(config.id)" class="btn btn-icon btn-danger">
+                                    🗑️ 삭제
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div v-if="showModal" class="modal-overlay" @click.self="closeModal">
+            <div class="modal">
+                <div class="modal-header">
+                    <h2>{{ modalTitle }}</h2>
+                    <button @click="closeModal" class="close-btn">×</button>
+                </div>
+
+                <form @submit.prevent="saveConfig">
+                    <div class="form-group">
+                        <label>설정명 *</label>
+                        <input type="text" v-model="formData.name" required placeholder="예: 강남갈비 수집">
+                    </div>
+
+                    <div class="form-group">
+                        <label>지역 *</label>
+                        <div v-for="(region, idx) in formData.regions" :key="idx" class="region-item">
+                            <input type="text" v-model="region.sido" placeholder="시/도 (예: 서울)" required>
+                            <input type="text" v-model="region.gugun" placeholder="구/군 (예: 강남구)" required>
+                            <input type="text" v-model="region.dong" placeholder="동 (예: 역삼동)">
+                            <button type="button" @click="removeRegion(idx)" class="btn-remove">삭제</button>
+                        </div>
+                        <button type="button" @click="addRegion" class="btn-add">➕ 지역 추가</button>
+                    </div>
+
+                    <div class="form-group">
+                        <label>키워드 *</label>
+                        <div v-for="(keyword, idx) in formData.keywords" :key="idx" class="keyword-item">
+                            <input type="text" v-model="formData.keywords[idx]" placeholder="예: 갈비" required>
+                            <button type="button" @click="removeKeyword(idx)" class="btn-remove">삭제</button>
+                        </div>
+                        <button type="button" @click="addKeyword" class="btn-add">➕ 키워드 추가</button>
+                    </div>
+
+                    <div class="form-group">
+                        <label>데이터 소스 *</label>
+                        <select v-model="formData.source" required>
+                            <option value="naver">네이버</option>
+                            <option value="google">구글</option>
+                            <option value="both">네이버 + 구글</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>상태</label>
+                        <select v-model="formData.status">
+                            <option value="active">활성</option>
+                            <option value="paused">일시정지</option>
+                            <option value="pending">대기중</option>
+                        </select>
+                    </div>
+
+                    <div class="cost-preview">
+                        <h3>💰 예상 비용</h3>
+                        <div class="amount">${{ calculateCost().toFixed(2) }}/월</div>
+                        <div class="cost-details">
+                            {{ formData.keywords.length }}개 키워드 × {{ formData.regions.length }}개 지역 × {{ formatSource(formData.source) }}
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" @click="closeModal" class="btn btn-secondary">취소</button>
+                        <button type="submit" class="btn btn-success" :disabled="saving">
+                            {{ saving ? '저장 중...' : '저장' }}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const { createApp } = Vue;
+
+        createApp({
+            data() {
+                return {
+                    configs: [],
+                    loading: false,
+                    error: null,
+                    successMessage: null,
+                    showModal: false,
+                    editingId: null,
+                    saving: false,
+                    filter: {
+                        status: '',
+                        source: '',
+                        search: ''
+                    },
+                    formData: {
+                        name: '',
+                        regions: [{sido: '', gugun: '', dong: ''}],
+                        keywords: [''],
+                        source: 'both',
+                        status: 'active'
+                    }
+                }
+            },
+            computed: {
+                filteredConfigs() {
+                    let result = this.configs;
+
+                    if (this.filter.status) {
+                        result = result.filter(c => c.status === this.filter.status);
+                    }
+
+                    if (this.filter.source) {
+                        result = result.filter(c => c.source === this.filter.source);
+                    }
+
+                    if (this.filter.search) {
+                        const search = this.filter.search.toLowerCase();
+                        result = result.filter(c => 
+                            c.name.toLowerCase().includes(search) ||
+                            c.keywords.some(k => k.toLowerCase().includes(search))
+                        );
+                    }
+
+                    return result;
+                },
+                activeCount() {
+                    return this.configs.filter(c => c.status === 'active').length;
+                },
+                totalMonthlyCost() {
+                    return this.configs.reduce((sum, c) => sum + c.monthly_cost, 0);
+                },
+                totalKeywords() {
+                    return this.configs.reduce((sum, c) => sum + c.keywords.length, 0);
+                },
+                modalTitle() {
+                    return this.editingId ? '수집 설정 수정' : '새 수집 설정 추가';
+                }
+            },
+            methods: {
+                async loadConfigs() {
+                    this.loading = true;
+                    this.error = null;
+                    try {
+                        const response = await fetch('/api/data-management/collection-configs');
+                        if (!response.ok) throw new Error('설정 목록을 불러올 수 없습니다');
+                        this.configs = await response.json();
+                    } catch (e) {
+                        this.error = e.message;
+                    } finally {
+                        this.loading = false;
+                    }
+                },
+                openCreateModal() {
+                    this.editingId = null;
+                    this.formData = {
+                        name: '',
+                        regions: [{sido: '', gugun: '', dong: ''}],
+                        keywords: [''],
+                        source: 'both',
+                        status: 'active'
+                    };
+                    this.showModal = true;
+                },
+                openEditModal(config) {
+                    this.editingId = config.id;
+                    this.formData = {
+                        name: config.name,
+                        regions: JSON.parse(JSON.stringify(config.regions)),
+                        keywords: [...config.keywords],
+                        source: config.source,
+                        status: config.status
+                    };
+                    this.showModal = true;
+                },
+                closeModal() {
+                    this.showModal = false;
+                    this.editingId = null;
+                },
+                addRegion() {
+                    this.formData.regions.push({sido: '', gugun: '', dong: ''});
+                },
+                removeRegion(idx) {
+                    if (this.formData.regions.length > 1) {
+                        this.formData.regions.splice(idx, 1);
+                    }
+                },
+                addKeyword() {
+                    this.formData.keywords.push('');
+                },
+                removeKeyword(idx) {
+                    if (this.formData.keywords.length > 1) {
+                        this.formData.keywords.splice(idx, 1);
+                    }
+                },
+                calculateCost() {
+                    const validKeywords = this.formData.keywords.filter(k => k.trim()).length;
+                    const validRegions = this.formData.regions.filter(r => r.sido && r.gugun).length;
+                    
+                    let multiplier = 0;
+                    if (this.formData.source === 'naver') multiplier = 10;
+                    else if (this.formData.source === 'google') multiplier = 15;
+                    else if (this.formData.source === 'both') multiplier = 25;
+                    
+                    return validKeywords * validRegions * multiplier;
+                },
+                async saveConfig() {
+                    this.saving = true;
+                    this.error = null;
+                    
+                    const validKeywords = this.formData.keywords.filter(k => k.trim());
+                    const validRegions = this.formData.regions.filter(r => r.sido && r.gugun);
+                    
+                    if (validKeywords.length === 0 || validRegions.length === 0) {
+                        this.error = '최소 1개의 키워드와 지역이 필요합니다';
+                        this.saving = false;
+                        return;
+                    }
+                    
+                    const data = {
+                        name: this.formData.name,
+                        regions: validRegions,
+                        keywords: validKeywords,
+                        source: this.formData.source,
+                        status: this.formData.status,
+                        is_active: this.formData.status === 'active'
+                    };
+                    
+                    try {
+                        let response;
+                        if (this.editingId) {
+                            response = await fetch(`/api/data-management/collection-configs/${this.editingId}`, {
+                                method: 'PUT',
+                                headers: {'Content-Type': 'application/json'},
+                                body: JSON.stringify(data)
+                            });
+                        } else {
+                            response = await fetch('/api/data-management/collection-configs', {
+                                method: 'POST',
+                                headers: {'Content-Type': 'application/json'},
+                                body: JSON.stringify(data)
+                            });
+                        }
+                        
+                        if (!response.ok) {
+                            const errorData = await response.json();
+                            throw new Error(errorData.detail || '저장에 실패했습니다');
+                        }
+                        
+                        this.successMessage = this.editingId ? '설정이 수정되었습니다' : '새 설정이 추가되었습니다';
+                        setTimeout(() => this.successMessage = null, 3000);
+                        
+                        this.closeModal();
+                        await this.loadConfigs();
+                    } catch (e) {
+                        this.error = e.message;
+                    } finally {
+                        this.saving = false;
+                    }
+                },
+                async deleteConfig(id) {
+                    if (!confirm('정말 이 설정을 삭제하시겠습니까?')) return;
+                    
+                    try {
+                        const response = await fetch(`/api/data-management/collection-configs/${id}`, {
+                            method: 'DELETE'
+                        });
+                        
+                        if (!response.ok) throw new Error('삭제에 실패했습니다');
+                        
+                        this.successMessage = '설정이 삭제되었습니다';
+                        setTimeout(() => this.successMessage = null, 3000);
+                        
+                        await this.loadConfigs();
+                    } catch (e) {
+                        this.error = e.message;
+                    }
+                },
+                formatRegion(region) {
+                    const parts = [region.sido, region.gugun, region.dong].filter(p => p);
+                    return parts.join(' ');
+                },
+                formatSource(source) {
+                    const map = {
+                        'naver': '네이버',
+                        'google': '구글',
+                        'both': '네이버+구글'
+                    };
+                    return map[source] || source;
+                },
+                formatStatus(status) {
+                    const map = {
+                        'active': '활성',
+                        'paused': '일시정지',
+                        'pending': '대기중',
+                        'rejected': '거절됨'
+                    };
+                    return map[status] || status;
+                }
+            },
+            mounted() {
+                this.loadConfigs();
+            }
+        }).mount('#app');
+    </script>
+    </div> <!-- main-content -->
+</body>
+</html>

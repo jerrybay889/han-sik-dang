@@ -1,0 +1,1175 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>한식당 Data Hub - 중복 검사 & 품질 관리</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        #app {
+            max-width: 1800px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .header .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-bottom: 15px;
+        }
+
+        .nav-links {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .nav-link {
+            color: white;
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            background: rgba(255,255,255,0.2);
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+
+        .nav-link:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .stat-card .label {
+            font-size: 0.875rem;
+            color: #6b7280;
+            margin-bottom: 8px;
+        }
+
+        .stat-card .value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1f2937;
+        }
+
+        .stat-card.warning .value {
+            color: #f59e0b;
+        }
+
+        .stat-card.success .value {
+            color: #22c55e;
+        }
+
+        .stat-card.danger .value {
+            color: #ef4444;
+        }
+
+        .controls {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .controls-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .controls-header h2 {
+            font-size: 1.25rem;
+            color: #1f2937;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2563eb;
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background: #22c55e;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #16a34a;
+        }
+
+        .btn-warning {
+            background: #f59e0b;
+            color: white;
+        }
+
+        .btn-warning:hover {
+            background: #d97706;
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+
+        .btn-secondary {
+            background: #6b7280;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #4b5563;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 0.75rem;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .tab {
+            padding: 12px 24px;
+            background: white;
+            border: none;
+            border-radius: 8px 8px 0 0;
+            cursor: pointer;
+            font-weight: 600;
+            color: #6b7280;
+            transition: all 0.3s;
+        }
+
+        .tab.active {
+            background: white;
+            color: #3b82f6;
+            box-shadow: 0 -2px 8px rgba(0,0,0,0.1);
+        }
+
+        .tab:hover:not(.active) {
+            color: #3b82f6;
+        }
+
+        .table-container {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            overflow-x: auto;
+        }
+
+        .table-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .table-header h2 {
+            font-size: 1.25rem;
+            color: #1f2937;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: #f3f4f6;
+        }
+
+        th {
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            color: #374151;
+            border-bottom: 2px solid #e5e7eb;
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #e5e7eb;
+            color: #1f2937;
+        }
+
+        tbody tr:hover {
+            background: #f9fafb;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .status-pending {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .status-merged {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .status-separated {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .status-ignored {
+            background: #f3f4f6;
+            color: #4b5563;
+        }
+
+        .score {
+            font-weight: 700;
+            font-size: 1.125rem;
+        }
+
+        .score.high {
+            color: #22c55e;
+        }
+
+        .score.medium {
+            color: #f59e0b;
+        }
+
+        .score.low {
+            color: #ef4444;
+        }
+
+        .restaurant-card {
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 8px;
+        }
+
+        .restaurant-card .name {
+            font-weight: 600;
+            font-size: 1rem;
+            color: #1f2937;
+            margin-bottom: 4px;
+        }
+
+        .restaurant-card .details {
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+
+        .restaurant-card .source-badge {
+            display: inline-block;
+            background: #e0e7ff;
+            color: #3730a3;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            margin-left: 8px;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            max-width: 800px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-header h2 {
+            font-size: 1.5rem;
+            color: #1f2937;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #6b7280;
+        }
+
+        .close-btn:hover {
+            color: #1f2937;
+        }
+
+        .modal-body {
+            margin-bottom: 20px;
+        }
+
+        .comparison {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 15px;
+        }
+
+        .comparison-item {
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .comparison-item:hover {
+            border-color: #3b82f6;
+        }
+
+        .comparison-item.selected {
+            border-color: #3b82f6;
+            background: #eff6ff;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            padding-top: 20px;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #6b7280;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6b7280;
+        }
+
+        .empty-state h3 {
+            font-size: 1.25rem;
+            margin-bottom: 10px;
+        }
+
+        .error-message {
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #991b1b;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+        }
+
+        .success-message {
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            color: #166534;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+        }
+
+        .quality-indicators {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .quality-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 0.75rem;
+            color: #6b7280;
+        }
+
+        .quality-indicator.valid {
+            color: #22c55e;
+        }
+
+        .quality-indicator.invalid {
+            color: #ef4444;
+        }
+
+        /* 좌측 사이드바 스타일 */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 240px;
+            height: 100vh;
+            background: linear-gradient(180deg, #2c3e50 0%, #34495e 100%);
+            color: #ecf0f1;
+            overflow-y: auto;
+            z-index: 1000;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            text-align: center;
+        }
+
+        .sidebar-header h2 {
+            margin: 0 0 5px 0;
+            font-size: 18px;
+            color: #fff;
+        }
+
+        .sidebar-header p {
+            margin: 0;
+            font-size: 12px;
+            color: #bdc3c7;
+        }
+
+        .menu-group {
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .menu-label {
+            padding: 10px 20px;
+            font-size: 11px;
+            font-weight: 600;
+            color: #95a5a6;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .menu-item {
+            display: block;
+            padding: 12px 20px;
+            color: #ecf0f1;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            border-left: 3px solid transparent;
+        }
+
+        .menu-item:hover {
+            background: rgba(255,255,255,0.1);
+            border-left-color: #3498db;
+            padding-left: 25px;
+        }
+
+        .menu-item.active {
+            background: rgba(52, 152, 219, 0.2);
+            border-left-color: #3498db;
+            font-weight: 600;
+        }
+
+        .menu-item.submenu {
+            padding-left: 40px;
+            font-size: 13px;
+        }
+
+        .menu-item.submenu:hover {
+            padding-left: 45px;
+        }
+
+        /* 메인 콘텐츠 영역 - 사이드바 공간 확보 */
+        .main-content {
+            margin-left: 260px;
+            min-height: 100vh;
+        }
+    </style>
+</head>
+<body>
+    <!-- 좌측 사이드바 메뉴 -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h2>🍚 한식당 Data Hub</h2>
+            <p>데이터 관리 시스템</p>
+        </div>
+
+        <!-- 대시보드 -->
+        <div class="menu-group">
+            <a href="/dashboard" class="menu-item">
+                📊 대시보드
+            </a>
+        </div>
+
+        <!-- 데이터 관리 -->
+        <div class="menu-group">
+            <div class="menu-label">🔍 데이터 관리</div>
+            <a href="/dashboard/data-management" class="menu-item submenu">
+                수집 설정
+            </a>
+            <a href="/dashboard/data-management?tab=results" class="menu-item submenu">
+                수집 결과
+            </a>
+            <a href="/dashboard/data-management?tab=duplicates" class="menu-item submenu active">
+                중복 검사
+            </a>
+            <a href="/dashboard/data-management?tab=quality" class="menu-item submenu">
+                품질 관리
+            </a>
+        </div>
+
+        <!-- 작업 관리 -->
+        <div class="menu-group">
+            <div class="menu-label">⚙️ 작업 관리</div>
+            <a href="/dashboard/jobs" class="menu-item submenu">
+                작업 실행
+            </a>
+            <a href="/dashboard/jobs?tab=monitoring" class="menu-item submenu">
+                모니터링
+            </a>
+            <a href="/dashboard/jobs?tab=history" class="menu-item submenu">
+                작업 이력
+            </a>
+        </div>
+
+        <!-- 동기화 관리 -->
+        <div class="menu-group">
+            <div class="menu-label">📊 동기화 관리</div>
+            <a href="/dashboard/sync" class="menu-item submenu">
+                배포 현황
+            </a>
+            <a href="/dashboard/sync?tab=history" class="menu-item submenu">
+                배포 이력
+            </a>
+        </div>
+
+        <!-- 분석 -->
+        <div class="menu-group">
+            <a href="/dashboard/analytics" class="menu-item">
+                📈 분석
+            </a>
+        </div>
+
+        <!-- 설정 -->
+        <div class="menu-group">
+            <a href="/dashboard/settings" class="menu-item">
+                ⚙️ 설정
+            </a>
+        </div>
+    </div>
+
+    <!-- 메인 콘텐츠 영역 -->
+    <div class="main-content">
+        <div id="app">
+        <div class="header">
+            <h1>🔍 한식당 Data Hub</h1>
+            <div class="subtitle">중복 검사 & 품질 관리 - Stage A MVP</div>
+            <div class="nav-links">
+                <a href="/dashboard" class="nav-link">📊 대시보드</a>
+                <a href="/dashboard/collection-settings" class="nav-link">⚙️ 수집 설정</a>
+                <a href="/dashboard/quality-check" class="nav-link">🔍 품질 관리</a>
+                <a href="/docs" class="nav-link">📖 API 문서</a>
+            </div>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card warning">
+                <div class="label">대기 중 중복 그룹</div>
+                <div class="value">{{ pendingDuplicates }}</div>
+            </div>
+            <div class="stat-card success">
+                <div class="label">병합 완료</div>
+                <div class="value">{{ mergedCount }}</div>
+            </div>
+            <div class="stat-card">
+                <div class="label">평균 품질 점수</div>
+                <div class="value">{{ avgQualityScore.toFixed(1) }}</div>
+            </div>
+            <div class="stat-card">
+                <div class="label">총 레스토랑</div>
+                <div class="value">{{ totalRestaurants }}</div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <div class="controls-header">
+                <h2>작업</h2>
+                <div class="btn-group">
+                    <button @click="runDuplicateCheck" class="btn btn-primary" :disabled="checking">
+                        {{ checking ? '🔄 검사 중...' : '🔍 Exact Match 검사' }}
+                    </button>
+                    <button @click="calculateQuality" class="btn btn-success" :disabled="calculating">
+                        {{ calculating ? '🔄 계산 중...' : '📊 품질 점수 계산' }}
+                    </button>
+                    <button @click="refresh" class="btn btn-secondary">
+                        🔄 새로고침
+                    </button>
+                </div>
+            </div>
+            
+            <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #e5e7eb;">
+                <div style="margin-bottom: 15px;">
+                    <h3 style="font-size: 1rem; color: #1f2937; margin-bottom: 10px;">🔍 Fuzzy Match (유사도 기반)</h3>
+                    <div style="display: flex; align-items: center; gap: 15px;">
+                        <label style="font-size: 0.875rem; color: #6b7280;">
+                            유사도 임계값: <strong>{{ fuzzyThreshold }}%</strong>
+                        </label>
+                        <input 
+                            type="range" 
+                            v-model.number="fuzzyThreshold" 
+                            min="70" 
+                            max="95" 
+                            step="5"
+                            style="flex: 1; max-width: 300px;"
+                        />
+                        <button @click="runFuzzyCheck" class="btn btn-warning" :disabled="checkingFuzzy">
+                            {{ checkingFuzzy ? '🔄 검사 중...' : '🔍 Fuzzy Match 실행' }}
+                        </button>
+                    </div>
+                    <p style="font-size: 0.75rem; color: #6b7280; margin-top: 8px;">
+                        Levenshtein distance 기반 유사도 검사 (가중치: 이름 50%, 주소 30%, 전화번호 20%)
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div v-if="error" class="error-message">
+            {{ error }}
+        </div>
+
+        <div v-if="successMessage" class="success-message">
+            {{ successMessage }}
+        </div>
+
+        <div class="tabs">
+            <button 
+                class="tab" 
+                :class="{active: activeTab === 'duplicates'}"
+                @click="activeTab = 'duplicates'"
+            >
+                중복 그룹 ({{ duplicateGroups.length }})
+            </button>
+            <button 
+                class="tab" 
+                :class="{active: activeTab === 'quality'}"
+                @click="activeTab = 'quality'"
+            >
+                품질 점수 ({{ qualityScores.length }})
+            </button>
+        </div>
+
+        <div v-show="activeTab === 'duplicates'" class="table-container">
+            <div class="table-header">
+                <h2>중복 그룹 목록</h2>
+            </div>
+
+            <div v-if="loadingDuplicates" class="loading">
+                로딩 중...
+            </div>
+
+            <div v-else-if="duplicateGroups.length === 0" class="empty-state">
+                <h3>중복 그룹이 없습니다</h3>
+                <p>중복 검사를 실행하여 시작하세요</p>
+            </div>
+
+            <table v-else>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>레스토랑 수</th>
+                        <th>유사도</th>
+                        <th>매칭 방식</th>
+                        <th>상태</th>
+                        <th>생성 시간</th>
+                        <th>작업</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="group in duplicateGroups" :key="group.id">
+                        <td>{{ group.id }}</td>
+                        <td><strong>{{ group.restaurant_ids.length }}개</strong></td>
+                        <td>
+                            <span class="score" :class="getScoreClass(group.similarity_score)">
+                                {{ group.similarity_score }}%
+                            </span>
+                        </td>
+                        <td>{{ formatMatchType(group.match_type) }}</td>
+                        <td>
+                            <span :class="'status-badge status-' + group.status">
+                                {{ formatStatus(group.status) }}
+                            </span>
+                        </td>
+                        <td>{{ formatDate(group.created_at) }}</td>
+                        <td>
+                            <div class="btn-group">
+                                <button 
+                                    v-if="group.status === 'pending'"
+                                    @click="openMergeModal(group.id)" 
+                                    class="btn btn-sm btn-success"
+                                >
+                                    🔗 병합
+                                </button>
+                                <button 
+                                    v-if="group.status === 'pending'"
+                                    @click="separateGroup(group.id)" 
+                                    class="btn btn-sm btn-warning"
+                                >
+                                    ✂️ 별개
+                                </button>
+                                <button 
+                                    @click="viewGroupDetails(group.id)" 
+                                    class="btn btn-sm btn-primary"
+                                >
+                                    👁️ 상세
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div v-show="activeTab === 'quality'" class="table-container">
+            <div class="table-header">
+                <h2>품질 점수 목록</h2>
+            </div>
+
+            <div v-if="loadingQuality" class="loading">
+                로딩 중...
+            </div>
+
+            <div v-else-if="qualityScores.length === 0" class="empty-state">
+                <h3>품질 점수가 없습니다</h3>
+                <p>품질 점수 계산을 실행하여 시작하세요</p>
+            </div>
+
+            <table v-else>
+                <thead>
+                    <tr>
+                        <th>Restaurant ID</th>
+                        <th>종합 점수</th>
+                        <th>완성도</th>
+                        <th>품질 지표</th>
+                        <th>계산 시간</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="score in qualityScores" :key="score.id">
+                        <td><code>{{ score.restaurant_id.substring(0, 8) }}...</code></td>
+                        <td>
+                            <span class="score" :class="getScoreClass(score.total_score)">
+                                {{ score.total_score.toFixed(1) }}
+                            </span>
+                        </td>
+                        <td>{{ score.completeness_score.toFixed(1) }}%</td>
+                        <td>
+                            <div class="quality-indicators">
+                                <span class="quality-indicator" :class="score.phone_valid ? 'valid' : 'invalid'">
+                                    {{ score.phone_valid ? '✅' : '❌' }} 전화
+                                </span>
+                                <span class="quality-indicator" :class="score.address_complete ? 'valid' : 'invalid'">
+                                    {{ score.address_complete ? '✅' : '❌' }} 주소
+                                </span>
+                                <span class="quality-indicator" :class="score.coordinates_valid ? 'valid' : 'invalid'">
+                                    {{ score.coordinates_valid ? '✅' : '❌' }} 좌표
+                                </span>
+                            </div>
+                        </td>
+                        <td>{{ formatDate(score.created_at) }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div v-if="showDetailModal" class="modal-overlay" @click.self="closeDetailModal">
+            <div class="modal">
+                <div class="modal-header">
+                    <h2>중복 그룹 상세</h2>
+                    <button @click="closeDetailModal" class="close-btn">×</button>
+                </div>
+
+                <div class="modal-body" v-if="selectedGroupDetails">
+                    <p><strong>그룹 ID:</strong> {{ selectedGroupDetails.id }}</p>
+                    <p><strong>유사도:</strong> {{ selectedGroupDetails.similarity_score }}%</p>
+                    <p><strong>상태:</strong> {{ formatStatus(selectedGroupDetails.status) }}</p>
+                    <hr style="margin: 20px 0;">
+                    <h3 style="margin-bottom: 15px;">레스토랑 목록 ({{ selectedGroupDetails.restaurants.length }}개)</h3>
+                    <div v-for="(restaurant, idx) in selectedGroupDetails.restaurants" :key="restaurant.id" class="restaurant-card">
+                        <div class="name">
+                            {{ idx + 1 }}. {{ restaurant.name }}
+                            <span class="source-badge">{{ restaurant.source }}</span>
+                        </div>
+                        <div class="details">
+                            📍 {{ restaurant.address || '주소 없음' }}
+                        </div>
+                        <div class="details">
+                            📞 {{ restaurant.phone || '전화번호 없음' }}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button @click="closeDetailModal" class="btn btn-secondary">닫기</button>
+                </div>
+            </div>
+        </div>
+
+        <div v-if="showMergeModal" class="modal-overlay" @click.self="closeMergeModal">
+            <div class="modal">
+                <div class="modal-header">
+                    <h2>중복 병합</h2>
+                    <button @click="closeMergeModal" class="close-btn">×</button>
+                </div>
+
+                <div class="modal-body" v-if="selectedGroupDetails">
+                    <p style="margin-bottom: 20px; color: #6b7280;">
+                        유지할 레스토랑을 선택하세요. 나머지는 병합됩니다.
+                    </p>
+                    
+                    <div class="comparison">
+                        <div 
+                            v-for="restaurant in selectedGroupDetails.restaurants" 
+                            :key="restaurant.id"
+                            class="comparison-item"
+                            :class="{selected: selectedMasterId === restaurant.id}"
+                            @click="selectedMasterId = restaurant.id"
+                        >
+                            <div class="name">
+                                {{ restaurant.name }}
+                                <span class="source-badge">{{ restaurant.source }}</span>
+                            </div>
+                            <div class="details" style="margin-top: 8px;">
+                                📍 {{ restaurant.address || '주소 없음' }}
+                            </div>
+                            <div class="details">
+                                📞 {{ restaurant.phone || '전화번호 없음' }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button @click="closeMergeModal" class="btn btn-secondary">취소</button>
+                    <button 
+                        @click="confirmMerge" 
+                        class="btn btn-success" 
+                        :disabled="!selectedMasterId || merging"
+                    >
+                        {{ merging ? '병합 중...' : '✅ 병합 실행' }}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const { createApp } = Vue;
+
+        createApp({
+            data() {
+                return {
+                    activeTab: 'duplicates',
+                    duplicateGroups: [],
+                    qualityScores: [],
+                    selectedGroupDetails: null,
+                    selectedMasterId: null,
+                    showDetailModal: false,
+                    showMergeModal: false,
+                    loadingDuplicates: false,
+                    loadingQuality: false,
+                    checking: false,
+                    checkingFuzzy: false,
+                    calculating: false,
+                    merging: false,
+                    fuzzyThreshold: 85,
+                    error: null,
+                    successMessage: null
+                }
+            },
+            computed: {
+                pendingDuplicates() {
+                    return this.duplicateGroups.filter(g => g.status === 'pending').length;
+                },
+                mergedCount() {
+                    return this.duplicateGroups.filter(g => g.status === 'merged').length;
+                },
+                totalRestaurants() {
+                    return this.qualityScores.length;
+                },
+                avgQualityScore() {
+                    if (this.qualityScores.length === 0) return 0;
+                    const sum = this.qualityScores.reduce((acc, s) => acc + s.total_score, 0);
+                    return sum / this.qualityScores.length;
+                }
+            },
+            methods: {
+                async loadDuplicates() {
+                    this.loadingDuplicates = true;
+                    this.error = null;
+                    try {
+                        const response = await fetch('/api/data-management/duplicates');
+                        if (!response.ok) throw new Error('중복 그룹 목록을 불러올 수 없습니다');
+                        this.duplicateGroups = await response.json();
+                    } catch (e) {
+                        this.error = e.message;
+                    } finally {
+                        this.loadingDuplicates = false;
+                    }
+                },
+                async loadQuality() {
+                    this.loadingQuality = true;
+                    this.error = null;
+                    try {
+                        const response = await fetch('/api/data-management/duplicates/quality/scores?limit=100');
+                        if (!response.ok) throw new Error('품질 점수를 불러올 수 없습니다');
+                        this.qualityScores = await response.json();
+                    } catch (e) {
+                        this.error = e.message;
+                    } finally {
+                        this.loadingQuality = false;
+                    }
+                },
+                async runDuplicateCheck() {
+                    this.checking = true;
+                    this.error = null;
+                    try {
+                        const response = await fetch('/api/data-management/duplicates/check', {
+                            method: 'POST',
+                            headers: {'Content-Type': 'application/json'},
+                            body: JSON.stringify({})
+                        });
+                        if (!response.ok) throw new Error('중복 검사에 실패했습니다');
+                        const result = await response.json();
+                        this.successMessage = `Exact Match 완료: ${result.total_checked}개 검사, ${result.groups_created}개 그룹 생성`;
+                        setTimeout(() => this.successMessage = null, 5000);
+                        await this.loadDuplicates();
+                    } catch (e) {
+                        this.error = e.message;
+                    } finally {
+                        this.checking = false;
+                    }
+                },
+                async runFuzzyCheck() {
+                    this.checkingFuzzy = true;
+                    this.error = null;
+                    try {
+                        const response = await fetch('/api/data-management/duplicates/check-fuzzy', {
+                            method: 'POST',
+                            headers: {'Content-Type': 'application/json'},
+                            body: JSON.stringify({threshold: this.fuzzyThreshold})
+                        });
+                        if (!response.ok) throw new Error('Fuzzy Match 검사에 실패했습니다');
+                        const result = await response.json();
+                        this.successMessage = `Fuzzy Match 완료 (${result.threshold}%): ${result.total_checked}개 검사, ${result.groups_created}개 그룹 생성`;
+                        setTimeout(() => this.successMessage = null, 5000);
+                        await this.loadDuplicates();
+                    } catch (e) {
+                        this.error = e.message;
+                    } finally {
+                        this.checkingFuzzy = false;
+                    }
+                },
+                async calculateQuality() {
+                    this.calculating = true;
+                    this.error = null;
+                    try {
+                        const response = await fetch('/api/data-management/duplicates/quality/calculate', {
+                            method: 'POST',
+                            headers: {'Content-Type': 'application/json'},
+                            body: JSON.stringify({})
+                        });
+                        if (!response.ok) throw new Error('품질 점수 계산에 실패했습니다');
+                        const result = await response.json();
+                        this.successMessage = `품질 점수 계산 완료: ${result.total_calculated}개 레스토랑`;
+                        setTimeout(() => this.successMessage = null, 5000);
+                        await this.loadQuality();
+                    } catch (e) {
+                        this.error = e.message;
+                    } finally {
+                        this.calculating = false;
+                    }
+                },
+                async viewGroupDetails(groupId) {
+                    try {
+                        const response = await fetch(`/api/data-management/duplicates/${groupId}`);
+                        if (!response.ok) throw new Error('상세 정보를 불러올 수 없습니다');
+                        this.selectedGroupDetails = await response.json();
+                        this.showDetailModal = true;
+                    } catch (e) {
+                        this.error = e.message;
+                    }
+                },
+                async openMergeModal(groupId) {
+                    await this.viewGroupDetails(groupId);
+                    this.selectedMasterId = null;
+                    this.showMergeModal = true;
+                    this.showDetailModal = false;
+                },
+                async confirmMerge() {
+                    if (!this.selectedMasterId) return;
+                    
+                    this.merging = true;
+                    try {
+                        const response = await fetch(`/api/data-management/duplicates/${this.selectedGroupDetails.id}/merge`, {
+                            method: 'POST',
+                            headers: {'Content-Type': 'application/json'},
+                            body: JSON.stringify({master_id: this.selectedMasterId})
+                        });
+                        if (!response.ok) throw new Error('병합에 실패했습니다');
+                        const result = await response.json();
+                        this.successMessage = result.message;
+                        setTimeout(() => this.successMessage = null, 5000);
+                        this.closeMergeModal();
+                        await this.loadDuplicates();
+                    } catch (e) {
+                        this.error = e.message;
+                    } finally {
+                        this.merging = false;
+                    }
+                },
+                async separateGroup(groupId) {
+                    if (!confirm('이 그룹을 별개 레스토랑으로 표시하시겠습니까?')) return;
+                    
+                    try {
+                        const response = await fetch(`/api/data-management/duplicates/${groupId}/separate`, {
+                            method: 'POST'
+                        });
+                        if (!response.ok) throw new Error('처리에 실패했습니다');
+                        const result = await response.json();
+                        this.successMessage = result.message;
+                        setTimeout(() => this.successMessage = null, 5000);
+                        await this.loadDuplicates();
+                    } catch (e) {
+                        this.error = e.message;
+                    }
+                },
+                closeDetailModal() {
+                    this.showDetailModal = false;
+                    this.selectedGroupDetails = null;
+                },
+                closeMergeModal() {
+                    this.showMergeModal = false;
+                    this.selectedGroupDetails = null;
+                    this.selectedMasterId = null;
+                },
+                async refresh() {
+                    await Promise.all([this.loadDuplicates(), this.loadQuality()]);
+                },
+                formatMatchType(type) {
+                    const map = {
+                        'exact': '정확 일치',
+                        'fuzzy': '유사',
+                        'geo': '위치 기반'
+                    };
+                    return map[type] || type;
+                },
+                formatStatus(status) {
+                    const map = {
+                        'pending': '대기중',
+                        'merged': '병합됨',
+                        'separated': '별개',
+                        'ignored': '무시됨'
+                    };
+                    return map[status] || status;
+                },
+                formatDate(dateStr) {
+                    if (!dateStr) return '-';
+                    const date = new Date(dateStr);
+                    return date.toLocaleString('ko-KR');
+                },
+                getScoreClass(score) {
+                    if (score >= 80) return 'high';
+                    if (score >= 50) return 'medium';
+                    return 'low';
+                }
+            },
+            mounted() {
+                this.refresh();
+            }
+        }).mount('#app');
+    </script>
+    </div> <!-- main-content -->
+</body>
+</html>

@@ -1,0 +1,1879 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>수동 입력 - 한식당 Data Hub v2</title>
+    <script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans KR', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 240px;
+            height: 100vh;
+            background: linear-gradient(180deg, #2c3e50 0%, #34495e 100%);
+            color: #ecf0f1;
+            overflow-y: auto;
+            z-index: 1000;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            text-align: center;
+        }
+
+        .sidebar-header h2 {
+            margin: 0 0 5px 0;
+            font-size: 18px;
+            color: #fff;
+        }
+
+        .sidebar-header p {
+            margin: 0;
+            font-size: 12px;
+            color: #bdc3c7;
+        }
+
+        .menu-group {
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .menu-label {
+            padding: 10px 20px;
+            font-size: 11px;
+            font-weight: 600;
+            color: #95a5a6;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .menu-item {
+            display: block;
+            padding: 12px 20px;
+            color: #ecf0f1;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            border-left: 3px solid transparent;
+        }
+
+        .menu-item:hover {
+            background: rgba(255,255,255,0.1);
+            border-left-color: #3498db;
+            padding-left: 25px;
+        }
+
+        .menu-item.active {
+            background: rgba(52, 152, 219, 0.2);
+            border-left-color: #3498db;
+            font-weight: 600;
+        }
+
+        .main-content {
+            margin-left: 260px;
+            min-height: 100vh;
+            padding: 30px;
+        }
+
+        .header {
+            background: white;
+            padding: 25px 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            color: #2c3e50;
+            margin: 0 0 5px 0;
+        }
+
+        .subtitle {
+            color: #7f8c8d;
+            font-size: 0.95rem;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            background: white;
+            padding: 15px 20px 0 20px;
+            border-radius: 12px 12px 0 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .tab {
+            padding: 12px 24px;
+            border: none;
+            background: transparent;
+            color: #7f8c8d;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .tab:hover {
+            color: #667eea;
+        }
+
+        .tab.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+
+        .tab-content {
+            background: white;
+            padding: 30px;
+            border-radius: 0 0 12px 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .sub-tabs {
+            display: flex;
+            gap: 5px;
+            background: #f7fafc;
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .sub-tab {
+            padding: 10px 20px;
+            border: none;
+            background: transparent;
+            color: #666;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+        }
+
+        .sub-tab:hover {
+            background: #e2e8f0;
+        }
+
+        .sub-tab.active {
+            background: white;
+            color: #667eea;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 8px;
+        }
+
+        .form-label .required {
+            color: #f56565;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ecf0f1;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .form-row-3 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 20px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-success {
+            background: #27ae60;
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #95a5a6;
+            color: white;
+        }
+
+        .upload-area {
+            border: 3px dashed #d1d5db;
+            border-radius: 12px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .upload-area:hover {
+            border-color: #667eea;
+            background: #f8f9fa;
+        }
+
+        .upload-area.dragover {
+            border-color: #667eea;
+            background: #e7f3ff;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .preview-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            border-left: 4px solid #667eea;
+        }
+
+        .preview-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+
+        .preview-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .preview-item:last-child {
+            border-bottom: none;
+        }
+
+        .preview-label {
+            color: #7f8c8d;
+            font-size: 13px;
+        }
+
+        .preview-value {
+            color: #2c3e50;
+            font-weight: 600;
+            font-size: 13px;
+        }
+
+        .alert {
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border-left: 4px solid #28a745;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border-left: 4px solid #dc3545;
+        }
+
+        .alert-info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border-left: 4px solid #17a2b8;
+        }
+
+        .table-container {
+            max-height: 400px;
+            overflow-y: auto;
+            margin-top: 20px;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+        }
+
+        .csv-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        .csv-table thead {
+            position: sticky;
+            top: 0;
+            background: #f8f9fa;
+            z-index: 10;
+        }
+
+        .csv-table th {
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            color: #2c3e50;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .csv-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #f1f3f5;
+        }
+
+        .csv-table tbody tr:hover {
+            background: #f8f9fa;
+        }
+
+        .spinner {
+            border: 3px solid #ecf0f1;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .checkbox-group {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px;
+            background: #f7fafc;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            color: #2c3e50;
+        }
+
+        .checkbox-label:hover {
+            background: #e2e8f0;
+        }
+
+        .checkbox-input {
+            cursor: pointer;
+        }
+
+        .menu-item-card, .hour-item {
+            background: #f7fafc;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            position: relative;
+        }
+
+        .remove-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #f56565;
+            color: white;
+            border: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .add-btn {
+            background: #48bb78;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .add-btn:hover {
+            background: #38a169;
+        }
+
+        .image-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .image-item {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .image-item input {
+            flex: 1;
+        }
+
+        .image-item button {
+            width: 80px;
+        }
+
+        /* Phase 1: Compact Styles */
+        .region-autocomplete-wrapper {
+            position: relative;
+        }
+        .region-autocomplete-wrapper input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ecf0f1;
+            border-radius: 8px;
+        }
+        .region-autocomplete-wrapper input:focus {
+            border-color: #4F46E5;
+            outline: none;
+        }
+        .error-message {
+            display: block;
+            color: #DC2626;
+            font-size: 0.875rem;
+            margin-top: 4px;
+        }
+
+        /* Compact List Styles */
+        .menu-compact-list, .link-compact-list, .additional-info-list {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .menu-compact-header {
+            display: flex;
+            gap: 8px;
+            font-weight: 600;
+            font-size: 0.875rem;
+            color: #6B7280;
+            padding: 8px;
+            border-bottom: 2px solid #E5E7EB;
+        }
+        .menu-compact-row, .link-row {
+            display: flex;
+            gap: 8px;
+            padding: 6px;
+            background: #F9FAFB;
+            border-radius: 4px;
+            align-items: center;
+        }
+        .menu-compact-row input {
+            padding: 6px 8px;
+            border: 1px solid #D1D5DB;
+            border-radius: 4px;
+            font-size: 0.875rem;
+        }
+        .link-row select, .link-row input {
+            padding: 6px 8px;
+            border: 1px solid #D1D5DB;
+            border-radius: 4px;
+            font-size: 0.875rem;
+        }
+        .btn-remove {
+            padding: 4px 8px;
+            background: #FEE2E2;
+            color: #DC2626;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1.25rem;
+            line-height: 1;
+        }
+        .btn-add-compact {
+            margin-top: 8px;
+            padding: 8px 16px;
+            background: #DBEAFE;
+            color: #1E40AF;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 0.875rem;
+        }
+        .btn-add-compact:hover {
+            background: #BFDBFE;
+        }
+
+        /* Save Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+        .modal-content {
+            background: white;
+            padding: 32px;
+            border-radius: 12px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            max-width: 400px;
+        }
+        .modal-icon {
+            width: 64px;
+            height: 64px;
+            margin: 0 auto 16px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: bold;
+        }
+        .modal-icon.success {
+            background: #D1FAE5;
+            color: #059669;
+        }
+        .modal-icon.error {
+            background: #FEE2E2;
+            color: #DC2626;
+        }
+        .modal-content h3 {
+            font-size: 1.5rem;
+            margin-bottom: 8px;
+        }
+        .modal-content p {
+            color: #6B7280;
+            margin-bottom: 24px;
+        }
+
+        /* ====================================
+           🕐 영업시간 컴팩트 스타일
+           ==================================== */
+        .business-hours-compact {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .hours-row {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            padding: 10px 12px;
+            background: #F9FAFB;
+            border-radius: 6px;
+            border: 1px solid #E5E7EB;
+        }
+
+        .hours-row select,
+        .hours-row input[type="time"],
+        .hours-row input[type="text"] {
+            padding: 8px 10px;
+            border: 1px solid #D1D5DB;
+            border-radius: 4px;
+            font-size: 14px;
+            background: white;
+        }
+
+        .hours-row input[type="time"]:disabled {
+            background: #F3F4F6;
+            color: #9CA3AF;
+            cursor: not-allowed;
+        }
+
+        .hours-row label {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 14px;
+            color: #374151;
+            cursor: pointer;
+        }
+
+        .hours-row input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+        }
+
+        /* ====================================
+           🌐 Smart Region Autocomplete Styles
+           ==================================== */
+
+        .smart-region-input {
+            position: relative;
+            width: 100%;
+        }
+
+        /* 드롭다운 컨테이너 */
+        .region-dropdown {
+            position: absolute;
+            top: calc(100% + 4px);
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #E5E7EB;
+            border-radius: 8px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+                        0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            max-height: 320px;
+            overflow-y: auto;
+            z-index: 1000;
+            list-style: none;
+            padding: 4px;
+            margin: 0;
+        }
+
+        /* 드롭다운 스크롤바 커스텀 */
+        .region-dropdown::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .region-dropdown::-webkit-scrollbar-track {
+            background: #F3F4F6;
+            border-radius: 3px;
+        }
+
+        .region-dropdown::-webkit-scrollbar-thumb {
+            background: #D1D5DB;
+            border-radius: 3px;
+        }
+
+        .region-dropdown::-webkit-scrollbar-thumb:hover {
+            background: #9CA3AF;
+        }
+
+        /* 드롭다운 항목 */
+        .region-dropdown li {
+            padding: 10px 12px;
+            cursor: pointer;
+            transition: background 0.15s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-radius: 6px;
+        }
+
+        .region-dropdown li:hover,
+        .region-dropdown li.active {
+            background: #EEF2FF;
+        }
+
+        /* 시/도 이름 */
+        .region-dropdown .city {
+            color: #6B7280;
+            font-size: 13px;
+            flex-shrink: 0;
+        }
+
+        /* 구분자 */
+        .region-dropdown .separator {
+            color: #D1D5DB;
+            font-size: 12px;
+        }
+
+        /* 구/군 이름 */
+        .region-dropdown .district {
+            color: #111827;
+            font-weight: 600;
+            font-size: 15px;
+        }
+
+        /* 검색 결과 없음 */
+        .no-results {
+            padding: 16px;
+            text-align: center;
+            color: #6B7280;
+            font-size: 14px;
+            background: white;
+            border: 1px solid #E5E7EB;
+            border-radius: 8px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            position: absolute;
+            top: calc(100% + 4px);
+            left: 0;
+            right: 0;
+            z-index: 1000;
+        }
+
+        /* 선택된 지역 표시 */
+        .selected-region {
+            margin-top: 8px;
+            padding: 8px 12px;
+            background: #D1FAE5;
+            color: #059669;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .selected-region .clear-btn {
+            background: none;
+            border: none;
+            color: #059669;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 0 4px;
+            line-height: 1;
+            transition: color 0.2s;
+        }
+
+        .selected-region .clear-btn:hover {
+            color: #047857;
+        }
+
+        /* 도움말 텍스트 */
+        .help-text {
+            margin-top: 6px;
+            font-size: 13px;
+            color: #6B7280;
+        }
+
+        /* 모바일 대응 */
+        @media (max-width: 768px) {
+            .region-dropdown {
+                max-height: 240px;
+            }
+            
+            .region-dropdown li {
+                padding: 12px 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h2>한식당 Data Hub</h2>
+                <p>Restaurant Data Collection</p>
+            </div>
+
+            <div class="menu-group">
+                <div class="menu-label">대시보드</div>
+                <a href="/dashboard" class="menu-item">📊 메인 대시보드</a>
+            </div>
+
+            <div class="menu-group">
+                <div class="menu-label">데이터 수집</div>
+                <a href="/dashboard/collection-request" class="menu-item">📝 수집 요청</a>
+                <a href="/dashboard/collection-results" class="menu-item">📋 수집 결과</a>
+            </div>
+
+            <div class="menu-group">
+                <div class="menu-label">데이터 입력</div>
+                <a href="/dashboard/manual-input#url" class="menu-item active">🔗 URL 입력</a>
+                <a href="/dashboard/manual-input#csv" class="menu-item">📄 CSV 업로드</a>
+                <a href="/dashboard/manual-input#direct" class="menu-item">✏️ 직접 입력</a>
+            </div>
+
+            <div class="menu-group">
+                <div class="menu-label">데이터 편집</div>
+                <a href="/dashboard/unified-editor" class="menu-item">🔧 통합 편집</a>
+            </div>
+
+            <div class="menu-group">
+                <div class="menu-label">배포 관리</div>
+                <a href="/dashboard/deployment" class="menu-item">🚀 배포 관리</a>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="header">
+                <h1>✏️ 수동 입력</h1>
+                <p class="subtitle">URL 파싱, CSV 업로드, 직접 입력을 통해 레스토랑 데이터를 추가합니다</p>
+            </div>
+
+            <div v-if="alert.show" :class="['alert', alert.type]">
+                <span>{{ alert.message }}</span>
+                <button @click="alert.show = false" style="margin-left: auto; background: none; border: none; cursor: pointer; font-size: 18px;">×</button>
+            </div>
+
+            <div class="tabs">
+                <button class="tab" :class="{ active: activeTab === 'url' }" @click="activeTab = 'url'">
+                    🔗 URL 파싱
+                </button>
+                <button class="tab" :class="{ active: activeTab === 'csv' }" @click="activeTab = 'csv'">
+                    📂 CSV 업로드
+                </button>
+                <button class="tab" :class="{ active: activeTab === 'direct' }" @click="activeTab = 'direct'">
+                    ✍️ 직접 입력
+                </button>
+            </div>
+
+            <div class="tab-content">
+                <div v-if="activeTab === 'url'">
+                    <h3 style="margin-bottom: 20px;">네이버/구글/카카오 URL에서 레스토랑 정보 추출</h3>
+                    
+                    <div class="form-group">
+                        <label class="form-label">레스토랑 URL</label>
+                        <input type="text" class="form-input" v-model="urlForm.url" 
+                               placeholder="예: https://map.naver.com/place/12345678">
+                        <p style="color: #7f8c8d; font-size: 12px; margin-top: 5px;">
+                            지원: 네이버플레이스, 구글맵스, 카카오맵
+                        </p>
+                    </div>
+
+                    <div style="display: flex; gap: 10px;">
+                        <button class="btn btn-secondary" @click="parseURL" :disabled="loading">
+                            🔍 URL 분석
+                        </button>
+                        <button class="btn btn-success" @click="saveFromURL" :disabled="!urlPreview || loading">
+                            💾 저장하기
+                        </button>
+                    </div>
+
+                    <div v-if="loading" class="spinner"></div>
+
+                    <div v-if="urlPreview" class="preview-card">
+                        <div class="preview-title">✅ URL 파싱 완료</div>
+                        <div class="preview-item">
+                            <span class="preview-label">레스토랑 이름:</span>
+                            <span class="preview-value">{{ urlPreview.name }}</span>
+                        </div>
+                        <div class="preview-item">
+                            <span class="preview-label">주소:</span>
+                            <span class="preview-value">{{ urlPreview.address }}</span>
+                        </div>
+                        <div class="preview-item">
+                            <span class="preview-label">출처:</span>
+                            <span class="preview-value">{{ urlPreview.source.toUpperCase() }}</span>
+                        </div>
+                        <div class="preview-item">
+                            <span class="preview-label">Place ID:</span>
+                            <span class="preview-value">{{ urlPreview.place_id || 'N/A' }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div v-if="activeTab === 'csv'">
+                    <h3 style="margin-bottom: 20px;">CSV 파일 업로드 (일괄 등록)</h3>
+
+                    <div class="alert-info alert">
+                        <span>📝 CSV 템플릿을 다운로드하여 작성 후 업로드하세요.</span>
+                        <button class="btn btn-secondary" @click="downloadTemplate" style="margin-left: auto;">
+                            📥 템플릿 다운로드
+                        </button>
+                    </div>
+
+                    <div class="upload-area" 
+                         :class="{ dragover: isDragging }"
+                         @click="$refs.fileInput.click()"
+                         @dragover.prevent="isDragging = true"
+                         @dragleave.prevent="isDragging = false"
+                         @drop.prevent="handleFileDrop">
+                        <div style="font-size: 48px; margin-bottom: 10px;">📂</div>
+                        <div style="font-size: 16px; font-weight: 600; color: #2c3e50; margin-bottom: 5px;">
+                            클릭하거나 파일을 드래그하여 업로드
+                        </div>
+                        <div style="font-size: 13px; color: #7f8c8d;">
+                            CSV 파일만 지원 (UTF-8 인코딩)
+                        </div>
+                        <input type="file" ref="fileInput" class="file-input" accept=".csv" @change="handleFileSelect">
+                    </div>
+
+                    <div v-if="csvData.length > 0" style="margin-top: 30px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                            <h3>업로드된 데이터 ({{ csvData.length }}개)</h3>
+                            <div style="display: flex; gap: 10px;">
+                                <button class="btn btn-secondary" @click="csvData = []">취소</button>
+                                <button class="btn btn-success" @click="saveBatchCSV" :disabled="loading">
+                                    💾 {{ csvData.length }}개 저장
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="table-container">
+                            <table class="csv-table">
+                                <thead>
+                                    <tr>
+                                        <th>이름</th>
+                                        <th>분류</th>
+                                        <th>주소</th>
+                                        <th>전화번호</th>
+                                        <th>평점</th>
+                                        <th>리뷰수</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="(row, idx) in csvData" :key="idx">
+                                        <td>{{ row.name }}</td>
+                                        <td>{{ row.category || '-' }}</td>
+                                        <td>{{ row.address || '-' }}</td>
+                                        <td>{{ row.phone || '-' }}</td>
+                                        <td>{{ row.rating || '-' }}</td>
+                                        <td>{{ row.review_count || '-' }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div v-if="activeTab === 'direct'">
+                    <h3 style="margin-bottom: 20px;">레스토랑 정보 직접 입력</h3>
+
+                    <div>
+                        <h4 style="margin: 30px 0 20px 0; padding-bottom: 10px; border-bottom: 2px solid #667eea; color: #667eea; font-size: 18px;">🏪 기본정보</h4>
+                        <div class="form-group">
+                            <label class="form-label">레스토랑 이름 <span class="required">*</span></label>
+                            <input type="text" class="form-input" v-model="directForm.name" placeholder="예: 올래국수">
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">카테고리 <span class="required">*</span></label>
+                                <select class="form-input" v-model="directForm.category">
+                                    <option value="">선택하세요</option>
+                                    <option value="한식">한식</option>
+                                    <option value="중식">중식</option>
+                                    <option value="일식">일식</option>
+                                    <option value="양식">양식</option>
+                                    <option value="카페/디저트">카페/디저트</option>
+                                    <option value="해산물">해산물</option>
+                                    <option value="고기/구이">고기/구이</option>
+                                    <option value="분식">분식</option>
+                                    <option value="기타">기타</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">가격대</label>
+                                <select class="form-input" v-model="directForm.price_range">
+                                    <option value="">선택하세요</option>
+                                    <option value="저가">저가 (1만원 이하)</option>
+                                    <option value="중가">중가 (1-3만원)</option>
+                                    <option value="고가">고가 (3만원 이상)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">주소 <span class="required">*</span></label>
+                            <input type="text" class="form-input" v-model="directForm.address" placeholder="예: 서울시 강남구 테헤란로 123">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">전화번호</label>
+                            <input type="text" class="form-input" v-model="directForm.phone" placeholder="02-1234-5678">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">🌐 지역 <span class="required">*</span></label>
+                            <div class="smart-region-input">
+                                <input 
+                                    id="region-input"
+                                    type="text" 
+                                    class="form-input"
+                                    v-model="regionQuery"
+                                    @input="searchRegions"
+                                    @keydown.down.prevent="selectNextRegion"
+                                    @keydown.up.prevent="selectPrevRegion"
+                                    @keydown.enter.prevent="selectCurrentRegion"
+                                    @focus="showRegionDropdown = true"
+                                    @blur="hideRegionDropdown"
+                                    placeholder="예: 강남, 제주, 서울 중구"
+                                    autocomplete="off"
+                                    required
+                                >
+                                
+                                <ul 
+                                    v-if="showRegionDropdown && filteredRegions.length > 0" 
+                                    class="region-dropdown"
+                                    @mousedown.prevent
+                                >
+                                    <li 
+                                        v-for="(region, index) in filteredRegions" 
+                                        :key="index"
+                                        :class="{ active: index === selectedRegionIndex }"
+                                        @mousedown="selectRegion(region)"
+                                        @mouseenter="selectedRegionIndex = index"
+                                    >
+                                        <span class="city">{{ region.city }}</span>
+                                        <span class="separator">›</span>
+                                        <span class="district">{{ region.district }}</span>
+                                    </li>
+                                </ul>
+                                
+                                <div 
+                                    v-if="showRegionDropdown && regionQuery && filteredRegions.length === 0"
+                                    class="no-results"
+                                >
+                                    검색 결과가 없습니다
+                                </div>
+                                
+                                <div v-if="directForm.region" class="selected-region">
+                                    ✓ {{ directForm.region }}
+                                    <button type="button" @click="clearRegion" class="clear-btn">×</button>
+                                </div>
+                            </div>
+                            
+                            <div class="help-text">
+                                💡 팁: 구/군 이름만 입력해도 검색됩니다 (예: "강남", "중구", "제주")
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">평점 (1-5)</label>
+                                <input type="number" step="0.1" min="0" max="5" class="form-input" v-model.number="directForm.rating" placeholder="4.5">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">리뷰 수</label>
+                                <input type="number" class="form-input" v-model.number="directForm.review_count" placeholder="150">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h4 style="margin: 30px 0 20px 0; padding-bottom: 10px; border-bottom: 2px solid #667eea; color: #667eea; font-size: 18px;">📝 상세정보</h4>
+                        <div class="form-group">
+                            <label class="form-label">설명</label>
+                            <textarea class="form-input" v-model="directForm.description" rows="5" 
+                                      placeholder="레스토랑 설명을 입력하세요 (최대 500자)"></textarea>
+                            <small style="color: #999; font-size: 12px;">{{ (directForm.description || '').length }} / 500자</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">썸네일 URL</label>
+                            <input type="text" class="form-input" v-model="directForm.thumbnail_url" placeholder="https://example.com/image.jpg">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">이미지 URL 목록</label>
+                            <div class="image-list">
+                                <div class="image-item" v-for="(img, idx) in directForm.images" :key="idx">
+                                    <input type="text" class="form-input" v-model="directForm.images[idx]" :placeholder="'이미지 ' + (idx + 1)">
+                                    <button class="btn btn-secondary" @click="removeImage(idx)">삭제</button>
+                                </div>
+                                <button class="add-btn" @click="addImage" v-if="directForm.images.length < 10">➕ 이미지 추가</button>
+                            </div>
+                            <small style="color: #999; font-size: 12px;">최대 10개</small>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h4 style="margin: 30px 0 20px 0; padding-bottom: 10px; border-bottom: 2px solid #667eea; color: #667eea; font-size: 18px;">🍽️ 메뉴</h4>
+                        <div class="form-group">
+                            <label class="form-label">메뉴 목록</label>
+                            <div class="menu-compact-list">
+                                <div class="menu-compact-header">
+                                    <span style="width: 35%">메뉴명</span>
+                                    <span style="width: 20%">가격 (원)</span>
+                                    <span style="width: 40%">설명</span>
+                                    <span style="width: 5%"></span>
+                                </div>
+                                
+                                <div 
+                                    class="menu-compact-row" 
+                                    v-for="(menu, index) in directForm.menu_items" 
+                                    :key="index"
+                                >
+                                    <input 
+                                        v-model="menu.name" 
+                                        placeholder="김치찌개"
+                                        style="width: 35%"
+                                    >
+                                    <input 
+                                        v-model.number="menu.price" 
+                                        type="number"
+                                        placeholder="8000"
+                                        style="width: 20%"
+                                    >
+                                    <input 
+                                        v-model="menu.description" 
+                                        placeholder="매콤한 맛"
+                                        style="width: 40%"
+                                    >
+                                    <button 
+                                        @click="removeMenu(index)" 
+                                        class="btn-remove"
+                                        style="width: 5%"
+                                    >
+                                        ×
+                                    </button>
+                                </div>
+                                
+                                <button @click="addMenu" class="btn-add-compact">
+                                    + 메뉴 추가
+                                </button>
+                            </div>
+                            <small v-if="!directForm.menu_items || directForm.menu_items.length === 0" style="color: #999; font-size: 12px; display: block; margin-top: 10px;">메뉴를 추가해주세요</small>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h4 style="margin: 30px 0 20px 0; padding-bottom: 10px; border-bottom: 2px solid #667eea; color: #667eea; font-size: 18px;">🕐 영업시간</h4>
+                        <div class="form-group">
+                            <label class="form-label">영업시간 (동적 추가)</label>
+                            <div class="business-hours-compact">
+                                <div 
+                                    class="hours-row" 
+                                    v-for="(hour, index) in businessHoursList" 
+                                    :key="index"
+                                >
+                                    <!-- 요일 선택 (18%) -->
+                                    <select v-model="hour.day" style="width: 18%">
+                                        <option value="">요일</option>
+                                        <option value="monday">월요일</option>
+                                        <option value="tuesday">화요일</option>
+                                        <option value="wednesday">수요일</option>
+                                        <option value="thursday">목요일</option>
+                                        <option value="friday">금요일</option>
+                                        <option value="saturday">토요일</option>
+                                        <option value="sunday">일요일</option>
+                                    </select>
+                                    
+                                    <!-- 시작 시간 (20%) -->
+                                    <input 
+                                        v-model="hour.open" 
+                                        type="time"
+                                        style="width: 20%"
+                                        :disabled="hour.closed"
+                                    >
+                                    
+                                    <!-- 구분자 (5%) -->
+                                    <span style="width: 5%; text-align: center; color: #6B7280;">~</span>
+                                    
+                                    <!-- 종료 시간 (20%) -->
+                                    <input 
+                                        v-model="hour.close" 
+                                        type="time"
+                                        style="width: 20%"
+                                        :disabled="hour.closed"
+                                    >
+                                    
+                                    <!-- 휴무 체크박스 (15%) -->
+                                    <label style="width: 15%; display: flex; align-items: center; gap: 4px;">
+                                        <input type="checkbox" v-model="hour.closed">
+                                        <span>휴무</span>
+                                    </label>
+                                    
+                                    <!-- 휴무 메시지 (17%) -->
+                                    <input 
+                                        v-if="hour.closed"
+                                        v-model="hour.message" 
+                                        type="text"
+                                        placeholder="명절 휴무"
+                                        style="width: 17%"
+                                    >
+                                    <span v-else style="width: 17%"></span>
+                                    
+                                    <!-- 삭제 버튼 (5%) -->
+                                    <button 
+                                        type="button"
+                                        @click="removeHour(index)" 
+                                        class="btn-remove" 
+                                        style="width: 5%"
+                                        title="삭제"
+                                    >
+                                        ×
+                                    </button>
+                                </div>
+                                
+                                <button 
+                                    type="button"
+                                    @click="addHour" 
+                                    class="btn-add-compact"
+                                >
+                                    + 영업시간 추가
+                                </button>
+                            </div>
+                            
+                            <div class="help-text" style="margin-top: 10px; font-size: 12px; color: #6B7280;">
+                                💡 팁: 요일을 선택하고 시간을 입력하세요. 휴무일은 체크박스를 선택하세요.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h4 style="margin: 30px 0 20px 0; padding-bottom: 10px; border-bottom: 2px solid #667eea; color: #667eea; font-size: 18px;">🔗 링크 & 시설</h4>
+                        <div class="form-group">
+                            <label class="form-label">플랫폼 링크</label>
+                            <div class="link-compact-list">
+                                <div 
+                                    class="link-row" 
+                                    v-for="(link, index) in platformLinks" 
+                                    :key="index"
+                                >
+                                    <!-- 플랫폼 선택 -->
+                                    <select v-model="link.platform" style="width: 20%">
+                                        <option value="">선택</option>
+                                        <option value="google">구글</option>
+                                        <option value="naver">네이버</option>
+                                        <option value="kakao">카카오</option>
+                                        <option value="instagram">인스타그램</option>
+                                        <option value="facebook">페이스북</option>
+                                        <option value="other">기타 URL</option>
+                                    </select>
+                                    
+                                    <!-- URL 입력 -->
+                                    <input 
+                                        v-model="link.url" 
+                                        type="url"
+                                        placeholder="https://..."
+                                        style="width: 50%"
+                                    >
+                                    
+                                    <!-- Place ID (구글/네이버만) -->
+                                    <input 
+                                        v-model="link.placeId" 
+                                        placeholder="Place ID"
+                                        style="width: 25%"
+                                        v-if="link.platform === 'google' || link.platform === 'naver'"
+                                    >
+                                    
+                                    <!-- 삭제 -->
+                                    <button @click="removeLink(index)" class="btn-remove" style="width: 5%">
+                                        ×
+                                    </button>
+                                </div>
+                                
+                                <button @click="addLink" class="btn-add-compact">
+                                    + 링크 추가
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">편의시설</label>
+                            <div class="checkbox-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" v-model="facilities.parking"> 🅿️ 주차
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" v-model="facilities.wifi"> 📶 WiFi
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" v-model="facilities.reservation"> 📞 예약
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" v-model="facilities.delivery"> 🛵 배달
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" v-model="facilities.takeout"> 📦 포장
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" v-model="facilities.group"> 👥 단체석
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" v-model="facilities.kids"> 👶 유아동반
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" v-model="facilities.wheelchair"> ♿ 휠체어
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" v-model="facilities.pet"> 🐕 반려동물
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h4 style="margin: 30px 0 20px 0; padding-bottom: 10px; border-bottom: 2px solid #667eea; color: #667eea; font-size: 18px;">🌐 추가정보</h4>
+                        <div class="form-group">
+                            <label class="form-label">홈페이지 / SNS / 기타 링크</label>
+                            <div class="additional-info-list">
+                                <div 
+                                    class="link-row" 
+                                    v-for="(info, index) in additionalInfo" 
+                                    :key="index"
+                                >
+                                    <!-- 링크 타입 선택 -->
+                                    <select v-model="info.type" style="width: 20%">
+                                        <option value="">선택</option>
+                                        <option value="homepage">🏠 홈페이지</option>
+                                        <option value="blog">📝 블로그</option>
+                                        <option value="instagram">📷 인스타그램</option>
+                                        <option value="facebook">👥 페이스북</option>
+                                        <option value="youtube">🎥 유튜브</option>
+                                        <option value="other">🔗 기타</option>
+                                    </select>
+                                    
+                                    <!-- URL 입력 -->
+                                    <input 
+                                        v-model="info.url" 
+                                        type="url"
+                                        placeholder="https://..."
+                                        style="width: 75%"
+                                    >
+                                    
+                                    <!-- 삭제 -->
+                                    <button @click="removeAdditionalInfo(index)" class="btn-remove" style="width: 5%">
+                                        ×
+                                    </button>
+                                </div>
+                                
+                                <button @click="addAdditionalInfo" class="btn-add-compact">
+                                    + 링크 추가
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; gap: 10px; margin-top: 30px; padding-top: 20px; border-top: 2px solid #eee;">
+                        <button class="btn btn-secondary" @click="resetDirectForm">초기화</button>
+                        <button class="btn btn-primary" @click="saveDirectInput" :disabled="!directForm.name || loading">
+                            💾 저장하기
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Save Modal (Vue 앱 내부로 이동) -->
+        <div v-if="showSaveModal" class="modal-overlay" @click="closeSaveModal">
+            <div class="modal-content" @click.stop>
+                <div :class="['modal-icon', saveSuccess ? 'success' : 'error']">
+                    {{ saveSuccess ? '✓' : '✗' }}
+                </div>
+                <h3>{{ saveSuccess ? '저장 완료' : '저장 실패' }}</h3>
+                <p>{{ saveMessage }}</p>
+                <button @click="closeSaveModal" class="btn btn-primary">
+                    확인
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const { createApp } = Vue;
+
+        createApp({
+            data() {
+                return {
+                    activeTab: 'url',
+                    loading: false,
+                    alert: {
+                        show: false,
+                        type: 'alert-success',
+                        message: ''
+                    },
+                    urlForm: {
+                        url: ''
+                    },
+                    urlPreview: null,
+                    csvData: [],
+                    isDragging: false,
+                    directForm: {
+                        name: '',
+                        category: '',
+                        price_range: '',
+                        address: '',
+                        phone: '',
+                        region: '',
+                        rating: null,
+                        review_count: null,
+                        description: '',
+                        thumbnail_url: '',
+                        images: [],
+                        menu_items: [],
+                        business_hours: {},
+                        source: 'manual',
+                        google_place_id: '',
+                        naver_place_id: '',
+                        google_maps_url: '',
+                        naver_map_url: '',
+                        source_url: ''
+                    },
+                    facilities: {
+                        parking: false,
+                        wifi: false,
+                        reservation: false,
+                        delivery: false,
+                        takeout: false,
+                        group: false,
+                        kids: false,
+                        wheelchair: false,
+                        pet: false
+                    },
+                    weekDays: [
+                        { label: '월요일', value: 'monday' },
+                        { label: '화요일', value: 'tuesday' },
+                        { label: '수요일', value: 'wednesday' },
+                        { label: '목요일', value: 'thursday' },
+                        { label: '금요일', value: 'friday' },
+                        { label: '토요일', value: 'saturday' },
+                        { label: '일요일', value: 'sunday' }
+                    ],
+                    allRegions: [],
+                    regionQuery: '',
+                    filteredRegions: [],
+                    selectedRegionIndex: 0,
+                    showRegionDropdown: false,
+                    platformLinks: [
+                        { platform: '', url: '', placeId: '' }
+                    ],
+                    additionalInfo: [
+                        { type: '', url: '' }
+                    ],
+                    businessHoursList: [
+                        {
+                            day: '',
+                            open: '10:00',
+                            close: '22:00',
+                            closed: false,
+                            message: ''
+                        }
+                    ],
+                    showSaveModal: false,
+                    saveSuccess: false,
+                    saveMessage: ''
+                };
+            },
+            async mounted() {
+                try {
+                    console.log('📦 지역 데이터 로딩 중...');
+                    const response = await fetch('/static/regions-complete.json');
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}`);
+                    }
+                    
+                    const data = await response.json();
+                    this.allRegions = data.regions;
+                    
+                    console.log(`✅ ${data.total}개 지역 데이터 로드 완료`);
+                    console.log(`   버전: ${data.version}`);
+                    console.log(`   메모리: ${(JSON.stringify(data).length / 1024).toFixed(1)}KB`);
+                } catch (error) {
+                    console.error('❌ 지역 데이터 로드 실패:', error);
+                    alert('지역 데이터를 불러오는데 실패했습니다. 페이지를 새로고침해주세요.');
+                }
+            },
+            methods: {
+                async parseURL() {
+                    if (!this.urlForm.url) {
+                        this.showAlert('error', 'URL을 입력하세요.');
+                        return;
+                    }
+
+                    this.loading = true;
+                    try {
+                        const response = await axios.post('/api/data-management/manual-input/parse-url', {
+                            url: this.urlForm.url
+                        });
+
+                        if (response.data.success) {
+                            this.urlPreview = response.data.preview;
+                            this.showAlert('success', 'URL 파싱 완료! 저장하기 버튼을 클릭하세요.');
+                        }
+                    } catch (error) {
+                        this.showAlert('error', error.response?.data?.detail || 'URL 파싱 실패');
+                        this.urlPreview = null;
+                    } finally {
+                        this.loading = false;
+                    }
+                },
+                async saveFromURL() {
+                    if (!this.urlPreview) return;
+
+                    this.loading = true;
+                    try {
+                        const response = await axios.post('/api/data-management/manual-input/direct-input', {
+                            name: this.urlPreview.name,
+                            address: this.urlPreview.address,
+                            source: this.urlPreview.source
+                        });
+
+                        if (response.data.success) {
+                            this.showAlert('success', '레스토랑이 성공적으로 등록되었습니다!');
+                            this.urlForm.url = '';
+                            this.urlPreview = null;
+                        }
+                    } catch (error) {
+                        this.showAlert('error', error.response?.data?.detail || '저장 실패');
+                    } finally {
+                        this.loading = false;
+                    }
+                },
+                handleFileSelect(event) {
+                    const file = event.target.files[0];
+                    if (file) {
+                        this.processCSVFile(file);
+                    }
+                },
+                handleFileDrop(event) {
+                    this.isDragging = false;
+                    const file = event.dataTransfer.files[0];
+                    if (file && file.name.endsWith('.csv')) {
+                        this.processCSVFile(file);
+                    } else {
+                        this.showAlert('error', 'CSV 파일만 업로드 가능합니다.');
+                    }
+                },
+                async processCSVFile(file) {
+                    this.loading = true;
+                    const formData = new FormData();
+                    formData.append('file', file);
+
+                    try {
+                        const response = await axios.post('/api/data-management/manual-input/upload-csv', formData, {
+                            headers: { 'Content-Type': 'multipart/form-data' }
+                        });
+
+                        if (response.data.success) {
+                            this.csvData = response.data.data;
+                            this.showAlert('success', response.data.message);
+                        }
+                    } catch (error) {
+                        this.showAlert('error', error.response?.data?.detail || 'CSV 파일 처리 실패');
+                    } finally {
+                        this.loading = false;
+                    }
+                },
+                async saveBatchCSV() {
+                    if (this.csvData.length === 0) return;
+
+                    this.loading = true;
+                    try {
+                        const response = await axios.post('/api/data-management/manual-input/batch-create-from-csv', this.csvData);
+
+                        if (response.data.success) {
+                            this.showAlert('success', response.data.message);
+                            this.csvData = [];
+                            this.$refs.fileInput.value = '';
+                        }
+                    } catch (error) {
+                        this.showAlert('error', error.response?.data?.detail || '일괄 저장 실패');
+                    } finally {
+                        this.loading = false;
+                    }
+                },
+                async saveDirectInput() {
+                    if (!this.directForm.name) {
+                        this.showSaveModal = true;
+                        this.saveSuccess = false;
+                        this.saveMessage = '레스토랑 이름은 필수입니다.';
+                        return;
+                    }
+
+                    if (this.regionError) {
+                        this.showSaveModal = true;
+                        this.saveSuccess = false;
+                        this.saveMessage = '올바른 행정구역 명칭을 입력하세요.';
+                        return;
+                    }
+
+                    this.loading = true;
+                    try {
+                        this.convertPlatformLinks();
+                        const additionalLinks = this.convertAdditionalInfo();
+                        
+                        const business_hours = {};
+                        this.businessHoursList.forEach(hour => {
+                            if (hour.day) {
+                                business_hours[hour.day] = {
+                                    open: hour.open,
+                                    close: hour.close,
+                                    closed: hour.closed,
+                                    message: hour.closed ? hour.message : null
+                                };
+                            }
+                        });
+                        
+                        const payload = {
+                            ...this.directForm,
+                            business_hours,
+                            facilities: this.facilities,
+                            additional_info: additionalLinks
+                        };
+
+                        const response = await axios.post('/api/data-management/manual-input/direct-input', payload);
+
+                        if (response.data.success) {
+                            this.showSaveModal = true;
+                            this.saveSuccess = true;
+                            this.saveMessage = '레스토랑 정보가 성공적으로 저장되었습니다!';
+                            
+                            setTimeout(() => {
+                                window.location.href = '/dashboard/collection-results';
+                            }, 2000);
+                        }
+                    } catch (error) {
+                        this.showSaveModal = true;
+                        this.saveSuccess = false;
+                        this.saveMessage = error.response?.data?.detail || '저장 실패';
+                    } finally {
+                        this.loading = false;
+                    }
+                },
+                resetDirectForm() {
+                    this.directForm = {
+                        name: '',
+                        category: '',
+                        price_range: '',
+                        address: '',
+                        phone: '',
+                        region: '',
+                        rating: null,
+                        review_count: null,
+                        description: '',
+                        thumbnail_url: '',
+                        images: [],
+                        menu_items: [],
+                        business_hours: {},
+                        source: 'manual',
+                        google_place_id: '',
+                        naver_place_id: '',
+                        google_maps_url: '',
+                        naver_map_url: '',
+                        source_url: ''
+                    };
+                    this.facilities = {
+                        parking: false,
+                        wifi: false,
+                        reservation: false,
+                        delivery: false,
+                        takeout: false,
+                        group: false,
+                        kids: false,
+                        wheelchair: false,
+                        pet: false
+                    };
+                    this.businessHoursList = [
+                        {
+                            day: '',
+                            open: '10:00',
+                            close: '22:00',
+                            closed: false,
+                            message: ''
+                        }
+                    ];
+                },
+                addMenu() {
+                    if (!this.directForm.menu_items) {
+                        this.directForm.menu_items = [];
+                    }
+                    this.directForm.menu_items.push({ name: '', price: null, description: '' });
+                },
+                removeMenu(index) {
+                    this.directForm.menu_items.splice(index, 1);
+                },
+                addImage() {
+                    if (!this.directForm.images) {
+                        this.directForm.images = [];
+                    }
+                    if (this.directForm.images.length < 10) {
+                        this.directForm.images.push('');
+                    }
+                },
+                removeImage(index) {
+                    this.directForm.images.splice(index, 1);
+                },
+                addHour() {
+                    this.businessHoursList.push({
+                        day: '',
+                        open: '10:00',
+                        close: '22:00',
+                        closed: false,
+                        message: ''
+                    });
+                },
+                removeHour(index) {
+                    if (this.businessHoursList.length > 1) {
+                        this.businessHoursList.splice(index, 1);
+                    } else {
+                        alert('최소 1개의 영업시간은 유지해야 합니다.');
+                    }
+                },
+                async downloadTemplate() {
+                    try {
+                        const response = await axios.get('/api/data-management/manual-input/csv-template');
+                        if (response.data.success) {
+                            const template = response.data.template;
+                            const headers = response.data.headers;
+                            
+                            let csv = headers.join(',') + '\n';
+                            template.forEach(row => {
+                                csv += headers.map(h => `"${row[h]}"`).join(',') + '\n';
+                            });
+
+                            const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+                            const link = document.createElement('a');
+                            link.href = URL.createObjectURL(blob);
+                            link.download = 'restaurant_template.csv';
+                            link.click();
+                        }
+                    } catch (error) {
+                        this.showAlert('error', '템플릿 다운로드 실패');
+                    }
+                },
+                showAlert(type, message) {
+                    this.alert = {
+                        show: true,
+                        type: `alert-${type}`,
+                        message: message
+                    };
+                    setTimeout(() => {
+                        this.alert.show = false;
+                    }, 5000);
+                },
+                searchRegions() {
+                    const query = this.regionQuery.toLowerCase().trim();
+                    
+                    if (query.length === 0) {
+                        this.filteredRegions = [];
+                        this.showRegionDropdown = false;
+                        return;
+                    }
+                    
+                    this.filteredRegions = this.allRegions
+                        .filter(region => {
+                            return region.keywords.some(keyword => 
+                                keyword.includes(query)
+                            );
+                        })
+                        .slice(0, 10);
+                    
+                    this.selectedRegionIndex = 0;
+                    this.showRegionDropdown = true;
+                    
+                    console.log(`🔍 "${query}" 검색 → ${this.filteredRegions.length}개 결과`);
+                },
+                selectNextRegion() {
+                    if (this.selectedRegionIndex < this.filteredRegions.length - 1) {
+                        this.selectedRegionIndex++;
+                    }
+                },
+                selectPrevRegion() {
+                    if (this.selectedRegionIndex > 0) {
+                        this.selectedRegionIndex--;
+                    }
+                },
+                selectCurrentRegion() {
+                    if (this.filteredRegions.length > 0) {
+                        this.selectRegion(this.filteredRegions[this.selectedRegionIndex]);
+                    }
+                },
+                selectRegion(region) {
+                    this.directForm.region = region.full;
+                    this.regionQuery = region.full;
+                    this.showRegionDropdown = false;
+                    
+                    console.log(`✅ 지역 선택: ${region.full}`);
+                },
+                hideRegionDropdown() {
+                    setTimeout(() => {
+                        this.showRegionDropdown = false;
+                    }, 200);
+                },
+                clearRegion() {
+                    this.directForm.region = '';
+                    this.regionQuery = '';
+                    this.filteredRegions = [];
+                },
+                addLink() {
+                    this.platformLinks.push({
+                        platform: '',
+                        url: '',
+                        placeId: ''
+                    });
+                },
+                removeLink(index) {
+                    this.platformLinks.splice(index, 1);
+                },
+                convertPlatformLinks() {
+                    this.platformLinks.forEach(link => {
+                        if (link.platform === 'google') {
+                            this.directForm.google_maps_url = link.url;
+                            this.directForm.google_place_id = link.placeId;
+                        } else if (link.platform === 'naver') {
+                            this.directForm.naver_map_url = link.url;
+                            this.directForm.naver_place_id = link.placeId;
+                        } else if (link.platform === 'other') {
+                            this.directForm.source_url = link.url;
+                        }
+                    });
+                },
+                addAdditionalInfo() {
+                    this.additionalInfo.push({
+                        type: '',
+                        url: ''
+                    });
+                },
+                removeAdditionalInfo(index) {
+                    this.additionalInfo.splice(index, 1);
+                },
+                convertAdditionalInfo() {
+                    const additionalLinks = {};
+                    this.additionalInfo.forEach(info => {
+                        if (info.type && info.url) {
+                            additionalLinks[info.type] = info.url;
+                        }
+                    });
+                    return additionalLinks;
+                },
+                closeSaveModal() {
+                    this.showSaveModal = false;
+                }
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>

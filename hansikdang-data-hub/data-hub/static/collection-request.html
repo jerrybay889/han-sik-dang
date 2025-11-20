@@ -1,0 +1,1147 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>수집 요청 관리 - 한식당 Data Hub</title>
+    <script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans KR', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        /* 좌측 사이드바 스타일 */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 240px;
+            height: 100vh;
+            background: linear-gradient(180deg, #2c3e50 0%, #34495e 100%);
+            color: #ecf0f1;
+            overflow-y: auto;
+            z-index: 1000;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            text-align: center;
+        }
+
+        .sidebar-header h2 {
+            margin: 0 0 5px 0;
+            font-size: 18px;
+            color: #fff;
+        }
+
+        .sidebar-header p {
+            margin: 0;
+            font-size: 12px;
+            color: #bdc3c7;
+        }
+
+        .menu-group {
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .menu-label {
+            padding: 10px 20px;
+            font-size: 11px;
+            font-weight: 600;
+            color: #95a5a6;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .menu-item {
+            display: block;
+            padding: 12px 20px;
+            color: #ecf0f1;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            border-left: 3px solid transparent;
+        }
+
+        .menu-item:hover {
+            background: rgba(255,255,255,0.1);
+            border-left-color: #3498db;
+            padding-left: 25px;
+        }
+
+        .menu-item.active {
+            background: rgba(52, 152, 219, 0.2);
+            border-left-color: #3498db;
+            font-weight: 600;
+        }
+
+        .menu-item.submenu {
+            padding-left: 40px;
+            font-size: 13px;
+        }
+
+        .menu-item.submenu:hover {
+            padding-left: 45px;
+        }
+
+        /* 메인 콘텐츠 영역 */
+        .main-content {
+            margin-left: 260px;
+            min-height: 100vh;
+            padding: 30px;
+        }
+
+        .header {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            color: #2c3e50;
+            margin: 0;
+        }
+
+        .subtitle {
+            color: #7f8c8d;
+            font-size: 0.95rem;
+            margin-top: 5px;
+        }
+
+        /* 버튼 스타일 */
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-success {
+            background: #27ae60;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #229954;
+        }
+
+        .btn-danger {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c0392b;
+        }
+
+        .btn-secondary {
+            background: #95a5a6;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #7f8c8d;
+        }
+
+        .btn-small {
+            padding: 8px 16px;
+            font-size: 13px;
+        }
+
+        /* 탭 스타일 */
+        .tabs {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .tab-buttons {
+            display: flex;
+            gap: 10px;
+            border-bottom: 2px solid #ecf0f1;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        .tab-button {
+            padding: 10px 20px;
+            background: transparent;
+            border: none;
+            border-bottom: 3px solid transparent;
+            color: #7f8c8d;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .tab-button:hover {
+            color: #2c3e50;
+        }
+
+        .tab-button.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+
+        /* 요청 카드 스타일 */
+        .request-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+        }
+
+        .request-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            border-left: 4px solid #667eea;
+        }
+
+        .request-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+        }
+
+        .request-card.status-pending {
+            border-left-color: #f39c12;
+        }
+
+        .request-card.status-running {
+            border-left-color: #3498db;
+        }
+
+        .request-card.status-completed {
+            border-left-color: #27ae60;
+        }
+
+        .request-card.status-failed {
+            border-left-color: #e74c3c;
+        }
+
+        .request-card.status-cancelled {
+            border-left-color: #95a5a6;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #2c3e50;
+            margin: 0 0 5px 0;
+        }
+
+        .card-description {
+            color: #7f8c8d;
+            font-size: 13px;
+            margin: 0;
+        }
+
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-badge.pending {
+            background: #fef5e7;
+            color: #f39c12;
+        }
+
+        .status-badge.running {
+            background: #ebf5fb;
+            color: #3498db;
+        }
+
+        .status-badge.completed {
+            background: #eafaf1;
+            color: #27ae60;
+        }
+
+        .status-badge.failed {
+            background: #fadbd8;
+            color: #e74c3c;
+        }
+
+        .status-badge.cancelled {
+            background: #ecf0f1;
+            color: #95a5a6;
+        }
+
+        .card-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 15px;
+            font-size: 13px;
+            color: #7f8c8d;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .meta-label {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .card-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        .tag {
+            padding: 4px 10px;
+            background: #ecf0f1;
+            color: #2c3e50;
+            border-radius: 12px;
+            font-size: 12px;
+        }
+
+        .card-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        /* 모달 스타일 */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+
+        .modal {
+            background: white;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+
+        .modal-header {
+            padding: 25px 30px;
+            border-bottom: 1px solid #ecf0f1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            font-size: 24px;
+            color: #2c3e50;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 28px;
+            color: #95a5a6;
+            cursor: pointer;
+            line-height: 1;
+            padding: 0;
+            width: 32px;
+            height: 32px;
+        }
+
+        .close-btn:hover {
+            color: #2c3e50;
+        }
+
+        .modal-body {
+            padding: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 8px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ecf0f1;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .form-textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ecf0f1;
+            border-radius: 8px;
+            font-size: 14px;
+            resize: vertical;
+            min-height: 80px;
+            font-family: inherit;
+        }
+
+        .form-textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .input-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            padding: 8px;
+            border: 2px solid #ecf0f1;
+            border-radius: 8px;
+            min-height: 44px;
+            cursor: text;
+        }
+
+        .input-tags:focus-within {
+            border-color: #667eea;
+        }
+
+        .input-tags .tag {
+            background: #667eea;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .input-tags .tag button {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 14px;
+            padding: 0;
+            line-height: 1;
+        }
+
+        .input-tags input {
+            border: none;
+            outline: none;
+            flex: 1;
+            min-width: 120px;
+            padding: 4px 8px;
+            font-size: 14px;
+        }
+
+        .checkbox-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .checkbox-item input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .checkbox-item label {
+            font-size: 14px;
+            color: #2c3e50;
+            cursor: pointer;
+        }
+
+        .cost-display {
+            background: #fef5e7;
+            border-left: 4px solid #f39c12;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+
+        .cost-label {
+            font-size: 13px;
+            color: #7f8c8d;
+            margin-bottom: 5px;
+        }
+
+        .cost-amount {
+            font-size: 24px;
+            font-weight: 700;
+            color: #f39c12;
+        }
+
+        .modal-footer {
+            padding: 20px 30px;
+            border-top: 1px solid #ecf0f1;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        /* 빈 상태 */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #7f8c8d;
+        }
+
+        .empty-state-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+            opacity: 0.3;
+        }
+
+        .empty-state-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .empty-state-description {
+            font-size: 14px;
+        }
+
+        /* 로딩 스피너 */
+        .spinner {
+            border: 3px solid #ecf0f1;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 40px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <!-- 좌측 사이드바 -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h2>한식당 Data Hub</h2>
+                <p>Restaurant Data Collection</p>
+            </div>
+
+            <div class="menu-group">
+                <div class="menu-label">대시보드</div>
+                <a href="/dashboard" class="menu-item">📊 메인 대시보드</a>
+            </div>
+
+            <div class="menu-group">
+                <div class="menu-label">데이터 수집</div>
+                <a href="/dashboard/collection-request" class="menu-item active">📝 수집 요청</a>
+                <a href="/dashboard/collection-results" class="menu-item">📋 수집 결과</a>
+            </div>
+
+            <div class="menu-group">
+                <div class="menu-label">데이터 입력</div>
+                <a href="/dashboard/manual-input#url" class="menu-item">🔗 URL 입력</a>
+                <a href="/dashboard/manual-input#csv" class="menu-item">📄 CSV 업로드</a>
+                <a href="/dashboard/manual-input#direct" class="menu-item">✏️ 직접 입력</a>
+            </div>
+
+            <div class="menu-group">
+                <div class="menu-label">데이터 편집</div>
+                <a href="/dashboard/unified-editor" class="menu-item">🔧 통합 편집</a>
+            </div>
+
+            <div class="menu-group">
+                <div class="menu-label">배포 관리</div>
+                <a href="/dashboard/deployment" class="menu-item">🚀 배포 관리</a>
+            </div>
+        </div>
+
+        <!-- 메인 콘텐츠 -->
+        <div class="main-content">
+            <!-- 헤더 -->
+            <div class="header">
+                <div>
+                    <h1>📝 수집 요청 관리</h1>
+                    <p class="subtitle">On-demand 방식으로 레스토랑 데이터 수집을 요청하고 관리합니다</p>
+                </div>
+                <button class="btn btn-primary" @click="openCreateModal">
+                    ➕ 새 요청
+                </button>
+            </div>
+
+            <!-- 탭 영역 -->
+            <div class="tabs">
+                <div class="tab-buttons">
+                    <button 
+                        class="tab-button" 
+                        :class="{ active: activeTab === 'pending' }"
+                        @click="activeTab = 'pending'"
+                    >
+                        ⏳ 대기중 ({{ stats.pending }})
+                    </button>
+                    <button 
+                        class="tab-button" 
+                        :class="{ active: activeTab === 'running' }"
+                        @click="activeTab = 'running'"
+                    >
+                        ▶️ 실행중 ({{ stats.running }})
+                    </button>
+                    <button 
+                        class="tab-button" 
+                        :class="{ active: activeTab === 'completed' }"
+                        @click="activeTab = 'completed'"
+                    >
+                        ✅ 완료됨 ({{ stats.completed }})
+                    </button>
+                    <button 
+                        class="tab-button" 
+                        :class="{ active: activeTab === 'failed' }"
+                        @click="activeTab = 'failed'"
+                    >
+                        ❌ 실패 ({{ stats.failed }})
+                    </button>
+                    <button 
+                        class="tab-button" 
+                        :class="{ active: activeTab === 'cancelled' }"
+                        @click="activeTab = 'cancelled'"
+                    >
+                        🚫 취소됨 ({{ stats.cancelled }})
+                    </button>
+                </div>
+
+                <!-- 로딩 -->
+                <div v-if="loading" class="spinner"></div>
+
+                <!-- 요청 카드 -->
+                <div v-else-if="filteredRequests.length > 0" class="request-cards">
+                    <div 
+                        v-for="request in filteredRequests" 
+                        :key="request.id"
+                        class="request-card"
+                        :class="`status-${request.status}`"
+                    >
+                        <div class="card-header">
+                            <div>
+                                <h3 class="card-title">{{ request.name }}</h3>
+                                <p class="card-description">{{ request.description }}</p>
+                            </div>
+                            <span class="status-badge" :class="request.status">
+                                {{ getStatusText(request.status) }}
+                            </span>
+                        </div>
+
+                        <div class="card-meta">
+                            <div class="meta-item">
+                                <span class="meta-label">예상 비용:</span>
+                                ${{ request.estimated_cost }}
+                            </div>
+                            <div class="meta-item" v-if="request.actual_cost">
+                                <span class="meta-label">실제 비용:</span>
+                                ${{ request.actual_cost }}
+                            </div>
+                            <div class="meta-item" v-if="request.results_count > 0">
+                                <span class="meta-label">수집 결과:</span>
+                                {{ request.results_count }}개
+                            </div>
+                        </div>
+
+                        <div class="card-tags">
+                            <span class="tag" v-for="region in request.regions" :key="region">
+                                📍 {{ region }}
+                            </span>
+                            <span class="tag" v-for="keyword in request.keywords" :key="keyword">
+                                🔍 {{ keyword }}
+                            </span>
+                        </div>
+
+                        <div class="card-meta">
+                            <div class="meta-item">
+                                <span class="meta-label">생성일:</span>
+                                {{ formatDate(request.created_at) }}
+                            </div>
+                        </div>
+
+                        <div class="card-actions">
+                            <button 
+                                v-if="request.status === 'pending'" 
+                                class="btn btn-success btn-small"
+                                @click="startRequest(request.id)"
+                            >
+                                ▶️ 시작
+                            </button>
+                            <button 
+                                v-if="request.status === 'running'" 
+                                class="btn btn-danger btn-small"
+                                @click="cancelRequest(request.id)"
+                            >
+                                🚫 중단
+                            </button>
+                            <button 
+                                v-if="request.status === 'completed'" 
+                                class="btn btn-primary btn-small"
+                                @click="viewResults(request.id)"
+                            >
+                                📊 결과 보기
+                            </button>
+                            <button 
+                                class="btn btn-secondary btn-small"
+                                @click="deleteRequest(request.id)"
+                            >
+                                🗑️ 삭제
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 빈 상태 -->
+                <div v-else class="empty-state">
+                    <div class="empty-state-icon">📭</div>
+                    <div class="empty-state-title">아직 요청이 없습니다</div>
+                    <div class="empty-state-description">
+                        "+ 새 요청" 버튼을 클릭하여 첫 번째 수집 요청을 생성하세요
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 생성 모달 -->
+        <div v-if="showCreateModal" class="modal-overlay" @click.self="closeCreateModal">
+            <div class="modal">
+                <div class="modal-header">
+                    <h2>새 수집 요청</h2>
+                    <button class="close-btn" @click="closeCreateModal">&times;</button>
+                </div>
+
+                <div class="modal-body">
+                    <form @submit.prevent="createRequest">
+                        <div class="form-group">
+                            <label class="form-label">요청 이름 *</label>
+                            <input 
+                                type="text" 
+                                class="form-input" 
+                                v-model="newRequest.name"
+                                placeholder="예: 강남 프리미엄 한식당"
+                                required
+                            >
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">설명</label>
+                            <textarea 
+                                class="form-textarea" 
+                                v-model="newRequest.description"
+                                placeholder="이 수집 요청의 목적과 특징을 설명해주세요"
+                            ></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">지역 (쉼표로 구분)</label>
+                            <div class="input-tags" @click="focusRegionInput">
+                                <span class="tag" v-for="(region, index) in newRequest.regions" :key="index">
+                                    {{ region }}
+                                    <button type="button" @click="removeRegion(index)">×</button>
+                                </span>
+                                <input 
+                                    ref="regionInput"
+                                    type="text" 
+                                    v-model="regionInput"
+                                    @keydown.enter.prevent="addRegion"
+                                    @keydown.comma.prevent="addRegion"
+                                    placeholder="지역 입력 후 Enter"
+                                >
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">키워드 (쉼표로 구분)</label>
+                            <div class="input-tags" @click="focusKeywordInput">
+                                <span class="tag" v-for="(keyword, index) in newRequest.keywords" :key="index">
+                                    {{ keyword }}
+                                    <button type="button" @click="removeKeyword(index)">×</button>
+                                </span>
+                                <input 
+                                    ref="keywordInput"
+                                    type="text" 
+                                    v-model="keywordInput"
+                                    @keydown.enter.prevent="addKeyword"
+                                    @keydown.comma.prevent="addKeyword"
+                                    placeholder="키워드 입력 후 Enter"
+                                >
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">참고 URL (선택)</label>
+                            <div class="input-tags" @click="focusUrlInput">
+                                <span class="tag" v-for="(url, index) in newRequest.reference_urls" :key="index">
+                                    {{ url }}
+                                    <button type="button" @click="removeUrl(index)">×</button>
+                                </span>
+                                <input 
+                                    ref="urlInput"
+                                    type="text" 
+                                    v-model="urlInput"
+                                    @keydown.enter.prevent="addUrl"
+                                    placeholder="URL 입력 후 Enter"
+                                >
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">수집 방법</label>
+                            <div class="checkbox-group">
+                                <div class="checkbox-item">
+                                    <input 
+                                        type="checkbox" 
+                                        id="method-naver" 
+                                        value="naver"
+                                        v-model="newRequest.crawl_methods"
+                                    >
+                                    <label for="method-naver">네이버 지도</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input 
+                                        type="checkbox" 
+                                        id="method-google" 
+                                        value="google"
+                                        v-model="newRequest.crawl_methods"
+                                    >
+                                    <label for="method-google">구글 맵스</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input 
+                                        type="checkbox" 
+                                        id="method-kakao" 
+                                        value="kakao"
+                                        v-model="newRequest.crawl_methods"
+                                    >
+                                    <label for="method-kakao">카카오맵</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="cost-display">
+                            <div class="cost-label">예상 비용</div>
+                            <div class="cost-amount">${{ estimatedCost }}</div>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @click="closeCreateModal">
+                        취소
+                    </button>
+                    <button type="button" class="btn btn-primary" @click="createRequest">
+                        생성
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const { createApp } = Vue;
+
+        createApp({
+            data() {
+                return {
+                    activeTab: 'pending',
+                    requests: [],
+                    loading: false,
+                    showCreateModal: false,
+                    newRequest: {
+                        name: '',
+                        description: '',
+                        regions: [],
+                        keywords: [],
+                        reference_urls: [],
+                        crawl_methods: ['naver', 'google']
+                    },
+                    regionInput: '',
+                    keywordInput: '',
+                    urlInput: '',
+                    stats: {
+                        pending: 0,
+                        running: 0,
+                        completed: 0,
+                        failed: 0,
+                        cancelled: 0
+                    }
+                };
+            },
+            computed: {
+                filteredRequests() {
+                    return this.requests.filter(req => req.status === this.activeTab);
+                },
+                estimatedCost() {
+                    const regionCount = this.newRequest.regions.length || 1;
+                    const keywordCount = this.newRequest.keywords.length || 1;
+                    const methodCount = this.newRequest.crawl_methods.length || 1;
+                    
+                    const costPerMethod = {
+                        'naver': 10,
+                        'google': 15,
+                        'kakao': 8
+                    };
+                    
+                    let total = 0;
+                    this.newRequest.crawl_methods.forEach(method => {
+                        total += (costPerMethod[method] || 10) * regionCount * keywordCount;
+                    });
+                    
+                    return total.toFixed(2);
+                }
+            },
+            mounted() {
+                this.loadRequests();
+            },
+            methods: {
+                async loadRequests() {
+                    this.loading = true;
+                    try {
+                        const response = await axios.get('/api/data-management/collection-requests');
+                        if (response.data.success) {
+                            this.requests = response.data.data;
+                            this.calculateStats();
+                        }
+                    } catch (error) {
+                        console.error('요청 로드 실패:', error);
+                        alert('요청 목록을 불러오는데 실패했습니다.');
+                    } finally {
+                        this.loading = false;
+                    }
+                },
+                calculateStats() {
+                    this.stats = {
+                        pending: this.requests.filter(r => r.status === 'pending').length,
+                        running: this.requests.filter(r => r.status === 'running').length,
+                        completed: this.requests.filter(r => r.status === 'completed').length,
+                        failed: this.requests.filter(r => r.status === 'failed').length,
+                        cancelled: this.requests.filter(r => r.status === 'cancelled').length
+                    };
+                },
+                openCreateModal() {
+                    this.showCreateModal = true;
+                },
+                closeCreateModal() {
+                    this.showCreateModal = false;
+                    this.resetForm();
+                },
+                resetForm() {
+                    this.newRequest = {
+                        name: '',
+                        description: '',
+                        regions: [],
+                        keywords: [],
+                        reference_urls: [],
+                        crawl_methods: ['naver', 'google']
+                    };
+                    this.regionInput = '';
+                    this.keywordInput = '';
+                    this.urlInput = '';
+                },
+                async createRequest() {
+                    if (!this.newRequest.name) {
+                        alert('요청 이름을 입력해주세요.');
+                        return;
+                    }
+
+                    if (this.newRequest.crawl_methods.length === 0) {
+                        alert('최소 1개 이상의 수집 방법을 선택해주세요.');
+                        return;
+                    }
+
+                    try {
+                        const response = await axios.post('/api/data-management/collection-requests', this.newRequest);
+                        if (response.data.success) {
+                            alert('수집 요청이 생성되었습니다.');
+                            this.closeCreateModal();
+                            this.loadRequests();
+                        }
+                    } catch (error) {
+                        console.error('요청 생성 실패:', error);
+                        alert('요청 생성에 실패했습니다: ' + (error.response?.data?.detail || error.message));
+                    }
+                },
+                async startRequest(id) {
+                    if (!confirm('이 요청을 시작하시겠습니까?')) return;
+
+                    try {
+                        const response = await axios.post(`/api/data-management/collection-requests/${id}/start`);
+                        if (response.data.success) {
+                            alert('수집이 시작되었습니다.');
+                            this.loadRequests();
+                        }
+                    } catch (error) {
+                        console.error('시작 실패:', error);
+                        alert('시작에 실패했습니다: ' + (error.response?.data?.detail || error.message));
+                    }
+                },
+                async cancelRequest(id) {
+                    if (!confirm('실행 중인 요청을 취소하시겠습니까?')) return;
+
+                    try {
+                        const response = await axios.post(`/api/data-management/collection-requests/${id}/cancel`);
+                        if (response.data.success) {
+                            alert('요청이 취소되었습니다.');
+                            this.loadRequests();
+                        }
+                    } catch (error) {
+                        console.error('취소 실패:', error);
+                        alert('취소에 실패했습니다: ' + (error.response?.data?.detail || error.message));
+                    }
+                },
+                async deleteRequest(id) {
+                    if (!confirm('이 요청을 삭제하시겠습니까?')) return;
+
+                    try {
+                        const response = await axios.delete(`/api/data-management/collection-requests/${id}`);
+                        if (response.data.success) {
+                            alert('요청이 삭제되었습니다.');
+                            this.loadRequests();
+                        }
+                    } catch (error) {
+                        console.error('삭제 실패:', error);
+                        alert('삭제에 실패했습니다: ' + (error.response?.data?.detail || error.message));
+                    }
+                },
+                viewResults(id) {
+                    window.location.href = `/dashboard/jobs#results?request=${id}`;
+                },
+                addRegion() {
+                    const value = this.regionInput.trim();
+                    if (value && !this.newRequest.regions.includes(value)) {
+                        this.newRequest.regions.push(value);
+                        this.regionInput = '';
+                    }
+                },
+                removeRegion(index) {
+                    this.newRequest.regions.splice(index, 1);
+                },
+                focusRegionInput() {
+                    this.$refs.regionInput.focus();
+                },
+                addKeyword() {
+                    const value = this.keywordInput.trim();
+                    if (value && !this.newRequest.keywords.includes(value)) {
+                        this.newRequest.keywords.push(value);
+                        this.keywordInput = '';
+                    }
+                },
+                removeKeyword(index) {
+                    this.newRequest.keywords.splice(index, 1);
+                },
+                focusKeywordInput() {
+                    this.$refs.keywordInput.focus();
+                },
+                addUrl() {
+                    const value = this.urlInput.trim();
+                    if (value && !this.newRequest.reference_urls.includes(value)) {
+                        this.newRequest.reference_urls.push(value);
+                        this.urlInput = '';
+                    }
+                },
+                removeUrl(index) {
+                    this.newRequest.reference_urls.splice(index, 1);
+                },
+                focusUrlInput() {
+                    this.$refs.urlInput.focus();
+                },
+                getStatusText(status) {
+                    const statusMap = {
+                        'pending': '대기중',
+                        'running': '실행중',
+                        'completed': '완료됨',
+                        'failed': '실패',
+                        'cancelled': '취소됨'
+                    };
+                    return statusMap[status] || status;
+                },
+                formatDate(dateString) {
+                    if (!dateString) return '-';
+                    const date = new Date(dateString);
+                    return date.toLocaleString('ko-KR', {
+                        year: 'numeric',
+                        month: '2-digit',
+                        day: '2-digit',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+                }
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>

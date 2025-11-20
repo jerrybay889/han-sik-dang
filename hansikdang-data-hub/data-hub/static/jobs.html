@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>작업 관리 - 한식당 Data Hub</title>
+    <script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans KR', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        /* 좌측 사이드바 스타일 */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 240px;
+            height: 100vh;
+            background: linear-gradient(180deg, #2c3e50 0%, #34495e 100%);
+            color: #ecf0f1;
+            overflow-y: auto;
+            z-index: 1000;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            text-align: center;
+        }
+
+        .sidebar-header h2 {
+            margin: 0 0 5px 0;
+            font-size: 18px;
+            color: #fff;
+        }
+
+        .sidebar-header p {
+            margin: 0;
+            font-size: 12px;
+            color: #bdc3c7;
+        }
+
+        .menu-group {
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .menu-label {
+            padding: 10px 20px;
+            font-size: 11px;
+            font-weight: 600;
+            color: #95a5a6;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .menu-item {
+            display: block;
+            padding: 12px 20px;
+            color: #ecf0f1;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            border-left: 3px solid transparent;
+        }
+
+        .menu-item:hover {
+            background: rgba(255,255,255,0.1);
+            border-left-color: #3498db;
+            padding-left: 25px;
+        }
+
+        .menu-item.active {
+            background: rgba(52, 152, 219, 0.2);
+            border-left-color: #3498db;
+            font-weight: 600;
+        }
+
+        .menu-item.submenu {
+            padding-left: 40px;
+            font-size: 13px;
+        }
+
+        .menu-item.submenu:hover {
+            padding-left: 45px;
+        }
+
+        /* 메인 콘텐츠 영역 */
+        .main-content {
+            margin-left: 260px;
+            min-height: 100vh;
+            padding: 30px;
+        }
+
+        .header {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #7f8c8d;
+            font-size: 1rem;
+        }
+
+        /* 탭 버튼 */
+        .tab-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            background: white;
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 12px 20px;
+            border: none;
+            background: #e5e7eb;
+            color: #4b5563;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .tab-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .tab-btn:hover:not(.active) {
+            background: #d1d5db;
+        }
+
+        /* 탭 콘텐츠 */
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* 작업 버튼 그리드 */
+        .jobs-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .job-card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+        }
+
+        .job-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .job-card h3 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 1.2rem;
+        }
+
+        .job-card p {
+            color: #7f8c8d;
+            margin-bottom: 15px;
+            font-size: 0.9rem;
+        }
+
+        .job-btn {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .job-btn.primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .job-btn.success {
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            color: white;
+        }
+
+        .job-btn.warning {
+            background: linear-gradient(135deg, #ed8936 0%, #dd6b20 100%);
+            color: white;
+        }
+
+        .job-btn:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+
+        .job-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* 모니터링 테이블 */
+        .monitoring-table {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .monitoring-table h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: #f3f4f6;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            color: #374151;
+            border-bottom: 2px solid #e5e7eb;
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #e5e7eb;
+            color: #6b7280;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-badge.running {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .status-badge.success {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .status-badge.failed {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .alert-success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #6ee7b7;
+        }
+
+        .alert-error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fca5a5;
+        }
+
+        .alert-info {
+            background: #dbeafe;
+            color: #1e40af;
+            border: 1px solid #93c5fd;
+        }
+    </style>
+</head>
+<body>
+    <!-- 좌측 사이드바 메뉴 -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h2>🍚 한식당 Data Hub</h2>
+            <p>데이터 관리 시스템</p>
+        </div>
+
+        <!-- 대시보드 -->
+        <div class="menu-group">
+            <a href="/dashboard" class="menu-item">
+                📊 대시보드
+            </a>
+        </div>
+
+        <!-- 데이터 관리 -->
+        <div class="menu-group">
+            <div class="menu-label">🔍 데이터 관리</div>
+            <a href="/dashboard/data-management" class="menu-item submenu">
+                수집 설정
+            </a>
+            <a href="/dashboard/data-management?tab=results" class="menu-item submenu">
+                수집 결과
+            </a>
+            <a href="/dashboard/data-management?tab=duplicates" class="menu-item submenu">
+                중복 검사
+            </a>
+            <a href="/dashboard/data-management?tab=quality" class="menu-item submenu">
+                품질 관리
+            </a>
+        </div>
+
+        <!-- 작업 관리 -->
+        <div class="menu-group">
+            <div class="menu-label">⚙️ 작업 관리</div>
+            <a href="/dashboard/jobs" class="menu-item submenu active">
+                작업 실행
+            </a>
+            <a href="/dashboard/jobs?tab=monitoring" class="menu-item submenu">
+                모니터링
+            </a>
+            <a href="/dashboard/jobs?tab=history" class="menu-item submenu">
+                작업 이력
+            </a>
+        </div>
+
+        <!-- 동기화 관리 -->
+        <div class="menu-group">
+            <div class="menu-label">📊 동기화 관리</div>
+            <a href="/dashboard/sync" class="menu-item submenu">
+                배포 현황
+            </a>
+            <a href="/dashboard/sync?tab=history" class="menu-item submenu">
+                배포 이력
+            </a>
+        </div>
+
+        <!-- 분석 -->
+        <div class="menu-group">
+            <a href="/dashboard/analytics" class="menu-item">
+                📈 분석
+            </a>
+        </div>
+
+        <!-- 설정 -->
+        <div class="menu-group">
+            <a href="/dashboard/settings" class="menu-item">
+                ⚙️ 설정
+            </a>
+        </div>
+    </div>
+
+    <!-- 메인 콘텐츠 영역 -->
+    <div class="main-content">
+        <div id="app">
+            <div class="header">
+                <h1>⚙️ 작업 관리</h1>
+                <div class="subtitle">데이터 수집, 처리, 동기화 작업을 실행하고 모니터링합니다</div>
+            </div>
+
+            <!-- 알림 메시지 -->
+            <div v-if="alert.show" :class="'alert alert-' + alert.type">
+                {{ alert.message }}
+            </div>
+
+            <!-- 탭 버튼 -->
+            <div class="tab-buttons">
+                <button 
+                    :class="['tab-btn', { active: currentTab === 'execute' }]"
+                    @click="currentTab = 'execute'">
+                    🚀 작업 실행
+                </button>
+                <button 
+                    :class="['tab-btn', { active: currentTab === 'monitoring' }]"
+                    @click="currentTab = 'monitoring'">
+                    📊 모니터링
+                </button>
+                <button 
+                    :class="['tab-btn', { active: currentTab === 'history' }]"
+                    @click="currentTab = 'history'">
+                    📜 작업 이력
+                </button>
+            </div>
+
+            <!-- 탭 1: 작업 실행 -->
+            <div :class="['tab-content', { active: currentTab === 'execute' }]">
+                <div class="jobs-grid">
+                    <!-- Smart Targeting -->
+                    <div class="job-card">
+                        <h3>🎯 Smart Targeting</h3>
+                        <p>Google Trends 분석 → 동적 검색 쿼리 생성 (Feature 1)</p>
+                        <button class="job-btn primary" @click="runJob('smart-targeting')" :disabled="loading">
+                            실행하기
+                        </button>
+                    </div>
+
+                    <!-- Naver 스크래핑 -->
+                    <div class="job-card">
+                        <h3>🔍 Naver 수집</h3>
+                        <p>네이버 지도에서 레스토랑 데이터 수집 (월 990개 목표)</p>
+                        <button class="job-btn success" @click="runJob('naver-scraping')" :disabled="loading">
+                            실행하기
+                        </button>
+                    </div>
+
+                    <!-- 중복 검사 -->
+                    <div class="job-card">
+                        <h3>🔗 중복 검사</h3>
+                        <p>Fuzzy Match + GPS 거리 기반 중복 검사 (Feature 2)</p>
+                        <button class="job-btn warning" @click="runJob('duplicate-check')" :disabled="loading">
+                            실행하기
+                        </button>
+                    </div>
+
+                    <!-- Gemini AI 처리 -->
+                    <div class="job-card">
+                        <h3>🤖 AI 처리</h3>
+                        <p>Gemini로 설명 정제 & 번역 (200-300자)</p>
+                        <button class="job-btn primary" @click="runJob('ai-processing')" :disabled="loading">
+                            실행하기
+                        </button>
+                    </div>
+
+                    <!-- Google 평점 수집 -->
+                    <div class="job-card">
+                        <h3>⭐ Google 평점</h3>
+                        <p>Google Places API로 평점/리뷰/이미지 수집</p>
+                        <button class="job-btn success" @click="runJob('google-rating')" :disabled="loading">
+                            실행하기
+                        </button>
+                    </div>
+
+                    <!-- 플랫폼 동기화 -->
+                    <div class="job-card">
+                        <h3>🚀 플랫폼 동기화</h3>
+                        <p>한식당 플랫폼으로 데이터 전송</p>
+                        <button class="job-btn primary" @click="runJob('platform-sync')" :disabled="loading">
+                            실행하기
+                        </button>
+                    </div>
+
+                    <!-- Google Drive 백업 -->
+                    <div class="job-card">
+                        <h3>💾 Drive 백업</h3>
+                        <p>Google Drive에 CSV 백업 (매일 22:00 자동)</p>
+                        <button class="job-btn warning" @click="runJob('drive-backup')" :disabled="loading">
+                            실행하기
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 탭 2: 모니터링 -->
+            <div :class="['tab-content', { active: currentTab === 'monitoring' }]">
+                <div class="monitoring-table">
+                    <h2>📊 실행 중인 작업</h2>
+                    <p v-if="runningJobs.length === 0" style="color: #6b7280; padding: 20px;">
+                        현재 실행 중인 작업이 없습니다.
+                    </p>
+                    <table v-else>
+                        <thead>
+                            <tr>
+                                <th>작업명</th>
+                                <th>상태</th>
+                                <th>시작 시간</th>
+                                <th>진행률</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="job in runningJobs" :key="job.id">
+                                <td>{{ job.name }}</td>
+                                <td><span :class="['status-badge', job.status]">{{ getStatusText(job.status) }}</span></td>
+                                <td>{{ job.startTime }}</td>
+                                <td>{{ job.progress }}%</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 탭 3: 작업 이력 -->
+            <div :class="['tab-content', { active: currentTab === 'history' }]">
+                <div class="monitoring-table">
+                    <h2>📜 최근 작업 이력</h2>
+                    <p v-if="jobHistory.length === 0" style="color: #6b7280; padding: 20px;">
+                        작업 이력이 없습니다.
+                    </p>
+                    <table v-else>
+                        <thead>
+                            <tr>
+                                <th>작업명</th>
+                                <th>상태</th>
+                                <th>실행 시간</th>
+                                <th>완료 시간</th>
+                                <th>소요 시간</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="job in jobHistory" :key="job.id">
+                                <td>{{ job.name }}</td>
+                                <td><span :class="['status-badge', job.status]">{{ getStatusText(job.status) }}</span></td>
+                                <td>{{ job.startTime }}</td>
+                                <td>{{ job.endTime }}</td>
+                                <td>{{ job.duration }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const { createApp } = Vue;
+
+        createApp({
+            data() {
+                return {
+                    currentTab: 'execute',
+                    loading: false,
+                    alert: {
+                        show: false,
+                        type: 'info',
+                        message: ''
+                    },
+                    runningJobs: [],
+                    jobHistory: []
+                };
+            },
+            methods: {
+                async runJob(jobType) {
+                    this.loading = true;
+                    this.showAlert('info', `작업을 실행 중입니다: ${this.getJobName(jobType)}`);
+                    
+                    try {
+                        // 실제 API 호출 (향후 구현)
+                        await new Promise(resolve => setTimeout(resolve, 2000));
+                        
+                        this.showAlert('success', `작업이 성공적으로 시작되었습니다: ${this.getJobName(jobType)}`);
+                        
+                        // 모니터링 탭에 추가
+                        this.runningJobs.push({
+                            id: Date.now(),
+                            name: this.getJobName(jobType),
+                            status: 'running',
+                            startTime: new Date().toLocaleString('ko-KR'),
+                            progress: 0
+                        });
+                    } catch (error) {
+                        this.showAlert('error', '작업 실행에 실패했습니다.');
+                    } finally {
+                        this.loading = false;
+                    }
+                },
+                
+                getJobName(jobType) {
+                    const names = {
+                        'smart-targeting': '🎯 Smart Targeting',
+                        'naver-scraping': '🔍 Naver 수집',
+                        'duplicate-check': '🔗 중복 검사',
+                        'ai-processing': '🤖 AI 처리',
+                        'google-rating': '⭐ Google 평점',
+                        'platform-sync': '🚀 플랫폼 동기화',
+                        'drive-backup': '💾 Drive 백업'
+                    };
+                    return names[jobType] || jobType;
+                },
+                
+                getStatusText(status) {
+                    const texts = {
+                        'running': '실행중',
+                        'success': '성공',
+                        'failed': '실패'
+                    };
+                    return texts[status] || status;
+                },
+                
+                showAlert(type, message) {
+                    this.alert = { show: true, type, message };
+                    setTimeout(() => {
+                        this.alert.show = false;
+                    }, 5000);
+                },
+                
+                async loadData() {
+                    // 향후 API 연동
+                }
+            },
+            mounted() {
+                // URL 파라미터로 탭 전환
+                const urlParams = new URLSearchParams(window.location.search);
+                const tab = urlParams.get('tab');
+                if (tab) {
+                    this.currentTab = tab;
+                }
+                
+                this.loadData();
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>

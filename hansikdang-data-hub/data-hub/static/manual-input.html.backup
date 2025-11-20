@@ -1,0 +1,1245 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>수동 입력 - 한식당 Data Hub</title>
+    <script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans KR', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 240px;
+            height: 100vh;
+            background: linear-gradient(180deg, #2c3e50 0%, #34495e 100%);
+            color: #ecf0f1;
+            overflow-y: auto;
+            z-index: 1000;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            text-align: center;
+        }
+
+        .sidebar-header h2 {
+            margin: 0 0 5px 0;
+            font-size: 18px;
+            color: #fff;
+        }
+
+        .sidebar-header p {
+            margin: 0;
+            font-size: 12px;
+            color: #bdc3c7;
+        }
+
+        .menu-group {
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .menu-label {
+            padding: 10px 20px;
+            font-size: 11px;
+            font-weight: 600;
+            color: #95a5a6;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .menu-item {
+            display: block;
+            padding: 12px 20px;
+            color: #ecf0f1;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            border-left: 3px solid transparent;
+        }
+
+        .menu-item:hover {
+            background: rgba(255,255,255,0.1);
+            border-left-color: #3498db;
+            padding-left: 25px;
+        }
+
+        .menu-item.active {
+            background: rgba(52, 152, 219, 0.2);
+            border-left-color: #3498db;
+            font-weight: 600;
+        }
+
+        .main-content {
+            margin-left: 260px;
+            min-height: 100vh;
+            padding: 30px;
+        }
+
+        .header {
+            background: white;
+            padding: 25px 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            color: #2c3e50;
+            margin: 0 0 5px 0;
+        }
+
+        .subtitle {
+            color: #7f8c8d;
+            font-size: 0.95rem;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            background: white;
+            padding: 15px 20px 0 20px;
+            border-radius: 12px 12px 0 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .tab {
+            padding: 12px 24px;
+            border: none;
+            background: transparent;
+            color: #7f8c8d;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .tab:hover {
+            color: #667eea;
+        }
+
+        .tab.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+
+        .tab-content {
+            background: white;
+            padding: 30px;
+            border-radius: 0 0 12px 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .sub-tabs {
+            display: flex;
+            gap: 5px;
+            background: #f7fafc;
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .sub-tab {
+            padding: 10px 20px;
+            border: none;
+            background: transparent;
+            color: #666;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+        }
+
+        .sub-tab:hover {
+            background: #e2e8f0;
+        }
+
+        .sub-tab.active {
+            background: white;
+            color: #667eea;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 8px;
+        }
+
+        .form-label .required {
+            color: #f56565;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ecf0f1;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .form-row-3 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 20px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-success {
+            background: #27ae60;
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #95a5a6;
+            color: white;
+        }
+
+        .upload-area {
+            border: 3px dashed #d1d5db;
+            border-radius: 12px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .upload-area:hover {
+            border-color: #667eea;
+            background: #f8f9fa;
+        }
+
+        .upload-area.dragover {
+            border-color: #667eea;
+            background: #e7f3ff;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .preview-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            border-left: 4px solid #667eea;
+        }
+
+        .preview-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+
+        .preview-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .preview-item:last-child {
+            border-bottom: none;
+        }
+
+        .preview-label {
+            color: #7f8c8d;
+            font-size: 13px;
+        }
+
+        .preview-value {
+            color: #2c3e50;
+            font-weight: 600;
+            font-size: 13px;
+        }
+
+        .alert {
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border-left: 4px solid #28a745;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border-left: 4px solid #dc3545;
+        }
+
+        .alert-info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border-left: 4px solid #17a2b8;
+        }
+
+        .table-container {
+            max-height: 400px;
+            overflow-y: auto;
+            margin-top: 20px;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+        }
+
+        .csv-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        .csv-table thead {
+            position: sticky;
+            top: 0;
+            background: #f8f9fa;
+            z-index: 10;
+        }
+
+        .csv-table th {
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            color: #2c3e50;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .csv-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #f1f3f5;
+        }
+
+        .csv-table tbody tr:hover {
+            background: #f8f9fa;
+        }
+
+        .spinner {
+            border: 3px solid #ecf0f1;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .checkbox-group {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px;
+            background: #f7fafc;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            color: #2c3e50;
+        }
+
+        .checkbox-label:hover {
+            background: #e2e8f0;
+        }
+
+        .checkbox-input {
+            cursor: pointer;
+        }
+
+        .menu-item-card, .hour-item {
+            background: #f7fafc;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            position: relative;
+        }
+
+        .remove-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #f56565;
+            color: white;
+            border: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .add-btn {
+            background: #48bb78;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .add-btn:hover {
+            background: #38a169;
+        }
+
+        .image-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .image-item {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .image-item input {
+            flex: 1;
+        }
+
+        .image-item button {
+            width: 80px;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h2>한식당 Data Hub</h2>
+                <p>Restaurant Data Collection</p>
+            </div>
+
+            <div class="menu-group">
+                <div class="menu-label">대시보드</div>
+                <a href="/dashboard" class="menu-item">📊 메인 대시보드</a>
+            </div>
+
+            <div class="menu-group">
+                <div class="menu-label">데이터 수집</div>
+                <a href="/dashboard/collection-request" class="menu-item">📝 수집 요청</a>
+                <a href="/dashboard/collection-results" class="menu-item">📋 수집 결과</a>
+            </div>
+
+            <div class="menu-group">
+                <div class="menu-label">데이터 입력</div>
+                <a href="/dashboard/manual-input#url" class="menu-item active">🔗 URL 입력</a>
+                <a href="/dashboard/manual-input#csv" class="menu-item">📄 CSV 업로드</a>
+                <a href="/dashboard/manual-input#direct" class="menu-item">✏️ 직접 입력</a>
+            </div>
+
+            <div class="menu-group">
+                <div class="menu-label">데이터 편집</div>
+                <a href="/dashboard/unified-editor" class="menu-item">🔧 통합 편집</a>
+            </div>
+
+            <div class="menu-group">
+                <div class="menu-label">배포 관리</div>
+                <a href="/dashboard/deployment" class="menu-item">🚀 배포 관리</a>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="header">
+                <h1>✏️ 수동 입력</h1>
+                <p class="subtitle">URL 파싱, CSV 업로드, 직접 입력을 통해 레스토랑 데이터를 추가합니다</p>
+            </div>
+
+            <div v-if="alert.show" :class="['alert', alert.type]">
+                <span>{{ alert.message }}</span>
+                <button @click="alert.show = false" style="margin-left: auto; background: none; border: none; cursor: pointer; font-size: 18px;">×</button>
+            </div>
+
+            <div class="tabs">
+                <button class="tab" :class="{ active: activeTab === 'url' }" @click="activeTab = 'url'">
+                    🔗 URL 파싱
+                </button>
+                <button class="tab" :class="{ active: activeTab === 'csv' }" @click="activeTab = 'csv'">
+                    📂 CSV 업로드
+                </button>
+                <button class="tab" :class="{ active: activeTab === 'direct' }" @click="activeTab = 'direct'">
+                    ✍️ 직접 입력
+                </button>
+            </div>
+
+            <div class="tab-content">
+                <div v-if="activeTab === 'url'">
+                    <h3 style="margin-bottom: 20px;">네이버/구글/카카오 URL에서 레스토랑 정보 추출</h3>
+                    
+                    <div class="form-group">
+                        <label class="form-label">레스토랑 URL</label>
+                        <input type="text" class="form-input" v-model="urlForm.url" 
+                               placeholder="예: https://map.naver.com/place/12345678">
+                        <p style="color: #7f8c8d; font-size: 12px; margin-top: 5px;">
+                            지원: 네이버플레이스, 구글맵스, 카카오맵
+                        </p>
+                    </div>
+
+                    <div style="display: flex; gap: 10px;">
+                        <button class="btn btn-secondary" @click="parseURL" :disabled="loading">
+                            🔍 URL 분석
+                        </button>
+                        <button class="btn btn-success" @click="saveFromURL" :disabled="!urlPreview || loading">
+                            💾 저장하기
+                        </button>
+                    </div>
+
+                    <div v-if="loading" class="spinner"></div>
+
+                    <div v-if="urlPreview" class="preview-card">
+                        <div class="preview-title">✅ URL 파싱 완료</div>
+                        <div class="preview-item">
+                            <span class="preview-label">레스토랑 이름:</span>
+                            <span class="preview-value">{{ urlPreview.name }}</span>
+                        </div>
+                        <div class="preview-item">
+                            <span class="preview-label">주소:</span>
+                            <span class="preview-value">{{ urlPreview.address }}</span>
+                        </div>
+                        <div class="preview-item">
+                            <span class="preview-label">출처:</span>
+                            <span class="preview-value">{{ urlPreview.source.toUpperCase() }}</span>
+                        </div>
+                        <div class="preview-item">
+                            <span class="preview-label">Place ID:</span>
+                            <span class="preview-value">{{ urlPreview.place_id || 'N/A' }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div v-if="activeTab === 'csv'">
+                    <h3 style="margin-bottom: 20px;">CSV 파일 업로드 (일괄 등록)</h3>
+
+                    <div class="alert-info alert">
+                        <span>📝 CSV 템플릿을 다운로드하여 작성 후 업로드하세요.</span>
+                        <button class="btn btn-secondary" @click="downloadTemplate" style="margin-left: auto;">
+                            📥 템플릿 다운로드
+                        </button>
+                    </div>
+
+                    <div class="upload-area" 
+                         :class="{ dragover: isDragging }"
+                         @click="$refs.fileInput.click()"
+                         @dragover.prevent="isDragging = true"
+                         @dragleave.prevent="isDragging = false"
+                         @drop.prevent="handleFileDrop">
+                        <div style="font-size: 48px; margin-bottom: 10px;">📂</div>
+                        <div style="font-size: 16px; font-weight: 600; color: #2c3e50; margin-bottom: 5px;">
+                            클릭하거나 파일을 드래그하여 업로드
+                        </div>
+                        <div style="font-size: 13px; color: #7f8c8d;">
+                            CSV 파일만 지원 (UTF-8 인코딩)
+                        </div>
+                        <input type="file" ref="fileInput" class="file-input" accept=".csv" @change="handleFileSelect">
+                    </div>
+
+                    <div v-if="csvData.length > 0" style="margin-top: 30px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                            <h3>업로드된 데이터 ({{ csvData.length }}개)</h3>
+                            <div style="display: flex; gap: 10px;">
+                                <button class="btn btn-secondary" @click="csvData = []">취소</button>
+                                <button class="btn btn-success" @click="saveBatchCSV" :disabled="loading">
+                                    💾 {{ csvData.length }}개 저장
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="table-container">
+                            <table class="csv-table">
+                                <thead>
+                                    <tr>
+                                        <th>이름</th>
+                                        <th>분류</th>
+                                        <th>주소</th>
+                                        <th>전화번호</th>
+                                        <th>평점</th>
+                                        <th>리뷰수</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="(row, idx) in csvData" :key="idx">
+                                        <td>{{ row.name }}</td>
+                                        <td>{{ row.category || '-' }}</td>
+                                        <td>{{ row.address || '-' }}</td>
+                                        <td>{{ row.phone || '-' }}</td>
+                                        <td>{{ row.rating || '-' }}</td>
+                                        <td>{{ row.review_count || '-' }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div v-if="activeTab === 'direct'">
+                    <h3 style="margin-bottom: 20px;">레스토랑 정보 직접 입력</h3>
+
+                    <div class="sub-tabs">
+                        <button class="sub-tab" :class="{ active: directSubTab === 'basic' }" @click="directSubTab = 'basic'">
+                            기본정보
+                        </button>
+                        <button class="sub-tab" :class="{ active: directSubTab === 'details' }" @click="directSubTab = 'details'">
+                            상세정보
+                        </button>
+                        <button class="sub-tab" :class="{ active: directSubTab === 'menu' }" @click="directSubTab = 'menu'">
+                            메뉴
+                        </button>
+                        <button class="sub-tab" :class="{ active: directSubTab === 'hours' }" @click="directSubTab = 'hours'">
+                            영업시간
+                        </button>
+                        <button class="sub-tab" :class="{ active: directSubTab === 'links' }" @click="directSubTab = 'links'">
+                            링크/시설
+                        </button>
+                    </div>
+
+                    <div v-show="directSubTab === 'basic'">
+                        <div class="form-group">
+                            <label class="form-label">레스토랑 이름 <span class="required">*</span></label>
+                            <input type="text" class="form-input" v-model="directForm.name" placeholder="예: 올래국수">
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">카테고리 <span class="required">*</span></label>
+                                <select class="form-input" v-model="directForm.category">
+                                    <option value="">선택하세요</option>
+                                    <option value="한식">한식</option>
+                                    <option value="중식">중식</option>
+                                    <option value="일식">일식</option>
+                                    <option value="양식">양식</option>
+                                    <option value="카페/디저트">카페/디저트</option>
+                                    <option value="해산물">해산물</option>
+                                    <option value="고기/구이">고기/구이</option>
+                                    <option value="분식">분식</option>
+                                    <option value="기타">기타</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">가격대</label>
+                                <select class="form-input" v-model="directForm.price_range">
+                                    <option value="">선택하세요</option>
+                                    <option value="저가">저가 (1만원 이하)</option>
+                                    <option value="중가">중가 (1-3만원)</option>
+                                    <option value="고가">고가 (3만원 이상)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">주소 <span class="required">*</span></label>
+                            <input type="text" class="form-input" v-model="directForm.address" placeholder="예: 서울시 강남구 테헤란로 123">
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">전화번호</label>
+                                <input type="text" class="form-input" v-model="directForm.phone" placeholder="02-1234-5678">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">지역</label>
+                                <input type="text" class="form-input" v-model="directForm.region" placeholder="예: 서울시 강남구">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">평점 (1-5)</label>
+                                <input type="number" step="0.1" min="0" max="5" class="form-input" v-model.number="directForm.rating" placeholder="4.5">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">리뷰 수</label>
+                                <input type="number" class="form-input" v-model.number="directForm.review_count" placeholder="150">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">위도</label>
+                                <input type="number" step="0.000001" class="form-input" v-model.number="directForm.latitude" placeholder="37.5665">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">경도</label>
+                                <input type="number" step="0.000001" class="form-input" v-model.number="directForm.longitude" placeholder="126.9780">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div v-show="directSubTab === 'details'">
+                        <div class="form-group">
+                            <label class="form-label">설명</label>
+                            <textarea class="form-input" v-model="directForm.description" rows="5" 
+                                      placeholder="레스토랑 설명을 입력하세요 (최대 500자)"></textarea>
+                            <small style="color: #999; font-size: 12px;">{{ (directForm.description || '').length }} / 500자</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">썸네일 URL</label>
+                            <input type="text" class="form-input" v-model="directForm.thumbnail_url" placeholder="https://example.com/image.jpg">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">이미지 URL 목록</label>
+                            <div class="image-list">
+                                <div class="image-item" v-for="(img, idx) in directForm.images" :key="idx">
+                                    <input type="text" class="form-input" v-model="directForm.images[idx]" :placeholder="'이미지 ' + (idx + 1)">
+                                    <button class="btn btn-secondary" @click="removeImage(idx)">삭제</button>
+                                </div>
+                                <button class="add-btn" @click="addImage" v-if="directForm.images.length < 10">➕ 이미지 추가</button>
+                            </div>
+                            <small style="color: #999; font-size: 12px;">최대 10개</small>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">YouTube 언급 수</label>
+                                <input type="number" min="0" class="form-input" v-model.number="directForm.youtube_mention_count" placeholder="0">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">블로그 언급 수</label>
+                                <input type="number" min="0" class="form-input" v-model.number="directForm.blog_mention_count" placeholder="0">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div v-show="directSubTab === 'menu'">
+                        <div class="form-group">
+                            <label class="form-label">메뉴 목록</label>
+                            <div v-if="directForm.menu_items && directForm.menu_items.length > 0">
+                                <div class="menu-item-card" v-for="(menu, idx) in directForm.menu_items" :key="idx">
+                                    <button class="remove-btn" @click="removeMenu(idx)">×</button>
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label class="form-label">메뉴명</label>
+                                            <input type="text" class="form-input" v-model="menu.name" placeholder="예: 김치찌개">
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="form-label">가격 (원)</label>
+                                            <input type="number" class="form-input" v-model.number="menu.price" placeholder="8000">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">설명 (선택)</label>
+                                        <input type="text" class="form-input" v-model="menu.description" placeholder="메뉴 설명">
+                                    </div>
+                                </div>
+                            </div>
+                            <button class="add-btn" @click="addMenu">➕ 메뉴 추가</button>
+                            <small v-if="!directForm.menu_items || directForm.menu_items.length === 0" style="color: #999; font-size: 12px; display: block; margin-top: 10px;">메뉴를 추가해주세요</small>
+                        </div>
+                    </div>
+
+                    <div v-show="directSubTab === 'hours'">
+                        <div class="form-group">
+                            <label class="form-label">영업시간</label>
+                            <div class="hour-item" v-for="day in weekDays" :key="day.value">
+                                <div class="form-row">
+                                    <div class="form-group" style="margin-bottom: 0;">
+                                        <label class="form-label">{{ day.label }}</label>
+                                        <div style="display: flex; gap: 10px; align-items: center;">
+                                            <input 
+                                                v-model="getHours(day.value).open" 
+                                                type="time" 
+                                                class="form-input"
+                                                style="flex: 1;"
+                                                :disabled="getHours(day.value).closed"
+                                            >
+                                            <span>~</span>
+                                            <input 
+                                                v-model="getHours(day.value).close" 
+                                                type="time" 
+                                                class="form-input"
+                                                style="flex: 1;"
+                                                :disabled="getHours(day.value).closed"
+                                            >
+                                            <label style="margin: 0; display: flex; align-items: center; gap: 5px; cursor: pointer;">
+                                                <input 
+                                                    type="checkbox" 
+                                                    v-model="getHours(day.value).closed"
+                                                    @change="toggleClosed(day.value)"
+                                                >
+                                                휴무
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <button class="add-btn" @click="applyToAll" style="margin-top: 15px;">월요일 시간을 전체 적용</button>
+                        </div>
+                    </div>
+
+                    <div v-show="directSubTab === 'links'">
+                        <div class="form-group">
+                            <label class="form-label">플랫폼</label>
+                            <select class="form-input" v-model="directForm.source">
+                                <option value="manual">수동 입력</option>
+                                <option value="naver">네이버</option>
+                                <option value="google">구글</option>
+                            </select>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Google Place ID</label>
+                                <input type="text" class="form-input" v-model="directForm.google_place_id" placeholder="ChIJ...">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Naver Place ID</label>
+                                <input type="text" class="form-input" v-model="directForm.naver_place_id" placeholder="1234567">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Google Maps URL</label>
+                                <input type="text" class="form-input" v-model="directForm.google_maps_url" placeholder="https://maps.google.com/...">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Naver Map URL</label>
+                                <input type="text" class="form-input" v-model="directForm.naver_map_url" placeholder="https://map.naver.com/...">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">원본 URL</label>
+                            <input type="text" class="form-input" v-model="directForm.source_url" placeholder="원본 페이지 URL">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">편의시설</label>
+                            <div class="checkbox-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" v-model="facilities.parking"> 🅿️ 주차
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" v-model="facilities.wifi"> 📶 WiFi
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" v-model="facilities.reservation"> 📞 예약
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" v-model="facilities.delivery"> 🛵 배달
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" v-model="facilities.takeout"> 📦 포장
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" v-model="facilities.group"> 👥 단체석
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" v-model="facilities.kids"> 👶 유아동반
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" v-model="facilities.wheelchair"> ♿ 휠체어
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" v-model="facilities.pet"> 🐕 반려동물
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; gap: 10px; margin-top: 30px; padding-top: 20px; border-top: 2px solid #eee;">
+                        <button class="btn btn-secondary" @click="resetDirectForm">초기화</button>
+                        <button class="btn btn-primary" @click="saveDirectInput" :disabled="!directForm.name || loading">
+                            💾 저장하기
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const { createApp } = Vue;
+
+        createApp({
+            data() {
+                return {
+                    activeTab: 'url',
+                    directSubTab: 'basic',
+                    loading: false,
+                    alert: {
+                        show: false,
+                        type: 'alert-success',
+                        message: ''
+                    },
+                    urlForm: {
+                        url: ''
+                    },
+                    urlPreview: null,
+                    csvData: [],
+                    isDragging: false,
+                    directForm: {
+                        name: '',
+                        category: '',
+                        price_range: '',
+                        address: '',
+                        phone: '',
+                        region: '',
+                        latitude: null,
+                        longitude: null,
+                        rating: null,
+                        review_count: null,
+                        description: '',
+                        thumbnail_url: '',
+                        images: [],
+                        youtube_mention_count: null,
+                        blog_mention_count: null,
+                        menu_items: [],
+                        business_hours: {},
+                        source: 'manual',
+                        google_place_id: '',
+                        naver_place_id: '',
+                        google_maps_url: '',
+                        naver_map_url: '',
+                        source_url: ''
+                    },
+                    facilities: {
+                        parking: false,
+                        wifi: false,
+                        reservation: false,
+                        delivery: false,
+                        takeout: false,
+                        group: false,
+                        kids: false,
+                        wheelchair: false,
+                        pet: false
+                    },
+                    weekDays: [
+                        { label: '월요일', value: 'monday' },
+                        { label: '화요일', value: 'tuesday' },
+                        { label: '수요일', value: 'wednesday' },
+                        { label: '목요일', value: 'thursday' },
+                        { label: '금요일', value: 'friday' },
+                        { label: '토요일', value: 'saturday' },
+                        { label: '일요일', value: 'sunday' }
+                    ]
+                };
+            },
+            methods: {
+                async parseURL() {
+                    if (!this.urlForm.url) {
+                        this.showAlert('error', 'URL을 입력하세요.');
+                        return;
+                    }
+
+                    this.loading = true;
+                    try {
+                        const response = await axios.post('/api/data-management/manual-input/parse-url', {
+                            url: this.urlForm.url
+                        });
+
+                        if (response.data.success) {
+                            this.urlPreview = response.data.preview;
+                            this.showAlert('success', 'URL 파싱 완료! 저장하기 버튼을 클릭하세요.');
+                        }
+                    } catch (error) {
+                        this.showAlert('error', error.response?.data?.detail || 'URL 파싱 실패');
+                        this.urlPreview = null;
+                    } finally {
+                        this.loading = false;
+                    }
+                },
+                async saveFromURL() {
+                    if (!this.urlPreview) return;
+
+                    this.loading = true;
+                    try {
+                        const response = await axios.post('/api/data-management/manual-input/direct-input', {
+                            name: this.urlPreview.name,
+                            address: this.urlPreview.address,
+                            source: this.urlPreview.source
+                        });
+
+                        if (response.data.success) {
+                            this.showAlert('success', '레스토랑이 성공적으로 등록되었습니다!');
+                            this.urlForm.url = '';
+                            this.urlPreview = null;
+                        }
+                    } catch (error) {
+                        this.showAlert('error', error.response?.data?.detail || '저장 실패');
+                    } finally {
+                        this.loading = false;
+                    }
+                },
+                handleFileSelect(event) {
+                    const file = event.target.files[0];
+                    if (file) {
+                        this.processCSVFile(file);
+                    }
+                },
+                handleFileDrop(event) {
+                    this.isDragging = false;
+                    const file = event.dataTransfer.files[0];
+                    if (file && file.name.endsWith('.csv')) {
+                        this.processCSVFile(file);
+                    } else {
+                        this.showAlert('error', 'CSV 파일만 업로드 가능합니다.');
+                    }
+                },
+                async processCSVFile(file) {
+                    this.loading = true;
+                    const formData = new FormData();
+                    formData.append('file', file);
+
+                    try {
+                        const response = await axios.post('/api/data-management/manual-input/upload-csv', formData, {
+                            headers: { 'Content-Type': 'multipart/form-data' }
+                        });
+
+                        if (response.data.success) {
+                            this.csvData = response.data.data;
+                            this.showAlert('success', response.data.message);
+                        }
+                    } catch (error) {
+                        this.showAlert('error', error.response?.data?.detail || 'CSV 파일 처리 실패');
+                    } finally {
+                        this.loading = false;
+                    }
+                },
+                async saveBatchCSV() {
+                    if (this.csvData.length === 0) return;
+
+                    this.loading = true;
+                    try {
+                        const response = await axios.post('/api/data-management/manual-input/batch-create-from-csv', this.csvData);
+
+                        if (response.data.success) {
+                            this.showAlert('success', response.data.message);
+                            this.csvData = [];
+                            this.$refs.fileInput.value = '';
+                        }
+                    } catch (error) {
+                        this.showAlert('error', error.response?.data?.detail || '일괄 저장 실패');
+                    } finally {
+                        this.loading = false;
+                    }
+                },
+                async saveDirectInput() {
+                    if (!this.directForm.name) {
+                        this.showAlert('error', '레스토랑 이름은 필수입니다.');
+                        return;
+                    }
+
+                    this.loading = true;
+                    try {
+                        const payload = {
+                            ...this.directForm,
+                            facilities: this.facilities
+                        };
+
+                        const response = await axios.post('/api/data-management/manual-input/direct-input', payload);
+
+                        if (response.data.success) {
+                            this.showAlert('success', '레스토랑이 성공적으로 등록되었습니다!');
+                            this.resetDirectForm();
+                        }
+                    } catch (error) {
+                        this.showAlert('error', error.response?.data?.detail || '저장 실패');
+                    } finally {
+                        this.loading = false;
+                    }
+                },
+                resetDirectForm() {
+                    this.directForm = {
+                        name: '',
+                        category: '',
+                        price_range: '',
+                        address: '',
+                        phone: '',
+                        region: '',
+                        latitude: null,
+                        longitude: null,
+                        rating: null,
+                        review_count: null,
+                        description: '',
+                        thumbnail_url: '',
+                        images: [],
+                        youtube_mention_count: null,
+                        blog_mention_count: null,
+                        menu_items: [],
+                        business_hours: {},
+                        source: 'manual',
+                        google_place_id: '',
+                        naver_place_id: '',
+                        google_maps_url: '',
+                        naver_map_url: '',
+                        source_url: ''
+                    };
+                    this.facilities = {
+                        parking: false,
+                        wifi: false,
+                        reservation: false,
+                        delivery: false,
+                        takeout: false,
+                        group: false,
+                        kids: false,
+                        wheelchair: false,
+                        pet: false
+                    };
+                    this.directSubTab = 'basic';
+                },
+                addMenu() {
+                    if (!this.directForm.menu_items) {
+                        this.directForm.menu_items = [];
+                    }
+                    this.directForm.menu_items.push({ name: '', price: null, description: '' });
+                },
+                removeMenu(index) {
+                    this.directForm.menu_items.splice(index, 1);
+                },
+                addImage() {
+                    if (!this.directForm.images) {
+                        this.directForm.images = [];
+                    }
+                    if (this.directForm.images.length < 10) {
+                        this.directForm.images.push('');
+                    }
+                },
+                removeImage(index) {
+                    this.directForm.images.splice(index, 1);
+                },
+                getHours(day) {
+                    if (!this.directForm.business_hours) {
+                        this.directForm.business_hours = {};
+                    }
+                    if (!this.directForm.business_hours[day]) {
+                        this.directForm.business_hours[day] = { open: '09:00', close: '21:00', closed: false };
+                    }
+                    return this.directForm.business_hours[day];
+                },
+                toggleClosed(day) {
+                    const hours = this.getHours(day);
+                    if (hours.closed) {
+                        hours.open = '';
+                        hours.close = '';
+                    } else {
+                        hours.open = '09:00';
+                        hours.close = '21:00';
+                    }
+                },
+                applyToAll() {
+                    const mondayHours = this.getHours('monday');
+                    this.weekDays.forEach(day => {
+                        if (day.value !== 'monday') {
+                            this.directForm.business_hours[day.value] = {
+                                open: mondayHours.open,
+                                close: mondayHours.close,
+                                closed: mondayHours.closed
+                            };
+                        }
+                    });
+                    this.showAlert('success', '월요일 시간이 전체 요일에 적용되었습니다.');
+                },
+                async downloadTemplate() {
+                    try {
+                        const response = await axios.get('/api/data-management/manual-input/csv-template');
+                        if (response.data.success) {
+                            const template = response.data.template;
+                            const headers = response.data.headers;
+                            
+                            let csv = headers.join(',') + '\n';
+                            template.forEach(row => {
+                                csv += headers.map(h => `"${row[h]}"`).join(',') + '\n';
+                            });
+
+                            const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+                            const link = document.createElement('a');
+                            link.href = URL.createObjectURL(blob);
+                            link.download = 'restaurant_template.csv';
+                            link.click();
+                        }
+                    } catch (error) {
+                        this.showAlert('error', '템플릿 다운로드 실패');
+                    }
+                },
+                showAlert(type, message) {
+                    this.alert = {
+                        show: true,
+                        type: `alert-${type}`,
+                        message: message
+                    };
+                    setTimeout(() => {
+                        this.alert.show = false;
+                    }, 5000);
+                }
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>

@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>통합 편집 - Data Hub</title>
+    <script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; }
+        
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 240px;
+            height: 100vh;
+            background: linear-gradient(180deg, #2c3e50 0%, #34495e 100%);
+            color: #ecf0f1;
+            overflow-y: auto;
+            z-index: 100;
+        }
+        .sidebar-header { padding: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); text-align: center; }
+        .sidebar-header h2 { font-size: 18px; color: #fff; margin-bottom: 5px; }
+        .sidebar-header p { font-size: 12px; color: #bdc3c7; }
+        .menu-group { padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .menu-label { padding: 10px 20px; font-size: 11px; color: #95a5a6; text-transform: uppercase; }
+        .menu-item { display: block; padding: 12px 20px; color: #ecf0f1; text-decoration: none; transition: all 0.3s; border-left: 3px solid transparent; }
+        .menu-item:hover, .menu-item.active { background: rgba(255,255,255,0.1); border-left-color: #667eea; }
+        
+        .container { margin-left: 240px; padding: 20px; }
+        h1 { color: white; margin-bottom: 20px; }
+        
+        .filters { background: white; padding: 15px; border-radius: 8px; margin-bottom: 20px; display: flex; gap: 10px; }
+        select, input { padding: 8px; border: 1px solid #ddd; border-radius: 4px; }
+        button { padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; }
+        .btn-primary { background: #667eea; color: white; }
+        .btn-success { background: #48bb78; color: white; }
+        .btn-danger { background: #f56565; color: white; }
+        
+        table { width: 100%; background: white; border-radius: 8px; overflow: hidden; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; }
+        th { background: #f7fafc; font-weight: 600; }
+        .status { padding: 4px 8px; border-radius: 4px; font-size: 12px; }
+        .status-pending { background: #fed7d7; color: #c53030; }
+        .status-edited { background: #feebc8; color: #c05621; }
+        .status-approved { background: #c6f6d5; color: #22543d; }
+        
+        .modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; z-index: 1000; }
+        .modal.show { display: flex; }
+        .modal-content { background: white; padding: 0; border-radius: 12px; width: 90%; max-width: 800px; max-height: 85vh; overflow: hidden; display: flex; flex-direction: column; }
+        
+        .modal-header { padding: 20px 30px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
+        .modal-header h2 { margin: 0; color: #333; }
+        .close-btn { background: none; border: none; font-size: 24px; cursor: pointer; color: #999; }
+        
+        .tabs { display: flex; border-bottom: 1px solid #eee; background: #f7fafc; }
+        .tab { padding: 15px 25px; cursor: pointer; border: none; background: none; font-size: 14px; color: #666; transition: all 0.2s; }
+        .tab.active { background: white; color: #667eea; border-bottom: 2px solid #667eea; font-weight: 600; }
+        .tab:hover { background: #e2e8f0; }
+        
+        .modal-body { padding: 30px; overflow-y: auto; flex: 1; }
+        .modal-footer { padding: 20px 30px; border-top: 1px solid #eee; display: flex; gap: 10px; justify-content: flex-end; }
+        
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; margin-bottom: 8px; font-weight: 600; color: #333; font-size: 14px; }
+        .form-group label .required { color: #f56565; }
+        .form-group input, .form-group select, .form-group textarea { 
+            width: 100%; 
+            padding: 10px; 
+            border: 1px solid #ddd; 
+            border-radius: 6px; 
+            font-size: 14px;
+        }
+        .form-group textarea { min-height: 100px; resize: vertical; }
+        .form-group small { color: #999; font-size: 12px; }
+        
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        
+        .menu-item, .hour-item { 
+            background: #f7fafc; 
+            padding: 15px; 
+            border-radius: 8px; 
+            margin-bottom: 15px;
+            position: relative;
+        }
+        .menu-item .remove-btn { 
+            position: absolute; 
+            top: 10px; 
+            right: 10px; 
+            background: #f56565; 
+            color: white; 
+            border: none; 
+            width: 24px; 
+            height: 24px; 
+            border-radius: 50%; 
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .add-btn { 
+            background: #48bb78; 
+            color: white; 
+            padding: 10px 20px; 
+            border: none; 
+            border-radius: 6px; 
+            cursor: pointer; 
+            font-size: 14px;
+        }
+        .add-btn:hover { background: #38a169; }
+        
+        .checkbox-group { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+        .checkbox-label { display: flex; align-items: center; gap: 8px; padding: 10px; background: #f7fafc; border-radius: 6px; cursor: pointer; }
+        .checkbox-label input { cursor: pointer; }
+        .checkbox-label:hover { background: #e2e8f0; }
+        
+        .platform-badge { 
+            display: inline-block; 
+            padding: 4px 12px; 
+            border-radius: 12px; 
+            font-size: 12px; 
+            font-weight: 600;
+        }
+        .platform-naver { background: #06BE34; color: white; }
+        .platform-google { background: #4285F4; color: white; }
+        .platform-manual { background: #9ca3af; color: white; }
+        
+        .image-list { display: flex; flex-direction: column; gap: 10px; }
+        .image-item { display: flex; gap: 10px; align-items: center; }
+        .image-item input { flex: 1; }
+        .image-item button { width: 80px; }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h2>한식당 Data Hub</h2>
+            <p>Restaurant Data Collection</p>
+        </div>
+        <div class="menu-group">
+            <div class="menu-label">대시보드</div>
+            <a href="/dashboard" class="menu-item">📊 메인 대시보드</a>
+        </div>
+        <div class="menu-group">
+            <div class="menu-label">데이터 수집</div>
+            <a href="/dashboard/collection-request" class="menu-item">📝 수집 요청</a>
+            <a href="/dashboard/collection-results" class="menu-item">📋 수집 결과</a>
+        </div>
+        <div class="menu-group">
+            <div class="menu-label">데이터 입력</div>
+            <a href="/dashboard/manual-input#url" class="menu-item">🔗 URL 입력</a>
+            <a href="/dashboard/manual-input#csv" class="menu-item">📄 CSV 업로드</a>
+            <a href="/dashboard/manual-input#direct" class="menu-item">✏️ 직접 입력</a>
+        </div>
+        <div class="menu-group">
+            <div class="menu-label">데이터 편집</div>
+            <a href="/dashboard/unified-editor" class="menu-item active">🔧 통합 편집</a>
+        </div>
+        <div class="menu-group">
+            <div class="menu-label">배포 관리</div>
+            <a href="/dashboard/deployment" class="menu-item">🚀 배포 관리</a>
+        </div>
+    </div>
+
+    <div id="app" class="container">
+        <h1>🎯 통합 편집 & 병합</h1>
+        
+        <div class="filters">
+            <select v-model="filters.source" @change="loadRestaurants">
+                <option value="">모든 소스</option>
+                <option value="manual">수동 입력</option>
+                <option value="naver">네이버</option>
+                <option value="google">구글</option>
+            </select>
+            <select v-model="filters.status" @change="loadRestaurants">
+                <option value="">모든 상태</option>
+                <option value="pending">대기</option>
+                <option value="edited">편집됨</option>
+                <option value="approved">승인됨</option>
+            </select>
+            <button @click="loadRestaurants" class="btn-primary">새로고침</button>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>이름</th>
+                    <th>카테고리</th>
+                    <th>평점</th>
+                    <th>인기점수</th>
+                    <th>소스</th>
+                    <th>상태</th>
+                    <th>작업</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr v-for="r in restaurants" :key="r.id">
+                    <td>{{ r.name }}</td>
+                    <td>{{ r.category || '-' }}</td>
+                    <td>{{ r.rating || '-' }}</td>
+                    <td>{{ r.popularity_score }}</td>
+                    <td>
+                        <span class="platform-badge" :class="'platform-' + r.source">{{ r.source }}</span>
+                    </td>
+                    <td><span :class="'status status-' + r.edit_status">{{ r.edit_status }}</span></td>
+                    <td>
+                        <button @click="openEdit(r)" class="btn-primary">편집</button>
+                        <button @click="changeStatus(r.id, 'approved')" class="btn-success">승인</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="modal" :class="{show: showEditModal}">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>레스토랑 편집</h2>
+                    <button class="close-btn" @click="closeModal">&times;</button>
+                </div>
+                
+                <div class="tabs">
+                    <button class="tab" :class="{active: activeTab === 'basic'}" @click="activeTab = 'basic'">기본정보</button>
+                    <button class="tab" :class="{active: activeTab === 'details'}" @click="activeTab = 'details'">상세정보</button>
+                    <button class="tab" :class="{active: activeTab === 'menu'}" @click="activeTab = 'menu'">메뉴</button>
+                    <button class="tab" :class="{active: activeTab === 'hours'}" @click="activeTab = 'hours'">영업시간</button>
+                    <button class="tab" :class="{active: activeTab === 'links'}" @click="activeTab = 'links'">링크/시설</button>
+                </div>
+                
+                <div class="modal-body" v-if="editingRestaurant">
+                    <div v-show="activeTab === 'basic'">
+                        <div class="form-group">
+                            <label>이름 <span class="required">*</span></label>
+                            <input v-model="editingRestaurant.name" placeholder="레스토랑 이름">
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>카테고리 <span class="required">*</span></label>
+                                <select v-model="editingRestaurant.category">
+                                    <option value="">선택하세요</option>
+                                    <option value="한식">한식</option>
+                                    <option value="중식">중식</option>
+                                    <option value="일식">일식</option>
+                                    <option value="양식">양식</option>
+                                    <option value="카페/디저트">카페/디저트</option>
+                                    <option value="해산물">해산물</option>
+                                    <option value="고기/구이">고기/구이</option>
+                                    <option value="분식">분식</option>
+                                    <option value="기타">기타</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>가격대</label>
+                                <select v-model="editingRestaurant.price_range">
+                                    <option value="">선택하세요</option>
+                                    <option value="저가">저가 (1만원 이하)</option>
+                                    <option value="중가">중가 (1-3만원)</option>
+                                    <option value="고가">고가 (3만원 이상)</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>주소 <span class="required">*</span></label>
+                            <input v-model="editingRestaurant.address" placeholder="전체 주소">
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>전화번호</label>
+                                <input v-model="editingRestaurant.phone" placeholder="02-1234-5678">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>지역</label>
+                                <input v-model="editingRestaurant.region" placeholder="예: 서울시 강남구">
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>평점 (1-5)</label>
+                                <input v-model.number="editingRestaurant.rating" type="number" step="0.1" min="0" max="5">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>리뷰 수</label>
+                                <input v-model.number="editingRestaurant.review_count" type="number" min="0">
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>위도</label>
+                                <input v-model.number="editingRestaurant.latitude" type="number" step="0.000001">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>경도</label>
+                                <input v-model.number="editingRestaurant.longitude" type="number" step="0.000001">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div v-show="activeTab === 'details'">
+                        <div class="form-group">
+                            <label>설명</label>
+                            <textarea v-model="editingRestaurant.description" placeholder="레스토랑 설명 (최대 500자)"></textarea>
+                            <small>{{ (editingRestaurant.description || '').length }} / 500자</small>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>썸네일 URL</label>
+                            <input v-model="editingRestaurant.thumbnail_url" placeholder="https://example.com/image.jpg">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>이미지 URL 목록</label>
+                            <div class="image-list">
+                                <div class="image-item" v-for="(img, idx) in editingRestaurant.images" :key="idx">
+                                    <input v-model="editingRestaurant.images[idx]" :placeholder="'이미지 ' + (idx + 1)">
+                                    <button class="btn-danger" @click="removeImage(idx)">삭제</button>
+                                </div>
+                                <button class="add-btn" @click="addImage" v-if="editingRestaurant.images.length < 10">➕ 이미지 추가</button>
+                            </div>
+                            <small>최대 10개</small>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>YouTube 언급 수</label>
+                                <input v-model.number="editingRestaurant.youtube_mention_count" type="number" min="0">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>블로그 언급 수</label>
+                                <input v-model.number="editingRestaurant.blog_mention_count" type="number" min="0">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div v-show="activeTab === 'menu'">
+                        <div class="form-group">
+                            <label>메뉴 목록</label>
+                            <div v-if="editingRestaurant.menu_items && editingRestaurant.menu_items.length > 0">
+                                <div class="menu-item" v-for="(menu, idx) in editingRestaurant.menu_items" :key="idx">
+                                    <button class="remove-btn" @click="removeMenu(idx)">×</button>
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label>메뉴명</label>
+                                            <input v-model="menu.name" placeholder="예: 김치찌개">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>가격 (원)</label>
+                                            <input v-model.number="menu.price" type="number" placeholder="8000">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>설명 (선택)</label>
+                                        <input v-model="menu.description" placeholder="메뉴 설명">
+                                    </div>
+                                </div>
+                            </div>
+                            <button class="add-btn" @click="addMenu">➕ 메뉴 추가</button>
+                            <small v-if="!editingRestaurant.menu_items || editingRestaurant.menu_items.length === 0">메뉴를 추가해주세요</small>
+                        </div>
+                    </div>
+                    
+                    <div v-show="activeTab === 'hours'">
+                        <div class="form-group">
+                            <label>영업시간</label>
+                            <div class="hour-item" v-for="day in weekDays" :key="day.value">
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>{{ day.label }}</label>
+                                        <div style="display: flex; gap: 10px; align-items: center;">
+                                            <input 
+                                                v-model="getHours(day.value).open" 
+                                                type="time" 
+                                                style="flex: 1;"
+                                                :disabled="getHours(day.value).closed"
+                                            >
+                                            <span>~</span>
+                                            <input 
+                                                v-model="getHours(day.value).close" 
+                                                type="time" 
+                                                style="flex: 1;"
+                                                :disabled="getHours(day.value).closed"
+                                            >
+                                            <label style="margin: 0; display: flex; align-items: center; gap: 5px;">
+                                                <input 
+                                                    type="checkbox" 
+                                                    v-model="getHours(day.value).closed"
+                                                    @change="toggleClosed(day.value)"
+                                                >
+                                                휴무
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <button class="add-btn" @click="applyToAll" style="margin-top: 15px;">월요일 시간을 전체 적용</button>
+                        </div>
+                    </div>
+                    
+                    <div v-show="activeTab === 'links'">
+                        <div class="form-group">
+                            <label>플랫폼</label>
+                            <select v-model="editingRestaurant.source">
+                                <option value="manual">수동 입력</option>
+                                <option value="naver">네이버</option>
+                                <option value="google">구글</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Google Place ID</label>
+                                <input v-model="editingRestaurant.google_place_id" placeholder="ChIJ...">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>Naver Place ID</label>
+                                <input v-model="editingRestaurant.naver_place_id" placeholder="1234567">
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Google Maps URL</label>
+                                <input v-model="editingRestaurant.google_maps_url" placeholder="https://maps.google.com/...">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>Naver Map URL</label>
+                                <input v-model="editingRestaurant.naver_map_url" placeholder="https://map.naver.com/...">
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>원본 URL</label>
+                            <input v-model="editingRestaurant.source_url" placeholder="원본 페이지 URL">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>편의시설</label>
+                            <div class="checkbox-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" v-model="facilities.parking"> 🅿️ 주차
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" v-model="facilities.wifi"> 📶 WiFi
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" v-model="facilities.reservation"> 📞 예약
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" v-model="facilities.delivery"> 🛵 배달
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" v-model="facilities.takeout"> 📦 포장
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" v-model="facilities.group"> 👥 단체석
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" v-model="facilities.kids"> 👶 유아동반
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" v-model="facilities.wheelchair"> ♿ 휠체어
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" v-model="facilities.pet"> 🐕 반려동물
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="modal-footer">
+                    <button @click="saveEdit" class="btn-success">💾 저장</button>
+                    <button @click="closeModal" class="btn-danger">✕ 취소</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const { createApp } = Vue;
+        createApp({
+            data() {
+                return {
+                    restaurants: [],
+                    filters: { source: '', status: '' },
+                    showEditModal: false,
+                    editingRestaurant: null,
+                    activeTab: 'basic',
+                    weekDays: [
+                        { value: 'monday', label: '월요일' },
+                        { value: 'tuesday', label: '화요일' },
+                        { value: 'wednesday', label: '수요일' },
+                        { value: 'thursday', label: '목요일' },
+                        { value: 'friday', label: '금요일' },
+                        { value: 'saturday', label: '토요일' },
+                        { value: 'sunday', label: '일요일' }
+                    ],
+                    facilities: {
+                        parking: false,
+                        wifi: false,
+                        reservation: false,
+                        delivery: false,
+                        takeout: false,
+                        group: false,
+                        kids: false,
+                        wheelchair: false,
+                        pet: false
+                    }
+                }
+            },
+            mounted() {
+                this.loadRestaurants();
+            },
+            methods: {
+                async loadRestaurants() {
+                    try {
+                        const params = new URLSearchParams();
+                        if (this.filters.source) params.append('source', this.filters.source);
+                        if (this.filters.status) params.append('edit_status', this.filters.status);
+                        const res = await axios.get(`/api/data-management/collection-results?${params}`);
+                        this.restaurants = res.data.data || [];
+                    } catch (error) {
+                        console.error('로드 실패:', error);
+                        alert('데이터 로드 실패');
+                    }
+                },
+                
+                async openEdit(r) {
+                    try {
+                        const res = await axios.get(`/api/data-management/collection-results/${r.id}`);
+                        const data = res.data.data;
+                        
+                        this.editingRestaurant = {
+                            id: data.id,
+                            name: data.name || '',
+                            category: data.category || '',
+                            address: data.address || '',
+                            phone: data.phone || '',
+                            region: data.region || '',
+                            rating: data.rating || 0,
+                            review_count: data.review_count || 0,
+                            price_range: data.price_range || '',
+                            description: data.description || '',
+                            latitude: data.latitude || null,
+                            longitude: data.longitude || null,
+                            thumbnail_url: data.thumbnail_url || '',
+                            images: data.images || [],
+                            menu_items: data.menu_items || [],
+                            business_hours: data.business_hours || {},
+                            source: data.source || 'manual',
+                            google_place_id: data.google_place_id || '',
+                            naver_place_id: data.naver_place_id || '',
+                            google_maps_url: data.google_maps_url || '',
+                            naver_map_url: data.naver_map_url || '',
+                            source_url: data.source_url || '',
+                            youtube_mention_count: data.youtube_mention_count || 0,
+                            blog_mention_count: data.blog_mention_count || 0,
+                            facilities: data.facilities || {}
+                        };
+                        
+                        this.facilities = {
+                            parking: data.facilities?.parking || false,
+                            wifi: data.facilities?.wifi || false,
+                            reservation: data.facilities?.reservation || false,
+                            delivery: data.facilities?.delivery || false,
+                            takeout: data.facilities?.takeout || false,
+                            group: data.facilities?.group || false,
+                            kids: data.facilities?.kids || false,
+                            wheelchair: data.facilities?.wheelchair || false,
+                            pet: data.facilities?.pet || false
+                        };
+                        
+                        if (!this.editingRestaurant.business_hours || Object.keys(this.editingRestaurant.business_hours).length === 0) {
+                            this.editingRestaurant.business_hours = {};
+                            this.weekDays.forEach(day => {
+                                this.editingRestaurant.business_hours[day.value] = {
+                                    open: '10:00',
+                                    close: '22:00',
+                                    closed: false
+                                };
+                            });
+                        }
+                        
+                        if (!Array.isArray(this.editingRestaurant.images)) {
+                            this.editingRestaurant.images = [];
+                        }
+                        
+                        this.showEditModal = true;
+                        this.activeTab = 'basic';
+                    } catch (error) {
+                        console.error('상세 로드 실패:', error);
+                        alert('상세 정보 로드 실패');
+                    }
+                },
+                
+                closeModal() {
+                    this.showEditModal = false;
+                    this.editingRestaurant = null;
+                    this.activeTab = 'basic';
+                },
+                
+                async saveEdit() {
+                    try {
+                        const id = this.editingRestaurant.id;
+                        this.editingRestaurant.facilities = { ...this.facilities };
+                        
+                        await axios.put(`/api/data-management/collection-results/${id}`, this.editingRestaurant);
+                        
+                        this.closeModal();
+                        await this.loadRestaurants();
+                        alert('✅ 저장되었습니다');
+                    } catch (error) {
+                        console.error('저장 실패:', error);
+                        alert('❌ 저장 실패: ' + (error.response?.data?.detail || error.message));
+                    }
+                },
+                
+                async changeStatus(id, status) {
+                    try {
+                        await axios.put(`/api/data-management/collection-results/${id}`, { edit_status: status });
+                        await this.loadRestaurants();
+                        alert('상태가 변경되었습니다');
+                    } catch (error) {
+                        console.error('상태 변경 실패:', error);
+                        alert('상태 변경 실패');
+                    }
+                },
+                
+                addMenu() {
+                    if (!this.editingRestaurant.menu_items) {
+                        this.editingRestaurant.menu_items = [];
+                    }
+                    this.editingRestaurant.menu_items.push({
+                        name: '',
+                        price: 0,
+                        description: ''
+                    });
+                },
+                
+                removeMenu(index) {
+                    this.editingRestaurant.menu_items.splice(index, 1);
+                },
+                
+                addImage() {
+                    if (!this.editingRestaurant.images) {
+                        this.editingRestaurant.images = [];
+                    }
+                    if (this.editingRestaurant.images.length < 10) {
+                        this.editingRestaurant.images.push('');
+                    }
+                },
+                
+                removeImage(index) {
+                    this.editingRestaurant.images.splice(index, 1);
+                },
+                
+                getHours(day) {
+                    if (!this.editingRestaurant.business_hours) {
+                        this.editingRestaurant.business_hours = {};
+                    }
+                    if (!this.editingRestaurant.business_hours[day]) {
+                        this.editingRestaurant.business_hours[day] = {
+                            open: '10:00',
+                            close: '22:00',
+                            closed: false
+                        };
+                    }
+                    return this.editingRestaurant.business_hours[day];
+                },
+                
+                toggleClosed(day) {
+                    const hours = this.getHours(day);
+                    if (hours.closed) {
+                        hours.open = '';
+                        hours.close = '';
+                    } else {
+                        hours.open = '10:00';
+                        hours.close = '22:00';
+                    }
+                },
+                
+                applyToAll() {
+                    const mondayHours = this.getHours('monday');
+                    this.weekDays.forEach(day => {
+                        if (day.value !== 'monday') {
+                            this.editingRestaurant.business_hours[day.value] = {
+                                open: mondayHours.open,
+                                close: mondayHours.close,
+                                closed: mondayHours.closed
+                            };
+                        }
+                    });
+                    alert('✅ 월요일 시간이 전체에 적용되었습니다');
+                }
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>

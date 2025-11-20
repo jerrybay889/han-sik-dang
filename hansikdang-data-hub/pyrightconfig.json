@@ -1,0 +1,9 @@
+{
+  "venvPath": "/home/runner/workspace",
+  "venv": ".pythonlibs",
+  "extraPaths": [
+    "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages"
+  ],
+  "pythonVersion": "3.11",
+  "typeCheckingMode": "basic"
+}

@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>통합 편집 - Data Hub</title>
+    <script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, sans-serif; background: #f5f5f5; }
+        .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
+        h1 { color: #333; margin-bottom: 20px; }
+        .filters { background: white; padding: 15px; border-radius: 8px; margin-bottom: 20px; display: flex; gap: 10px; }
+        select, input { padding: 8px; border: 1px solid #ddd; border-radius: 4px; }
+        button { padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; }
+        .btn-primary { background: #667eea; color: white; }
+        .btn-success { background: #48bb78; color: white; }
+        .btn-danger { background: #f56565; color: white; }
+        table { width: 100%; background: white; border-radius: 8px; overflow: hidden; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; }
+        th { background: #f7fafc; font-weight: 600; }
+        .status { padding: 4px 8px; border-radius: 4px; font-size: 12px; }
+        .status-pending { background: #fed7d7; color: #c53030; }
+        .status-edited { background: #feebc8; color: #c05621; }
+        .status-approved { background: #c6f6d5; color: #22543d; }
+        .modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; }
+        .modal.show { display: flex; }
+        .modal-content { background: white; padding: 30px; border-radius: 12px; width: 90%; max-width: 600px; max-height: 80vh; overflow-y: auto; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: 600; }
+        .form-group input { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; }
+    </style>
+</head>
+<body>
+    <div id="app" class="container">
+        <h1>🎯 통합 편집 & 병합</h1>
+        
+        <div class="filters">
+            <select v-model="filters.source" @change="loadRestaurants">
+                <option value="">모든 소스</option>
+                <option value="manual">수동 입력</option>
+                <option value="naver">네이버</option>
+                <option value="google">구글</option>
+            </select>
+            <select v-model="filters.status" @change="loadRestaurants">
+                <option value="">모든 상태</option>
+                <option value="pending">대기</option>
+                <option value="edited">편집됨</option>
+                <option value="approved">승인됨</option>
+            </select>
+            <button @click="loadRestaurants" class="btn-primary">새로고침</button>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>이름</th>
+                    <th>카테고리</th>
+                    <th>평점</th>
+                    <th>인기점수</th>
+                    <th>소스</th>
+                    <th>상태</th>
+                    <th>작업</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr v-for="r in restaurants" :key="r.id">
+                    <td>{{ r.name }}</td>
+                    <td>{{ r.category || '-' }}</td>
+                    <td>{{ r.rating || '-' }}</td>
+                    <td>{{ r.popularity_score }}</td>
+                    <td>{{ r.source }}</td>
+                    <td><span :class="'status status-' + r.edit_status">{{ r.edit_status }}</span></td>
+                    <td>
+                        <button @click="openEdit(r)" class="btn-primary">편집</button>
+                        <button @click="changeStatus(r.id, 'approved')" class="btn-success">승인</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="modal" :class="{show: showEditModal}">
+            <div class="modal-content">
+                <h2>레스토랑 편집</h2>
+                <div v-if="editingRestaurant">
+                    <div class="form-group">
+                        <label>이름</label>
+                        <input v-model="editingRestaurant.name">
+                    </div>
+                    <div class="form-group">
+                        <label>카테고리</label>
+                        <input v-model="editingRestaurant.category">
+                    </div>
+                    <div class="form-group">
+                        <label>주소</label>
+                        <input v-model="editingRestaurant.address">
+                    </div>
+                    <div class="form-group">
+                        <label>전화번호</label>
+                        <input v-model="editingRestaurant.phone">
+                    </div>
+                    <div class="form-group">
+                        <label>평점</label>
+                        <input v-model.number="editingRestaurant.rating" type="number" step="0.1">
+                    </div>
+                    <div style="display: flex; gap: 10px; margin-top: 20px;">
+                        <button @click="saveEdit" class="btn-success">저장</button>
+                        <button @click="showEditModal = false" class="btn-danger">취소</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const { createApp } = Vue;
+        createApp({
+            data() {
+                return {
+                    restaurants: [],
+                    filters: { source: '', status: '' },
+                    showEditModal: false,
+                    editingRestaurant: null
+                }
+            },
+            mounted() {
+                this.loadRestaurants();
+            },
+            methods: {
+                async loadRestaurants() {
+                    const params = new URLSearchParams();
+                    if (this.filters.source) params.append('source', this.filters.source);
+                    if (this.filters.status) params.append('edit_status', this.filters.status);
+                    const res = await axios.get(`/api/data-management/unified/list?${params}`);
+                    this.restaurants = res.data.data;
+                },
+                openEdit(r) {
+                    this.editingRestaurant = JSON.parse(JSON.stringify(r));
+                    this.showEditModal = true;
+                },
+                async saveEdit() {
+                    const id = this.editingRestaurant.id;
+                    await axios.put(`/api/data-management/unified/edit/${id}`, {
+                        name: this.editingRestaurant.name,
+                        category: this.editingRestaurant.category,
+                        address: this.editingRestaurant.address,
+                        phone: this.editingRestaurant.phone,
+                        rating: this.editingRestaurant.rating
+                    });
+                    this.showEditModal = false;
+                    this.loadRestaurants();
+                    alert('저장되었습니다');
+                },
+                async changeStatus(id, status) {
+                    await axios.post(`/api/data-management/unified/status/${id}`, { status });
+                    this.loadRestaurants();
+                    alert('상태가 변경되었습니다');
+                }
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>

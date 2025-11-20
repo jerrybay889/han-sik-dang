@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>배포 관리 - Data Hub</title>
+    <script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, sans-serif; background: #f5f5f5; }
+        .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
+        h1 { color: #333; margin-bottom: 10px; }
+        .subtitle { color: #666; margin-bottom: 20px; }
+        .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 20px; }
+        .stat-card { background: white; padding: 20px; border-radius: 8px; text-align: center; }
+        .stat-value { font-size: 2rem; font-weight: bold; color: #667eea; }
+        .stat-label { color: #666; font-size: 14px; margin-top: 5px; }
+        .filters { background: white; padding: 15px; border-radius: 8px; margin-bottom: 20px; display: flex; gap: 10px; align-items: center; }
+        select, input { padding: 8px; border: 1px solid #ddd; border-radius: 4px; }
+        button { padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-weight: 600; }
+        .btn-primary { background: #667eea; color: white; }
+        .btn-success { background: #48bb78; color: white; }
+        .btn-warning { background: #ed8936; color: white; }
+        table { width: 100%; background: white; border-radius: 8px; overflow: hidden; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; }
+        th { background: #f7fafc; font-weight: 600; }
+        th input[type="checkbox"] { cursor: pointer; }
+        .score { font-weight: bold; }
+        .score-high { color: #48bb78; }
+        .score-medium { color: #ed8936; }
+        .score-low { color: #f56565; }
+        .actions { margin-top: 20px; display: flex; gap: 10px; align-items: center; }
+        .selected-count { font-weight: bold; color: #667eea; }
+    </style>
+</head>
+<body>
+    <div id="app" class="container">
+        <h1>🚀 배포 관리</h1>
+        <p class="subtitle">승인된 레스토랑을 한식당 플랫폼에 배포합니다</p>
+
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-value">{{ stats.ready_to_deploy }}</div>
+                <div class="stat-label">배포 대기</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">{{ stats.deployed }}</div>
+                <div class="stat-label">배포 완료</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">{{ stats.pending }}</div>
+                <div class="stat-label">검토 중</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">{{ stats.avg_deployed_score.toFixed(1) }}</div>
+                <div class="stat-label">평균 점수</div>
+            </div>
+        </div>
+
+        <div class="filters">
+            <label>최소 점수:</label>
+            <input v-model.number="filters.minScore" type="number" step="10" placeholder="예: 70">
+            <button @click="loadCandidates" class="btn-primary">조회</button>
+            <span style="margin-left: auto;" class="selected-count">선택: {{ selectedIds.length }}개</span>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th><input type="checkbox" @change="toggleAll" :checked="allSelected"></th>
+                    <th>이름</th>
+                    <th>카테고리</th>
+                    <th>주소</th>
+                    <th>평점</th>
+                    <th>인기점수</th>
+                    <th>품질점수</th>
+                    <th>소스</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr v-for="r in candidates" :key="r.id">
+                    <td><input type="checkbox" :value="r.id" v-model="selectedIds"></td>
+                    <td>{{ r.name }}</td>
+                    <td>{{ r.category || '-' }}</td>
+                    <td>{{ r.address ? r.address.substring(0, 30) + '...' : '-' }}</td>
+                    <td>{{ r.rating || '-' }}</td>
+                    <td><span :class="'score score-' + getScoreClass(r.popularity_score)">{{ r.popularity_score }}</span></td>
+                    <td>{{ r.quality_score }}</td>
+                    <td>{{ r.source }}</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="actions">
+            <button @click="deploy" :disabled="selectedIds.length === 0" class="btn-success">
+                선택한 {{ selectedIds.length }}개 레스토랑 배포
+            </button>
+            <button @click="viewHistory" class="btn-warning">배포 이력 보기</button>
+        </div>
+    </div>
+
+    <script>
+        const { createApp } = Vue;
+        createApp({
+            data() {
+                return {
+                    stats: { ready_to_deploy: 0, deployed: 0, pending: 0, avg_deployed_score: 0 },
+                    candidates: [],
+                    selectedIds: [],
+                    filters: { minScore: null }
+                }
+            },
+            computed: {
+                allSelected() {
+                    return this.candidates.length > 0 && this.selectedIds.length === this.candidates.length;
+                }
+            },
+            mounted() {
+                this.loadStats();
+                this.loadCandidates();
+            },
+            methods: {
+                async loadStats() {
+                    const res = await axios.get('/api/deployment/stats');
+                    this.stats = res.data.data;
+                },
+                async loadCandidates() {
+                    const params = new URLSearchParams();
+                    if (this.filters.minScore) params.append('min_score', this.filters.minScore);
+                    const res = await axios.get(`/api/deployment/candidates?${params}`);
+                    this.candidates = res.data.data;
+                    this.selectedIds = [];
+                },
+                toggleAll(e) {
+                    this.selectedIds = e.target.checked ? this.candidates.map(r => r.id) : [];
+                },
+                getScoreClass(score) {
+                    if (score >= 70) return 'high';
+                    if (score >= 50) return 'medium';
+                    return 'low';
+                },
+                async deploy() {
+                    if (!confirm(`선택한 ${this.selectedIds.length}개 레스토랑을 배포하시겠습니까?`)) return;
+                    
+                    try {
+                        const res = await axios.post('/api/deployment/execute', {
+                            restaurant_ids: this.selectedIds,
+                            deployment_type: 'immediate'
+                        });
+                        alert(res.data.message);
+                        this.loadStats();
+                        this.loadCandidates();
+                    } catch (err) {
+                        alert('배포 실패: ' + (err.response?.data?.detail || err.message));
+                    }
+                },
+                async viewHistory() {
+                    window.location.href = '/dashboard/deployment-history';
+                }
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>

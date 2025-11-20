@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>수집 결과 - 한식당 Data Hub</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 240px;
+            height: 100vh;
+            background: linear-gradient(180deg, #2c3e50 0%, #34495e 100%);
+            color: #ecf0f1;
+            overflow-y: auto;
+        }
+        .sidebar-header { padding: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); text-align: center; }
+        .sidebar-header h2 { font-size: 18px; color: #fff; margin-bottom: 5px; }
+        .sidebar-header p { font-size: 12px; color: #bdc3c7; }
+        .menu-group { padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .menu-label { padding: 10px 20px; font-size: 11px; color: #95a5a6; text-transform: uppercase; }
+        .menu-item { display: block; padding: 12px 20px; color: #ecf0f1; text-decoration: none; transition: all 0.3s; border-left: 3px solid transparent; }
+        .menu-item:hover, .menu-item.active { background: rgba(255,255,255,0.1); border-left-color: #667eea; }
+        .main-content { margin-left: 240px; padding: 30px; }
+        .card { background: white; border-radius: 16px; padding: 30px; box-shadow: 0 10px 40px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        h1 { color: #2c3e50; margin-bottom: 10px; display: flex; align-items: center; gap: 10px; }
+        .subtitle { color: #7f8c8d; margin-bottom: 30px; }
+        .stats { display: flex; gap: 20px; margin-bottom: 20px; }
+        .stat-item { background: #f8f9fa; padding: 20px; border-radius: 12px; flex: 1; text-align: center; }
+        .stat-label { font-size: 13px; color: #666; margin-bottom: 8px; }
+        .stat-value { font-size: 28px; font-weight: 700; color: #667eea; }
+        .actions { margin-bottom: 20px; display: flex; gap: 10px; }
+        .btn { padding: 12px 24px; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; transition: all 0.3s; }
+        .btn-primary { background: #667eea; color: white; }
+        .btn-primary:hover { background: #5568d3; transform: translateY(-2px); }
+        .btn-secondary { background: #ecf0f1; color: #2c3e50; }
+        .btn-secondary:hover { background: #d5dbdb; }
+        .loading { text-align: center; padding: 60px; color: #666; font-size: 16px; }
+        .table-container { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { padding: 14px 12px; text-align: left; border-bottom: 1px solid #eee; }
+        th { background: #f8f9fa; font-weight: 600; font-size: 13px; color: #555; text-transform: uppercase; letter-spacing: 0.5px; }
+        td { font-size: 14px; color: #2c3e50; }
+        tbody tr { cursor: pointer; transition: background 0.2s; }
+        tbody tr:hover { background: #f8f9fa; }
+        .badge { display: inline-block; padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 600; }
+        .badge-top { background: #ffd700; color: #856404; }
+        .badge-popular { background: #d4edda; color: #155724; }
+        .badge-new { background: #d1ecf1; color: #0c5460; }
+        .badge-pending { background: #fff3cd; color: #856404; }
+        .badge-deployed { background: #cce5ff; color: #004085; }
+        .badge-edited { background: #e2e3e5; color: #383d41; }
+        .empty { text-align: center; padding: 60px; color: #999; font-size: 16px; }
+        .filters { background: #f8f9fa; padding: 20px; border-radius: 12px; margin-bottom: 20px; }
+        .filter-row { display: flex; gap: 15px; flex-wrap: wrap; }
+        .filter-group { flex: 1; min-width: 150px; }
+        .filter-group label { display: block; font-size: 12px; color: #666; margin-bottom: 5px; font-weight: 600; }
+        .filter-group select, .filter-group input { width: 100%; padding: 8px 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; }
+        .filter-group select:focus, .filter-group input:focus { outline: none; border-color: #667eea; }
+        .action-btn { padding: 6px 12px; border: none; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600; margin-right: 5px; transition: all 0.2s; }
+        .action-btn:hover { transform: translateY(-1px); opacity: 0.9; }
+        .btn-edit { background: #667eea; color: white; }
+        .btn-delete { background: #e74c3c; color: white; }
+        .btn-view { background: #27ae60; color: white; }
+        .actions-cell { white-space: nowrap; }
+        tbody tr { cursor: default; }
+        .pagination { display: flex; justify-content: center; align-items: center; gap: 10px; margin-top: 20px; padding: 20px; }
+        .page-btn { padding: 8px 16px; border: 1px solid #ddd; background: white; border-radius: 6px; cursor: pointer; font-size: 14px; transition: all 0.2s; }
+        .page-btn:hover:not(:disabled) { background: #667eea; color: white; border-color: #667eea; }
+        .page-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .page-info { font-size: 14px; color: #666; }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h2>한식당 Data Hub</h2>
+            <p>Restaurant Data Collection</p>
+        </div>
+        <div class="menu-group">
+            <div class="menu-label">대시보드</div>
+            <a href="/dashboard" class="menu-item">📊 메인 대시보드</a>
+        </div>
+        <div class="menu-group">
+            <div class="menu-label">데이터 수집</div>
+            <a href="/dashboard/collection-request" class="menu-item">📝 수집 요청</a>
+            <a href="/dashboard/collection-results" class="menu-item active">📋 수집 결과</a>
+        </div>
+        <div class="menu-group">
+            <div class="menu-label">데이터 입력</div>
+            <a href="/dashboard/manual-input#url" class="menu-item">🔗 URL 입력</a>
+            <a href="/dashboard/manual-input#csv" class="menu-item">📄 CSV 업로드</a>
+            <a href="/dashboard/manual-input#direct" class="menu-item">✏️ 직접 입력</a>
+        </div>
+        <div class="menu-group">
+            <div class="menu-label">데이터 편집</div>
+            <a href="/dashboard/unified-editor" class="menu-item">🔧 통합 편집</a>
+        </div>
+        <div class="menu-group">
+            <div class="menu-label">배포 관리</div>
+            <a href="/dashboard/deployment" class="menu-item">🚀 배포 관리</a>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="card">
+            <h1>📋 수집 결과</h1>
+            <p class="subtitle">수집된 레스토랑 데이터를 관리합니다 (클릭하여 상세보기)</p>
+
+            <div id="stats-container" class="stats">
+                <div class="stat-item">
+                    <div class="stat-label">전체</div>
+                    <div class="stat-value" id="stat-total">0</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">평균 평점</div>
+                    <div class="stat-value" id="stat-avg">0</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">평균 인기도</div>
+                    <div class="stat-value" id="stat-popularity">0</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Top Rated</div>
+                    <div class="stat-value" id="stat-top">0</div>
+                </div>
+            </div>
+
+            <div id="filters-container" class="filters">
+                <div class="filter-row">
+                    <div class="filter-group">
+                        <label>소스</label>
+                        <select id="filter-source" onchange="applyFilters()">
+                            <option value="">전체</option>
+                            <option value="naver">네이버</option>
+                            <option value="google">구글</option>
+                            <option value="manual">수동입력</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label>상태</label>
+                        <select id="filter-status" onchange="applyFilters()">
+                            <option value="">전체</option>
+                            <option value="pending">검토 대기</option>
+                            <option value="edited">편집됨</option>
+                            <option value="deployed">배포됨</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label>티어</label>
+                        <select id="filter-tier" onchange="applyFilters()">
+                            <option value="">전체</option>
+                            <option value="top_rated">Top Rated</option>
+                            <option value="popular">Popular</option>
+                            <option value="new">New</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label>정렬</label>
+                        <select id="sort-by" onchange="applyFilters()">
+                            <option value="created_desc">최신순</option>
+                            <option value="created_asc">오래된순</option>
+                            <option value="name_asc">이름 (가-하)</option>
+                            <option value="name_desc">이름 (하-가)</option>
+                            <option value="score_desc">점수 높은순</option>
+                            <option value="score_asc">점수 낮은순</option>
+                            <option value="rating_desc">평점 높은순</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label>검색</label>
+                        <input type="text" id="search-text" placeholder="이름 또는 주소 검색" onkeyup="applyFilters()">
+                    </div>
+                </div>
+            </div>
+
+            <div id="actions-container" class="actions" style="display: none;">
+                <button class="btn btn-primary" onclick="exportCSV()">📥 CSV 내보내기</button>
+                <button class="btn btn-secondary" onclick="loadData()">🔄 새로고침</button>
+                <button class="btn btn-secondary" onclick="resetFilters()">🔄 필터 초기화</button>
+                <div style="flex: 1; text-align: right; padding: 12px; color: #666; font-size: 14px;">
+                    <span id="result-count">0개 결과</span>
+                </div>
+            </div>
+
+            <div id="loading" class="loading">데이터 로딩 중...</div>
+
+            <div id="table-container" class="table-container" style="display: none;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>이름</th>
+                            <th>메뉴</th>
+                            <th>Platform</th>
+                            <th>카테고리</th>
+                            <th>주소</th>
+                            <th>평점</th>
+                            <th>인기도</th>
+                            <th>티어</th>
+                            <th>상태</th>
+                            <th>품질</th>
+                            <th>액션</th>
+                        </tr>
+                    </thead>
+                    <tbody id="results-body"></tbody>
+                </table>
+                
+                <div class="pagination">
+                    <button id="prev-page" class="page-btn" onclick="prevPage()">← 이전</button>
+                    <span class="page-info" id="page-info">1 / 1 페이지</span>
+                    <button id="next-page" class="page-btn" onclick="nextPage()">다음 →</button>
+                </div>
+            </div>
+
+            <div id="empty" class="empty" style="display: none;">
+                📭 데이터가 없습니다.
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let allResults = [];
+        let filteredResults = [];
+        let currentPage = 1;
+        const pageSize = 20;
+
+        async function loadData() {
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('table-container').style.display = 'none';
+            document.getElementById('empty').style.display = 'none';
+            
+            try {
+                const response = await fetch('/api/data-management/collection-results?limit=100');
+                const data = await response.json();
+                
+                if (data.success && data.data) {
+                    allResults = data.data;
+                    filteredResults = allResults;
+                    applyFilters();
+                    loadStats();
+                    document.getElementById('filters-container').style.display = 'block';
+                } else {
+                    showEmpty();
+                }
+            } catch (error) {
+                console.error('데이터 로드 오류:', error);
+                showEmpty();
+            }
+        }
+
+        async function loadStats() {
+            try {
+                const response = await fetch('/api/data-management/collection-results/stats/summary');
+                const data = await response.json();
+                
+                if (data.success && data.data) {
+                    document.getElementById('stat-total').textContent = data.data.total || 0;
+                    const avgRating = (data.data.avg_rating || 0).toFixed(1);
+                    document.getElementById('stat-avg').textContent = avgRating > 0 ? `⭐ ${avgRating}` : '-';
+                    const avgPopularity = (data.data.avg_popularity_score || 0).toFixed(0);
+                    document.getElementById('stat-popularity').textContent = avgPopularity > 0 ? `${avgPopularity}점` : '-';
+                    document.getElementById('stat-top').textContent = (data.data.by_tier?.top_rated || 0);
+                }
+            } catch (error) {
+                console.error('통계 로드 오류:', error);
+            }
+        }
+
+        function renderResults(results) {
+            const tbody = document.getElementById('results-body');
+            tbody.innerHTML = '';
+            
+            if (results.length === 0) {
+                showEmpty();
+                return;
+            }
+
+            const totalPages = Math.ceil(results.length / pageSize);
+            const startIndex = (currentPage - 1) * pageSize;
+            const endIndex = startIndex + pageSize;
+            const paginatedResults = results.slice(startIndex, endIndex);
+
+            paginatedResults.forEach(item => {
+                const row = document.createElement('tr');
+                
+                const quality = calculateQuality(item);
+                row.innerHTML = `
+                    <td><strong style="color: #667eea;">${item.name}</strong></td>
+                    <td>${formatMenu(item.menu_items)}</td>
+                    <td style="text-align: center; font-size: 20px;">${formatPlatform(item.source)}</td>
+                    <td>${item.category || '-'}</td>
+                    <td style="max-width: 300px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                        ${item.address || '-'}
+                    </td>
+                    <td>${item.rating ? '⭐ ' + item.rating.toFixed(1) : '-'}</td>
+                    <td>${item.popularity_score ? item.popularity_score.toFixed(0) + '점' : '-'}</td>
+                    <td>${formatTier(item.popularity_tier)}</td>
+                    <td>${formatStatus(item.edit_status)}</td>
+                    <td>${formatQuality(quality)}</td>
+                    <td class="actions-cell">
+                        <button class="action-btn btn-view" onclick="viewDetails('${item.id}')">👁️ 보기</button>
+                        <button class="action-btn btn-edit" onclick="editItem('${item.id}')">✏️ 편집</button>
+                        <button class="action-btn btn-delete" onclick="deleteItem('${item.id}', '${item.name}')">🗑️ 삭제</button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('table-container').style.display = 'block';
+            document.getElementById('actions-container').style.display = 'flex';
+            document.getElementById('result-count').textContent = `${paginatedResults.length}개 표시 중 (전체 ${results.length}개)`;
+            
+            updatePagination(totalPages);
+        }
+
+        function showEmpty() {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('empty').style.display = 'block';
+        }
+
+        function formatTier(tier) {
+            if (!tier) return '-';
+            const badges = {
+                'top_rated': '<span class="badge badge-top">Top</span>',
+                'popular': '<span class="badge badge-popular">Popular</span>',
+                'new': '<span class="badge badge-new">New</span>'
+            };
+            return badges[tier] || tier;
+        }
+
+        function formatStatus(status) {
+            if (!status) return '-';
+            const badges = {
+                'pending': '<span class="badge badge-pending">검토 대기</span>',
+                'edited': '<span class="badge badge-edited">편집됨</span>',
+                'deployed': '<span class="badge badge-deployed">배포됨</span>'
+            };
+            return badges[status] || status;
+        }
+
+        function calculateQuality(item) {
+            let score = 0;
+            if (item.name) score += 30;
+            if (item.address) score += 20;
+            if (item.phone) score += 20;
+            if (item.latitude && item.longitude) score += 20;
+            if (item.rating) score += 10;
+            return score;
+        }
+
+        function formatQuality(score) {
+            let color = '#e74c3c';
+            let label = '낮음';
+            if (score >= 80) {
+                color = '#27ae60';
+                label = '우수';
+            } else if (score >= 60) {
+                color = '#f39c12';
+                label = '보통';
+            }
+            return `<span style="color: ${color}; font-weight: 600;">${score}% ${label}</span>`;
+        }
+
+        function formatMenu(menuItems) {
+            if (!menuItems || menuItems.length === 0) return '-';
+            const displayMenus = menuItems.slice(0, 2).map(m => m.name || '메뉴').join(', ');
+            const moreCount = menuItems.length > 2 ? ` <small style="color: #999;">+${menuItems.length - 2}개</small>` : '';
+            return `<span style="font-size: 13px;">${displayMenus}${moreCount}</span>`;
+        }
+
+        function formatPlatform(source) {
+            const icons = {
+                'naver': '🅽',
+                'google': '🅶',
+                'manual': '✍️'
+            };
+            return icons[source] || '-';
+        }
+
+        function exportCSV() {
+            const headers = ['이름', '카테고리', '주소', '평점', '인기도', '티어', '상태'];
+            const rows = allResults.map(item => [
+                item.name || '',
+                item.category || '',
+                item.address || '',
+                item.rating || '',
+                item.popularity_score || '',
+                item.popularity_tier || '',
+                item.edit_status || ''
+            ]);
+            
+            let csv = headers.join(',') + '\n';
+            rows.forEach(row => {
+                csv += row.map(cell => `"${cell}"`).join(',') + '\n';
+            });
+            
+            const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `collection-results-${new Date().toISOString().split('T')[0]}.csv`;
+            link.click();
+        }
+
+        function applyFilters() {
+            const sourceFilter = document.getElementById('filter-source').value;
+            const statusFilter = document.getElementById('filter-status').value;
+            const tierFilter = document.getElementById('filter-tier').value;
+            const searchText = document.getElementById('search-text').value.toLowerCase();
+            const sortBy = document.getElementById('sort-by').value;
+
+            // 필터링
+            filteredResults = allResults.filter(item => {
+                if (sourceFilter && item.source !== sourceFilter) return false;
+                if (statusFilter && item.edit_status !== statusFilter) return false;
+                if (tierFilter && item.popularity_tier !== tierFilter) return false;
+                if (searchText) {
+                    const nameMatch = item.name && item.name.toLowerCase().includes(searchText);
+                    const addressMatch = item.address && item.address.toLowerCase().includes(searchText);
+                    if (!nameMatch && !addressMatch) return false;
+                }
+                return true;
+            });
+
+            // 정렬
+            filteredResults.sort((a, b) => {
+                switch (sortBy) {
+                    case 'created_desc':
+                        return new Date(b.created_at) - new Date(a.created_at);
+                    case 'created_asc':
+                        return new Date(a.created_at) - new Date(b.created_at);
+                    case 'name_asc':
+                        return (a.name || '').localeCompare(b.name || '');
+                    case 'name_desc':
+                        return (b.name || '').localeCompare(a.name || '');
+                    case 'score_desc':
+                        return (b.popularity_score || 0) - (a.popularity_score || 0);
+                    case 'score_asc':
+                        return (a.popularity_score || 0) - (b.popularity_score || 0);
+                    case 'rating_desc':
+                        return (b.rating || 0) - (a.rating || 0);
+                    default:
+                        return 0;
+                }
+            });
+
+            renderResults(filteredResults);
+        }
+
+        function resetFilters() {
+            document.getElementById('filter-source').value = '';
+            document.getElementById('filter-status').value = '';
+            document.getElementById('filter-tier').value = '';
+            document.getElementById('search-text').value = '';
+            document.getElementById('sort-by').value = 'created_desc';
+            currentPage = 1;
+            applyFilters();
+        }
+
+        function updatePagination(totalPages) {
+            document.getElementById('page-info').textContent = `${currentPage} / ${totalPages} 페이지`;
+            document.getElementById('prev-page').disabled = currentPage === 1;
+            document.getElementById('next-page').disabled = currentPage === totalPages;
+        }
+
+        function nextPage() {
+            const totalPages = Math.ceil(filteredResults.length / pageSize);
+            if (currentPage < totalPages) {
+                currentPage++;
+                renderResults(filteredResults);
+            }
+        }
+
+        function prevPage() {
+            if (currentPage > 1) {
+                currentPage--;
+                renderResults(filteredResults);
+            }
+        }
+
+        function viewDetails(id) {
+            window.location.href = `/dashboard/restaurant/${id}`;
+        }
+
+        function editItem(id) {
+            window.location.href = `/dashboard/unified-editor?id=${id}`;
+        }
+
+        async function deleteItem(id, name) {
+            if (!confirm(`"${name}" 레스토랑을 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/data-management/collection-results/${id}`, {
+                    method: 'DELETE'
+                });
+                
+                if (response.ok) {
+                    alert('✅ 삭제되었습니다');
+                    loadData();
+                } else {
+                    const error = await response.json();
+                    alert(`❌ 삭제 실패: ${error.detail || '알 수 없는 오류'}`);
+                }
+            } catch (error) {
+                console.error('삭제 오류:', error);
+                alert('❌ 삭제 중 오류가 발생했습니다');
+            }
+        }
+
+        // 페이지 로드 시 자동 실행
+        loadData();
+    </script>
+</body>
+</html>
